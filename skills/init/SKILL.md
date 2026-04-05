@@ -1,13 +1,13 @@
 ---
-name: analyze
-version: 1.0.0
+name: init
+version: 1.1.0
 description: >
   Auto-assess task tier and start the right workflow. Takes a description,
   scores it, creates the beads task, and invokes the first skill.
   TRIGGER: When starting any new work, or when the user describes a task.
 ---
 
-# Analyze: Auto-Tier Assessment & Workflow Routing
+# Init: Auto-Tier Assessment & Workflow Routing
 
 Takes a task description, assesses its complexity tier, creates the appropriate
 beads task, and auto-invokes the first workflow skill for that tier.
@@ -16,9 +16,9 @@ beads task, and auto-invokes the first workflow skill for that tier.
 
 The user provides a description and optional flags:
 
-- `/claude-workstation:analyze "Add rate limiting to all API endpoints"`
-- `/claude-workstation:analyze -p 0 "Critical production outage"`
-- `/claude-workstation:analyze --side-quest "Found: tokens aren't rotated"`
+- `/claude-workstation:init "Add rate limiting to all API endpoints"`
+- `/claude-workstation:init -p 0 "Critical production outage"`
+- `/claude-workstation:init --side-quest "Found: tokens aren't rotated"`
 
 ## Flow
 
@@ -99,6 +99,11 @@ bd create --title="<description>" --type=<task|epic> -p <priority>
 Then set it to in-progress:
 ```bash
 bd update <task-id> -s in_progress
+```
+
+Then persist the computed tier for use by `/resume`:
+```bash
+bd update <task-id> --notes "tier: <trivial|small|medium+>"
 ```
 
 ### Step 6: ROUTE
