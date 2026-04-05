@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "=== Small Tier: Add input validation ==="
+cd /tmp/workflow-test
+
+ID=$(bd create --title="Add input validation to add function" --type=bug --priority=2 2>&1 | grep -oP 'workflow-test-\w+')
+bd update "$ID" --claim
+
+# RED — add failing tests
+sed -i '/^\[/i \
+assert_eq "add rejects non-numeric first arg" "error" "$(add "abc" 3 2>/dev/null || echo "error")"\
+assert_eq "add rejects non-numeric second arg" "error" "$(add 3 "xyz" 2>/dev/null || echo "error")"\
+assert_eq "add still works with valid input" "7" "$(add 3 4)"' tests/run.sh
+
+# Verify RED
+if bash tests/run.sh 2>&1 | grep -q "FAIL"; then
+    echo "  RED confirmed"
+else
+    echo "  ERROR: Tests should have failed"; exit 1
+fi
+
+# GREEN — add validation
+sed -i '/^add() {/,/^}/ c\
+add() {\
+    local a="$1"\
+    local b="$2"\
+    if ! [[ "$a" =~ ^-?[0-9]+$ ]] || ! [[ "$b" =~ ^-?[0-9]+$ ]]; then\
+        echo "error: arguments must be integers" >\&2\
+        return 1\
+    fi\
+    echo $(( a + b ))\
+}' src/utils.sh
+
+# Verify GREEN
+bash tests/run.sh
+echo "  GREEN confirmed"
+
+git add src/utils.sh tests/run.sh
+git commit -m "fix: add input validation to add function"
+bd close "$ID" --reason="Input validation added with tests"
+
+echo "=== Small Tier: PASS ==="
