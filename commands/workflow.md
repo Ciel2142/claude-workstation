@@ -58,6 +58,27 @@ No brainstorming, no TDD, no code review. Just track it and do it.
 
 ---
 
+## Bug Path
+
+```
+1. TASK     bd create --title="..." --type=bug
+2. DEBUG    superpowers:systematic-debugging
+             Root cause → reproduce → hypothesis → verify
+3. TDD      superpowers:test-driven-development
+             RED: write regression test that reproduces the bug
+             GREEN: fix the bug, test passes
+             REFACTOR: clean up
+4. REVIEW   superpowers:requesting-code-review
+5. VERIFY   superpowers:verification-before-completion
+6. COMMIT   Conventional commit
+7. CLOSE    bd close <id>
+```
+
+All bugs follow this path regardless of tier. Systematic debugging before TDD ensures you
+understand the root cause before writing the fix.
+
+---
+
 ## Medium+ Path
 
 ```
@@ -117,7 +138,7 @@ Don't context-switch. Finish current task, then `bd ready`.
 | Plugin | Role | Tiers |
 |---|---|---|
 | **Beads** | Task lifecycle: create, claim, dep, close | All |
-| **Superpowers** | Process: brainstorm, plan, TDD, review, verify, debug, finish | Small, Medium+ |
+| **Superpowers** | Process: brainstorm, plan, TDD, review, verify, debug, finish | Small, Medium+, Bug |
 | **ECC** | Language/domain expertise within Superpowers process | All (as needed) |
 
 Superpowers drives the process. ECC provides expertise within it.
