@@ -254,23 +254,106 @@ Status symbols:
 
 ---
 
-## 7. Setup Updates
+## 7. Beads Milestone Tracking
+
+### Problem
+
+Beads tasks get created at start and closed at end, but nothing in between. If a session crashes or context compacts mid-work, the next session sees `in_progress` with no idea what's been completed.
+
+### Solution: Two-Layer Approach
+
+**Layer 1: `rules/beads-milestones.md`** — A rule file loaded into every session via `~/.claude/rules/common/`. Instructs Claude to update beads notes at natural completion points.
+
+**Layer 2: Updated `/workflow` command** — Adds beads update steps to the workflow reference so users can see when updates happen.
+
+### Milestone Update Points
+
+| Moment | Beads Action | Example |
+|---|---|---|
+| Brainstorming complete | `bd update <id> --notes "Spec: docs/superpowers/specs/..."` | Spec path + key decisions |
+| Plan written | `bd update <id> --notes "Plan: docs/superpowers/plans/..."` | Plan path + sub-task count |
+| Sub-task started | `bd update <sub-id> -s in_progress` | Claim the work |
+| Sub-task TDD green | `bd update <sub-id> --notes "Tests passing: <summary>"` | What was implemented |
+| Sub-task closed | `bd close <sub-id>` | Already in workflow |
+| Verification done | `bd update <id> --notes` with verification block | Append verification template output |
+| Epic closed | `bd close <epic-id>` | Already in workflow |
+
+### Rule File Content
+
+The rule file (`rules/beads-milestones.md`) contains:
+
+```markdown
+# Beads Milestone Updates
+
+After completing each workflow milestone, update the beads task so progress
+survives session crashes and context compaction.
+
+## When to Update
+
+- After brainstorming: note the spec path and key design decisions
+- After writing a plan: note the plan path and number of sub-tasks
+- After each sub-task TDD cycle: note what was implemented and that tests pass
+- After verification: append the verification output block
+- At session end: note where you stopped and what's next
+
+## How to Update
+
+bd update <id> --notes "<milestone>: <path-or-summary>"
+
+## What NOT to Do
+
+- Don't update after every micro-step (each brainstorming question, each test)
+- Don't duplicate the full spec/plan content — just reference the file path
+- Don't update if nothing meaningful changed since last update
+```
+
+### Workflow Command Updates
+
+Add beads update annotations to the Medium+ path in `commands/workflow.md`:
+
+```
+6. IMPLEMENT  bd ready → pick next → bd update <id> -s in_progress
+               For each sub-task:
+               ├─ superpowers:test-driven-development
+               ├─ Commit after each green
+               ├─ bd update <sub-id> --notes "Tests passing: <summary>"
+               ├─ superpowers:requesting-code-review
+               └─ bd close <sub-id>
+```
+
+And after brainstorming and planning steps:
+
+```
+2. BRAINSTORM superpowers:brainstorming
+               Output: design doc in docs/superpowers/specs/
+               bd update <epic-id> --notes "Spec: <path>"
+3. PLAN       superpowers:writing-plans
+               Output: plan in docs/superpowers/plans/
+               bd update <epic-id> --notes "Plan: <path>, N sub-tasks"
+```
+
+---
+
+## 8. Setup Updates
 
 The `/claude-workstation:setup` skill needs these additions:
 
 1. Copy `rules/verification-template.md` to `~/.claude/rules/common/verification-template.md`
-2. The hooks.json already gets copied by existing setup — no additional step needed for new hooks
+2. Copy `rules/beads-milestones.md` to `~/.claude/rules/common/beads-milestones.md`
+3. The hooks.json already gets copied by existing setup — no additional step needed for new hooks
 
 ---
 
-## 8. File Map
+## 9. File Map
 
 | File | Action | Purpose |
 |---|---|---|
 | `skills/analyze/SKILL.md` | Create | The analyze skill |
 | `hooks/hooks.json` | Update | Add SessionStart and PreCompact hooks |
 | `rules/verification-template.md` | Create | Verification output standard |
-| `skills/setup/SKILL.md` | Update | Copy verification template during setup |
+| `rules/beads-milestones.md` | Create | Milestone tracking rule |
+| `commands/workflow.md` | Update | Add beads update annotations |
+| `skills/setup/SKILL.md` | Update | Copy new rule files during setup |
 | `docs/superpowers/specs/2026-04-05-analyze-command-design.md` | Create | This spec |
 
 ---
@@ -283,6 +366,7 @@ The `/claude-workstation:setup` skill needs these additions:
 4. **Claude override allowed** — The scoring matrix guides but doesn't cage. When context clearly warrants a different tier, Claude should override.
 5. **Side-quest parks, doesn't start** — Side-quests are logged and linked but don't interrupt current work. This prevents the context-switching that derails agent sessions.
 6. **Verification is a rule, not part of `/analyze`** — It applies globally to all tasks, not just those created by `/analyze`.
+7. **Milestone updates, not step updates** — Beads gets updated at ~5-6 natural completion points per Medium+ task. Enough for crash recovery, not so much that it's noise.
 
 ---
 
