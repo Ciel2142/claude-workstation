@@ -28,14 +28,14 @@ A Claude Code plugin that restores your full development environment from a sing
 
 ## Dependencies
 
-Installed automatically by the setup skill:
+Installed by the setup skill (mgrep is offered as an optional add-on):
 
 | Plugin | Marketplace | Purpose |
 |---|---|---|
 | [Beads](https://github.com/steveyegge/beads) | beads-marketplace | Dolt-powered issue tracker with dependencies, milestones, and persistent task state across sessions |
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | superpowers-marketplace | Development process skills — brainstorming, planning, TDD, code review, verification, debugging |
 | [ECC](https://github.com/affaan-m/everything-claude-code) | everything-claude-code | Language-specific and domain-specific skills, agents, patterns, and coding standards |
-| [mgrep](https://github.com/mixedbread-ai/mgrep) | Mixedbread-Grep | Semantic code and web search using Mixedbread AI embeddings |
+| [mgrep](https://github.com/mixedbread-ai/mgrep) *(optional)* | Mixedbread-Grep | Semantic code and web search using Mixedbread AI embeddings — replaces built-in Grep, Glob, and WebSearch with natural language search |
 | Context7 | claude-plugins-official | Real-time library and framework documentation lookup via MCP |
 | Hookify | claude-plugins-official | Create and manage hooks to prevent unwanted agent behaviors |
 | Playwright | claude-plugins-official | Browser automation for E2E testing and visual verification |

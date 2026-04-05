@@ -22,8 +22,7 @@ markets = d.get('extraKnownMarketplaces', {})
 needed = {
     'everything-claude-code': 'affaan-m/everything-claude-code',
     'superpowers-marketplace': 'obra/superpowers-marketplace',
-    'beads-marketplace': 'steveyegge/beads',
-    'Mixedbread-Grep': 'mixedbread-ai/mgrep'
+    'beads-marketplace': 'steveyegge/beads'
 }
 for key, repo in needed.items():
     if key in markets:
@@ -37,7 +36,6 @@ For any MISSING marketplaces, add them:
 - `/plugin marketplace add github:affaan-m/everything-claude-code`
 - `/plugin marketplace add github:obra/superpowers-marketplace`
 - `/plugin marketplace add github:steveyegge/beads`
-- `/plugin marketplace add github:mixedbread-ai/mgrep`
 
 ## Step 2: Install Plugins
 
@@ -52,7 +50,6 @@ needed = {
     'everything-claude-code@everything-claude-code': 'ECC',
     'superpowers@superpowers-marketplace': 'Superpowers',
     'beads@beads-marketplace': 'Beads',
-    'mgrep@Mixedbread-Grep': 'mgrep',
     'context7@claude-plugins-official': 'Context7',
     'hookify@claude-plugins-official': 'Hookify',
     'playwright@claude-plugins-official': 'Playwright',
@@ -74,6 +71,37 @@ for key, name in needed.items():
 ```
 
 Install any MISSING plugins using `/plugin install <key>`.
+
+## Step 2b: Optional — mgrep (Semantic Search)
+
+**Ask the user before proceeding:**
+
+> **Would you like to install mgrep (semantic search)?**
+>
+> mgrep replaces the built-in Grep, Glob, and WebSearch tools with semantic search powered by Mixedbread AI embeddings. Instead of exact pattern matching, you describe what you're looking for in natural language and it finds semantically relevant code and files.
+>
+> **Why install it:**
+> - Natural language code search — find code by intent, not exact strings
+> - Semantic web search — `mgrep --web --answer "query"` replaces WebSearch
+> - Better for exploratory searches when you don't know exact function/variable names
+>
+> **Caveat:** Once installed, mgrep overrides all built-in search tools (Grep, Glob, WebSearch). If you prefer exact pattern matching for precision work, you may want to skip this.
+>
+> Install mgrep? (yes/no)
+
+**If the user says yes:**
+
+1. Register the marketplace:
+   ```bash
+   /plugin marketplace add github:mixedbread-ai/mgrep
+   ```
+
+2. Install the plugin:
+   ```bash
+   /plugin install mgrep@Mixedbread-Grep
+   ```
+
+**If the user says no**, skip to Step 3.
 
 ## Step 3: Copy Custom Rules
 
