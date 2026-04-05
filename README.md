@@ -96,6 +96,7 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 | **Trivial** | 1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
 | **Medium+** | 4+ files or new system | Epic → brainstorm → plan → sub-tasks → TDD → verify → close |
+| **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → close |
 
 ## Hooks
 
@@ -116,6 +117,7 @@ Copied to `~/.claude/rules/common/` during setup:
 | `development-workflow.md` | Research-first culture, GitHub search before coding |
 | `verification-template.md` | Standardized verification output format with exit codes |
 | `beads-milestones.md` | When to update beads notes (after brainstorming, planning, TDD, verification) |
+| `debugging.md` | Debugging-first protocol for bugs: root cause before fix, 3-strike rule |
 
 ## Context Profiles
 
