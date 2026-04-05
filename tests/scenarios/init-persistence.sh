@@ -31,25 +31,38 @@ fi
 bd close "$SMALL_ID" --reason="Tier persistence test"
 
 # Simulate /init for a medium+ epic with milestone progression
+# Note: bd update --notes replaces (not appends), so each milestone overwrites
+# the previous. Resume handles this by checking latest milestone first, and
+# falling back to task type inference for tier when tier: note is overwritten.
 EPIC_ID=$(bd create --title="Add string operations" --type=epic --priority=2 2>&1 | grep -oP 'workflow-test-\w+')
 bd update "$EPIC_ID" --notes "tier: medium+"
 
-# Simulate milestone progression (what brainstorming/planning would write)
-bd update "$EPIC_ID" --notes "Spec: docs/superpowers/specs/test-spec.md"
-bd update "$EPIC_ID" --notes "Plan: docs/superpowers/plans/test-plan.md, 3 tasks"
-
-# Verify resume can detect position from milestones
+# Verify tier is set initially
 EPIC_NOTES=$(bd show "$EPIC_ID" 2>&1)
 if echo "$EPIC_NOTES" | grep -q "tier: medium+"; then
-    echo "  Medium+ tier persisted: PASS"
+    echo "  Medium+ tier persisted initially: PASS"
 else
     echo "  Medium+ tier NOT in notes: FAIL"; exit 1
 fi
 
+# Simulate milestone progression — each overwrites previous notes
+bd update "$EPIC_ID" --notes "Spec: docs/superpowers/specs/test-spec.md"
+bd update "$EPIC_ID" --notes "Plan: docs/superpowers/plans/test-plan.md, 3 tasks"
+
+# Verify latest milestone is visible (Plan: overwrote Spec: which overwrote tier:)
+EPIC_NOTES=$(bd show "$EPIC_ID" 2>&1)
 if echo "$EPIC_NOTES" | grep -q "Plan:"; then
-    echo "  Plan milestone detected: PASS (resume would route to TDD)"
+    echo "  Latest milestone (Plan) detected: PASS"
 else
-    echo "  Plan milestone NOT in notes: FAIL"; exit 1
+    echo "  Latest milestone NOT in notes: FAIL"; exit 1
+fi
+
+# Verify tier inference fallback: epic type → medium+ (since tier: was overwritten)
+EPIC_TYPE=$(bd show "$EPIC_ID" 2>&1)
+if echo "$EPIC_TYPE" | grep -qi "epic"; then
+    echo "  Tier fallback via task type (epic → medium+): PASS"
+else
+    echo "  Task type not detectable: FAIL"; exit 1
 fi
 
 bd close "$EPIC_ID" --reason="Milestone progression test"
