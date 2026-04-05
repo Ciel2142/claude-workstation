@@ -9,8 +9,9 @@ ID=$(bd create --title="Fix greet function output format" --type=task --priority
 sed -i '/^\[/i \
 assert_eq "greet handles empty name" "Hello, stranger!" "$(greet "")"' tests/run.sh
 
-# RED
-if bash tests/run.sh 2>&1 | grep -q "FAIL"; then
+# RED (capture output first to avoid pipefail masking grep result)
+red_output=$(bash tests/run.sh 2>&1 || true)
+if echo "$red_output" | grep -q "FAIL"; then
     echo "  RED confirmed (escalated to small, applying TDD)"
 fi
 

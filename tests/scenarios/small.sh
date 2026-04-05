@@ -7,13 +7,16 @@ ID=$(bd create --title="Add input validation to add function" --type=bug --prior
 bd update "$ID" --claim
 
 # RED — add failing tests
+# Note: set +u before add calls prevents fatal nounset errors from bash arithmetic
+# indirection ($(( a + b )) where a="abc" → looks up unset $abc → nounset kills subshell)
 sed -i '/^\[/i \
-assert_eq "add rejects non-numeric first arg" "error" "$(add "abc" 3 2>/dev/null || echo "error")"\
-assert_eq "add rejects non-numeric second arg" "error" "$(add 3 "xyz" 2>/dev/null || echo "error")"\
+assert_eq "add rejects non-numeric first arg" "error" "$(set +u; add "abc" 3 2>/dev/null || echo "error")"\
+assert_eq "add rejects non-numeric second arg" "error" "$(set +u; add 3 "xyz" 2>/dev/null || echo "error")"\
 assert_eq "add still works with valid input" "7" "$(add 3 4)"' tests/run.sh
 
-# Verify RED
-if bash tests/run.sh 2>&1 | grep -q "FAIL"; then
+# Verify RED (capture output first to avoid pipefail masking grep result)
+red_output=$(bash tests/run.sh 2>&1 || true)
+if echo "$red_output" | grep -q "FAIL"; then
     echo "  RED confirmed"
 else
     echo "  ERROR: Tests should have failed"; exit 1
