@@ -14,6 +14,8 @@ bd create --title="..." --type=task|bug|feature|epic
 
 The beads task is the anchor. Everything else flows from it. No exceptions — design work, research, planning, and code all get tracked.
 
+**Or use `/claude-workstation:analyze`** to auto-assess the tier, create the task, and start the right flow in one step.
+
 ---
 
 ## Then Size Your Task
@@ -62,17 +64,20 @@ No brainstorming, no TDD, no code review. Just track it and do it.
 1. EPIC       bd create --title="..." --type=epic
 2. BRAINSTORM superpowers:brainstorming
                Output: design doc in docs/superpowers/specs/
+               bd update <epic-id> --notes "Spec: <path>"
 3. PLAN       superpowers:writing-plans
                Output: plan in docs/superpowers/plans/
+               bd update <epic-id> --notes "Plan: <path>, N sub-tasks"
 4. SUB-TASKS  For each plan step:
                bd create --title="Step N: ..." --type=task
                bd dep add <sub-id> <epic-id>
                bd dep add <sub-id> <prev-sub-id>  (if sequential)
 5. ISOLATE    superpowers:using-git-worktrees
-6. IMPLEMENT  bd ready → pick next → bd update <id> --claim
+6. IMPLEMENT  bd ready → pick next → bd update <sub-id> -s in_progress
                For each sub-task:
                ├─ superpowers:test-driven-development
                ├─ Commit after each green
+               ├─ bd update <sub-id> --notes "Tests passing: <summary>"
                ├─ superpowers:requesting-code-review
                └─ bd close <sub-id>
                Repeat until bd ready shows no more sub-tasks.
