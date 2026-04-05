@@ -8,7 +8,8 @@ This applies to ALL work — design, planning, research, and code. No exceptions
 
 ## Quick Start
 
-Run `/claude-workstation:init "description"` to auto-assess task tier, create the beads task, and start the right workflow in one step.
+- **New work:** `/claude-workstation:init "description"` — assess tier, create task, start workflow
+- **Resume work:** `/claude-workstation:resume` — pick up open tasks, load context, continue workflow
 
 ## Workflow
 

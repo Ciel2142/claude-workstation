@@ -5,7 +5,9 @@ A Claude Code plugin that restores your full development environment from a sing
 ## What's Included
 
 - **Unified Workflow** — Size-based routing (trivial/small/medium+) connecting Beads, Superpowers, and ECC
-- **Auto-Tier Assessment** — `/analyze` scores task descriptions and routes to the right workflow automatically
+- **Auto-Tier Assessment** — `/init` scores task descriptions and routes to the right workflow automatically
+- **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
+- **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
 - **MCP Servers** — context7, memory, exa, playwright, sequential-thinking, token-optimizer
 - **Context Profiles** — `claude-dev`, `claude-research`, `claude-review` shell aliases
 - **Custom Rules** — Workflow routing, plugin lanes, verification template, milestone tracking
@@ -49,28 +51,43 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 
 | Command | What it does |
 |---|---|
-| `/claude-workstation:analyze` | Auto-assess task tier, create beads task, start the right workflow |
+| `/claude-workstation:init` | Auto-assess task tier, create beads task, start the right workflow |
+| `/claude-workstation:resume` | Resume open work — load context, detect position, continue workflow |
 | `/workflow` | Show the full development playbook |
 | `/claude-workstation:setup` | Install dependencies and configure environment |
 | `/claude-workstation:test` | Validate configuration and run scenarios |
 
-### `/analyze` — Quick Start
+### `/init` — Start New Work
 
 ```bash
-/claude-workstation:analyze "Fix the login validation bug"
+/claude-workstation:init "Fix the login validation bug"
 # → Scores description → Small → creates task → starts TDD
 
-/claude-workstation:analyze "Design a new notification system"
+/claude-workstation:init "Design a new notification system"
 # → Scores description → Medium+ → creates epic → starts brainstorming
 
-/claude-workstation:analyze "Fix typo in README"
+/claude-workstation:init "Fix typo in README"
 # → Scores description → Trivial → creates task → "Go fix it"
 
-/claude-workstation:analyze --side-quest "Found: tokens aren't rotated"
+/claude-workstation:init --side-quest "Found: tokens aren't rotated"
 # → Detects side-quest → creates bug → links to current task → parks it
 ```
 
-The scoring matrix evaluates 6 weighted dimensions (task type, scope, domain count, change signal, complexity markers, forced escalation) to automatically classify tasks. Borderline scores bump up to the next tier.
+### `/resume` — Continue Open Work
+
+```bash
+/claude-workstation:resume
+# → Shows grouped task list → pick one → loads context → continues workflow
+
+/claude-workstation:resume --interactive
+# → Always shows list, suggests next skill but waits for confirmation
+
+/claude-workstation:resume claude-workstation-pyc
+# → Resumes specific task directly, skipping selection
+
+/claude-workstation:resume --dry
+# → Shows what would happen without invoking anything
+```
 
 ## Workflow Tiers
 
@@ -117,7 +134,8 @@ claude-workstation/
 ├── commands/
 │   └── workflow.md           # /workflow command — full playbook
 ├── skills/
-│   ├── analyze/SKILL.md      # /analyze — auto-tier assessment
+│   ├── init/SKILL.md          # /init — auto-tier assessment & workflow start
+│   ├── resume/SKILL.md        # /resume — continue open work
 │   ├── setup/SKILL.md        # /setup — environment installer
 │   └── test/SKILL.md         # /test — config validation
 ├── rules/common/             # Copied to ~/.claude/rules/common/
@@ -125,7 +143,8 @@ claude-workstation/
 │   ├── plugin-routing.md
 │   ├── development-workflow.md
 │   ├── verification-template.md
-│   └── beads-milestones.md
+│   ├── beads-milestones.md
+│   └── debugging.md
 ├── contexts/                 # Copied to ~/.claude/contexts/
 │   ├── dev.md
 │   ├── research.md
