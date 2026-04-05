@@ -33,9 +33,9 @@ for key, repo in needed.items():
 ```
 
 For any MISSING marketplaces, add them:
-- `/plugin marketplace add github:affaan-m/everything-claude-code`
-- `/plugin marketplace add github:obra/superpowers-marketplace`
-- `/plugin marketplace add github:steveyegge/beads`
+- `/plugin marketplace add https://github.com/affaan-m/everything-claude-code`
+- `/plugin marketplace add https://github.com/obra/superpowers-marketplace`
+- `/plugin marketplace add https://github.com/steveyegge/beads`
 
 ## Step 2: Install Plugins
 
@@ -93,7 +93,7 @@ Install any MISSING plugins using `/plugin install <key>`.
 
 1. Register the marketplace:
    ```bash
-   /plugin marketplace add github:mixedbread-ai/mgrep
+   /plugin marketplace add https://github.com/mixedbread-ai/mgrep
    ```
 
 2. Install the plugin:
