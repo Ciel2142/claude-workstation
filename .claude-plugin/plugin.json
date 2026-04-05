@@ -1,0 +1,23 @@
+{
+  "name": "claude-workstation",
+  "version": "1.0.0",
+  "description": "Personal development environment — unified workflow (Beads + Superpowers + ECC), MCP servers, context profiles, and shell aliases. One install restores everything.",
+  "author": {
+    "name": "Ciel2142",
+    "url": "https://github.com/Ciel2142"
+  },
+  "homepage": "https://github.com/Ciel2142/claude-workstation",
+  "repository": "https://github.com/Ciel2142/claude-workstation",
+  "license": "MIT",
+  "keywords": [
+    "workstation",
+    "workflow",
+    "beads",
+    "superpowers",
+    "ecc",
+    "mcp",
+    "setup"
+  ],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

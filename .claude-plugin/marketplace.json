@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-workstation",
+  "description": "Personal dev environment — unified Beads + Superpowers + ECC workflow, MCP servers, context profiles, shell aliases. One install restores everything.",
+  "owner": {
+    "name": "Ciel2142"
+  },
+  "plugins": [
+    {
+      "name": "claude-workstation",
+      "source": "./",
+      "description": "Unified development workflow with size-based routing, MCP server defaults, context profiles, and environment setup",
+      "version": "1.0.0"
+    }
+  ]
+}
