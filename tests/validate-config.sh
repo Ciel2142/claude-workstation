@@ -188,6 +188,67 @@ fi
 
 echo ""
 
+# --- 10. Debugging rule ---
+echo "10. Debugging rule"
+
+[[ -f "$HOME/.claude/rules/common/debugging.md" ]] \
+    && pass "debugging.md exists" \
+    || fail "debugging.md MISSING (run /claude-workstation:setup)"
+
+if grep -q "systematic-debugging" "$HOME/.claude/rules/common/debugging.md" 2>/dev/null; then
+    pass "debugging.md references systematic-debugging"
+else
+    fail "debugging.md MISSING systematic-debugging reference"
+fi
+
+echo ""
+
+# --- 11. Bug tier in unified workflow ---
+echo "11. Bug tier in unified workflow"
+
+if grep -q '^\| \*\*Bug\*\*' "$HOME/.claude/rules/common/unified-workflow.md" 2>/dev/null; then
+    pass "unified-workflow.md contains Bug tier"
+else
+    fail "unified-workflow.md MISSING Bug tier row"
+fi
+
+echo ""
+
+# --- 12. Skill directories ---
+echo "12. Skill directories"
+
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+
+for skill_dir in init resume setup test; do
+    if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
+        pass "skills/$skill_dir/SKILL.md exists"
+    else
+        fail "skills/$skill_dir/SKILL.md MISSING"
+    fi
+done
+
+echo ""
+
+# --- 13. SKILL.md frontmatter ---
+echo "13. SKILL.md frontmatter"
+
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+
+for skill_dir in init resume setup test; do
+    skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
+    if [[ -f "$skill_file" ]]; then
+        # Extract name from YAML frontmatter
+        yaml_name=$(sed -n '/^---$/,/^---$/{ /^name:/s/^name: *//p }' "$skill_file")
+        if [[ "$yaml_name" == "$skill_dir" ]]; then
+            pass "skills/$skill_dir/SKILL.md name matches directory ($yaml_name)"
+        else
+            fail "skills/$skill_dir/SKILL.md name mismatch (expected '$skill_dir', got '$yaml_name')"
+        fi
+    fi
+done
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"
