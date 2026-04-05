@@ -16,7 +16,7 @@ A Claude Code plugin that restores your full development environment from a sing
 
 ```bash
 # In Claude Code:
-/plugin marketplace add github:Ciel2142/claude-workstation
+/plugin marketplace add https://github.com/Ciel2142/claude-workstation
 /plugin install claude-workstation@claude-workstation
 
 # Then run setup:
@@ -32,10 +32,18 @@ Installed automatically by the setup skill:
 
 | Plugin | Purpose |
 |---|---|
-| [Beads](https://github.com/steveyegge/beads) | Task tracking |
-| [Superpowers](https://github.com/obra/superpowers-marketplace) | Development process |
-| [ECC](https://github.com/affaan-m/everything-claude-code) | Language/domain expertise |
-| + 9 more from claude-plugins-official | Search, review, security, etc. |
+| [Beads](https://github.com/steveyegge/beads) | Dolt-powered issue tracker with dependencies, milestones, and persistent task state across sessions |
+| [Superpowers](https://github.com/obra/superpowers-marketplace) | Development process skills — brainstorming, planning, TDD, code review, verification, debugging |
+| [ECC](https://github.com/affaan-m/everything-claude-code) | Language-specific and domain-specific skills, agents, patterns, and coding standards |
+| [mgrep](https://github.com/mixedbread-ai/mgrep) | Semantic code and web search using Mixedbread AI embeddings |
+| Context7 | Real-time library and framework documentation lookup via MCP |
+| Hookify | Create and manage hooks to prevent unwanted agent behaviors |
+| Playwright | Browser automation for E2E testing and visual verification |
+| Code Simplifier | Simplifies and refines code for clarity, consistency, and maintainability |
+| Code Review | Automated code review for quality, security, and best practices |
+| Security Guidance | Security vulnerability detection and remediation guidance |
+| Commit Commands | Git commit, push, and PR creation workflows |
+| Frontend Design | Create distinctive, production-grade frontend interfaces |
 
 ## Commands & Skills
 
