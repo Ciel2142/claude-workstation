@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -d .beads ] || [ -d \"$HOME/.beads\" ]; then IN_PROGRESS=$(bd list --status=in_progress 2>/dev/null | grep -c 'workflow-\\|beads-' || true); COMMITS=$(git log --oneline --since='4 hours ago' 2>/dev/null | wc -l | tr -d ' '); if [ \"$COMMITS\" -gt 0 ] && [ \"$IN_PROGRESS\" -eq 0 ]; then echo 'WARNING: This session made commits but has NO beads issues. Work should be tracked.'; fi; bd list --status=in_progress 2>/dev/null | head -5; echo '---'; echo 'Reminder: bd close <id> for completed work'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
