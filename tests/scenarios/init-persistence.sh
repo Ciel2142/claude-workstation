@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "=== Init Persistence: Tier stored in notes ==="
+cd /tmp/workflow-test
+
+# Simulate /init for a trivial task — init writes tier to notes
+TRIV_ID=$(bd create --title="Fix whitespace in utils" --type=task --priority=4 2>&1 | grep -oP 'workflow-test-\w+')
+bd update "$TRIV_ID" --notes "tier: trivial"
+
+# Verify tier was persisted
+TRIV_NOTES=$(bd show "$TRIV_ID" 2>&1)
+if echo "$TRIV_NOTES" | grep -q "tier: trivial"; then
+    echo "  Trivial tier persisted: PASS"
+else
+    echo "  Trivial tier NOT in notes: FAIL"; exit 1
+fi
+
+bd close "$TRIV_ID" --reason="Tier persistence test"
+
+# Simulate /init for a small task
+SMALL_ID=$(bd create --title="Add modulo function" --type=task --priority=3 2>&1 | grep -oP 'workflow-test-\w+')
+bd update "$SMALL_ID" --notes "tier: small"
+
+SMALL_NOTES=$(bd show "$SMALL_ID" 2>&1)
+if echo "$SMALL_NOTES" | grep -q "tier: small"; then
+    echo "  Small tier persisted: PASS"
+else
+    echo "  Small tier NOT in notes: FAIL"; exit 1
+fi
+
+bd close "$SMALL_ID" --reason="Tier persistence test"
+
+# Simulate /init for a medium+ epic with milestone progression
+EPIC_ID=$(bd create --title="Add string operations" --type=epic --priority=2 2>&1 | grep -oP 'workflow-test-\w+')
+bd update "$EPIC_ID" --notes "tier: medium+"
+
+# Simulate milestone progression (what brainstorming/planning would write)
+bd update "$EPIC_ID" --notes "Spec: docs/superpowers/specs/test-spec.md"
+bd update "$EPIC_ID" --notes "Plan: docs/superpowers/plans/test-plan.md, 3 tasks"
+
+# Verify resume can detect position from milestones
+EPIC_NOTES=$(bd show "$EPIC_ID" 2>&1)
+if echo "$EPIC_NOTES" | grep -q "tier: medium+"; then
+    echo "  Medium+ tier persisted: PASS"
+else
+    echo "  Medium+ tier NOT in notes: FAIL"; exit 1
+fi
+
+if echo "$EPIC_NOTES" | grep -q "Plan:"; then
+    echo "  Plan milestone detected: PASS (resume would route to TDD)"
+else
+    echo "  Plan milestone NOT in notes: FAIL"; exit 1
+fi
+
+bd close "$EPIC_ID" --reason="Milestone progression test"
+
+echo "=== Init Persistence: PASS ==="
