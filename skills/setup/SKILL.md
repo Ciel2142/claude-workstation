@@ -37,9 +37,9 @@ For any MISSING marketplaces, add them:
 - `/plugin marketplace add https://github.com/obra/superpowers-marketplace`
 - `/plugin marketplace add https://github.com/steveyegge/beads`
 
-## Step 2: Install Plugins
+## Step 2: Install and Update Plugins
 
-Check and install any missing plugins:
+Check, install missing, and update already-installed plugins:
 
 ```bash
 cat ~/.claude/settings.json | python3 -c "
@@ -62,7 +62,7 @@ needed = {
 for key, name in needed.items():
     status = plugins.get(key)
     if status is True:
-        print(f'OK: {name}')
+        print(f'UPDATE: {name} ({key})')
     elif status is False:
         print(f'DISABLED: {name} (enable with /plugin enable)')
     else:
@@ -70,7 +70,10 @@ for key, name in needed.items():
 "
 ```
 
-Install any MISSING plugins using `/plugin install <key>`.
+For any MISSING plugins, install using `/plugin install <key>`.
+
+For any UPDATE plugins, update using `/plugin update <key>`.
+A restart is required after updates take effect.
 
 ## Step 2b: Optional — mgrep (Semantic Search)
 
