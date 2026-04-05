@@ -25,6 +25,14 @@ echo "1. File existence"
     && pass "development-workflow.md exists" \
     || fail "development-workflow.md MISSING"
 
+[[ -f "$HOME/.claude/rules/common/verification-template.md" ]] \
+    && pass "verification-template.md exists" \
+    || fail "verification-template.md MISSING (run /claude-workstation:setup)"
+
+[[ -f "$HOME/.claude/rules/common/beads-milestones.md" ]] \
+    && pass "beads-milestones.md exists" \
+    || fail "beads-milestones.md MISSING (run /claude-workstation:setup)"
+
 [[ -f "$HOME/.claude/rules/context7.md" ]] \
     && pass "context7.md exists" \
     || fail "context7.md MISSING"
@@ -147,8 +155,20 @@ done
 
 echo ""
 
-# --- 8. Shell aliases ---
-echo "8. Shell aliases"
+echo "8. Content completeness (verification template)"
+
+for keyword in "Verification" "BLOCKING" "exit" "bd update"; do
+    if grep -q "$keyword" "$HOME/.claude/rules/common/verification-template.md" 2>/dev/null; then
+        pass "verification-template.md contains '$keyword'"
+    else
+        fail "verification-template.md MISSING '$keyword'"
+    fi
+done
+
+echo ""
+
+# --- 9. Shell aliases ---
+echo "9. Shell aliases"
 
 SHELL_RC=""
 [[ -f "$HOME/.bashrc" ]] && SHELL_RC="$HOME/.bashrc"
