@@ -1,5 +1,6 @@
 ---
 name: analyze
+version: 1.0.0
 description: >
   Auto-assess task tier and start the right workflow. Takes a description,
   scores it, creates the beads task, and invokes the first skill.
@@ -35,7 +36,7 @@ Extract from arguments:
 Before scoring, check if this is a side-quest. A side-quest is detected when ANY of:
 - Description starts with "Found:" or "Discovered:"
 - The `--side-quest` flag was passed
-- There is an active in-progress beads task (check `bd list --status=in_progress`) AND the new description is unrelated to it
+- There is an active in-progress beads task (check `bd list --status=in_progress`) AND the new description is unrelated to it (targets a different domain, system component, or concern than the current task)
 
 **If side-quest detected**, skip to the SIDE-QUEST FLOW below.
 
@@ -47,7 +48,7 @@ Evaluate the description against six weighted dimensions. Score each 0.0-1.0, th
 
 | Dimension | Weight | How to Score |
 |---|---|---|
-| **task_type** | 0.20 | Match signal words to type. `fix/bug/broken/error/crash` = bug (0.3). `add/create/implement/new` = feature (0.5). `refactor/rename/move/clean` = refactor (0.4). `design/system/migrate/architecture` = architecture (0.9). `docs/readme/config/typo/comment/format` = docs (0.1). If multiple match, use the highest. |
+| **task_type** | 0.20 | Match signal words to type. `fix/bug/broken/error/crash` = bug (0.3). `add/create/implement/new` = feature (0.5). `refactor/rename/move/clean` = refactor (0.4). `design/system/migrate/architecture` = architecture (0.9). `docs/readme/config/typo/comment/format` = docs (0.1). If multiple match, use the highest. If none match, use 0.4 (generic task). |
 | **scope_keywords** | 0.25 | Check for breadth signals. `all/every/across/entire/global` = 1.0. `most/many/several` = 0.7. No breadth words = 0.2. |
 | **domain_count** | 0.25 | Count distinct domains mentioned in the description: API, database, auth, frontend, backend, CI/CD, infrastructure, testing, security, config. 1 domain = 0.2. 2 domains = 0.5. 3+ domains = 1.0. |
 | **change_signal** | 0.15 | Check magnitude words. `typo/tweak/bump/rename` = 0.1. `update/improve/enhance` = 0.4. `new system/new component/rewrite/overhaul` = 1.0. No magnitude words = 0.3. |
@@ -74,8 +75,7 @@ Map the final score to a tier:
 |---|---|
 | < 0.25 | Trivial |
 | 0.25 - 0.39 | Small |
-| 0.40 - 0.50 | Borderline — bump to **Medium+** |
-| > 0.50 | Medium+ |
+| >= 0.40 | Medium+ |
 
 ### Step 5: CREATE
 
@@ -136,6 +136,7 @@ When a side-quest is detected:
    ```bash
    bd create --title="<description>" --type=bug -p <priority-override-or-2>
    ```
+   Type defaults to `bug`. If the side-quest is clearly a feature or task, use `--type=feature` or `--type=task` instead.
 
 3. **Link it:**
    ```bash
