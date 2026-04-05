@@ -250,7 +250,7 @@ Status symbols:
 
 ### File Location
 
-`rules/verification-template.md` — copied to `~/.claude/rules/common/` during setup.
+`rules/common/verification-template.md` — copied to `~/.claude/rules/common/` during setup.
 
 ---
 
@@ -262,7 +262,7 @@ Beads tasks get created at start and closed at end, but nothing in between. If a
 
 ### Solution: Two-Layer Approach
 
-**Layer 1: `rules/beads-milestones.md`** — A rule file loaded into every session via `~/.claude/rules/common/`. Instructs Claude to update beads notes at natural completion points.
+**Layer 1: `rules/common/beads-milestones.md`** — A rule file loaded into every session via `~/.claude/rules/common/`. Instructs Claude to update beads notes at natural completion points.
 
 **Layer 2: Updated `/workflow` command** — Adds beads update steps to the workflow reference so users can see when updates happen.
 
@@ -350,8 +350,8 @@ The `/claude-workstation:setup` skill needs these additions:
 |---|---|---|
 | `skills/analyze/SKILL.md` | Create | The analyze skill |
 | `hooks/hooks.json` | Update | Add SessionStart and PreCompact hooks |
-| `rules/verification-template.md` | Create | Verification output standard |
-| `rules/beads-milestones.md` | Create | Milestone tracking rule |
+| `rules/common/verification-template.md` | Create | Verification output standard |
+| `rules/common/beads-milestones.md` | Create | Milestone tracking rule |
 | `commands/workflow.md` | Update | Add beads update annotations |
 | `skills/setup/SKILL.md` | Update | Copy new rule files during setup |
 | `docs/superpowers/specs/2026-04-05-analyze-command-design.md` | Create | This spec |
