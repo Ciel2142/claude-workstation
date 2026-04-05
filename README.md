@@ -5,9 +5,11 @@ A Claude Code plugin that restores your full development environment from a sing
 ## What's Included
 
 - **Unified Workflow** — Size-based routing (trivial/small/medium+) connecting Beads, Superpowers, and ECC
+- **Auto-Tier Assessment** — `/analyze` scores task descriptions and routes to the right workflow automatically
 - **MCP Servers** — context7, memory, exa, playwright, sequential-thinking, token-optimizer
 - **Context Profiles** — `claude-dev`, `claude-research`, `claude-review` shell aliases
-- **Custom Rules** — Workflow routing, plugin lanes, research guidance
+- **Custom Rules** — Workflow routing, plugin lanes, verification template, milestone tracking
+- **Session Hooks** — SessionStart, PreCompact, and Stop hooks for beads state persistence
 - **Test Suite** — Config validation + dry-run scenarios for every workflow tier
 
 ## Install
@@ -35,13 +37,32 @@ Installed automatically by the setup skill:
 | [ECC](https://github.com/affaan-m/everything-claude-code) | Language/domain expertise |
 | + 9 more from claude-plugins-official | Search, review, security, etc. |
 
-## Commands
+## Commands & Skills
 
 | Command | What it does |
 |---|---|
+| `/claude-workstation:analyze` | Auto-assess task tier, create beads task, start the right workflow |
 | `/workflow` | Show the full development playbook |
 | `/claude-workstation:setup` | Install dependencies and configure environment |
 | `/claude-workstation:test` | Validate configuration and run scenarios |
+
+### `/analyze` — Quick Start
+
+```bash
+/claude-workstation:analyze "Fix the login validation bug"
+# → Scores description → Small → creates task → starts TDD
+
+/claude-workstation:analyze "Design a new notification system"
+# → Scores description → Medium+ → creates epic → starts brainstorming
+
+/claude-workstation:analyze "Fix typo in README"
+# → Scores description → Trivial → creates task → "Go fix it"
+
+/claude-workstation:analyze --side-quest "Found: tokens aren't rotated"
+# → Detects side-quest → creates bug → links to current task → parks it
+```
+
+The scoring matrix evaluates 6 weighted dimensions (task type, scope, domain count, change signal, complexity markers, forced escalation) to automatically classify tasks. Borderline scores bump up to the next tier.
 
 ## Workflow Tiers
 
@@ -51,6 +72,26 @@ Installed automatically by the setup skill:
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
 | **Medium+** | 4+ files or new system | Epic → brainstorm → plan → sub-tasks → TDD → verify → close |
 
+## Hooks
+
+| Hook | When | What |
+|---|---|---|
+| **SessionStart** | Session begins | Runs `bd prime` to load active tasks |
+| **PreCompact** | Before context compaction | Runs `bd prime` to preserve beads state |
+| **Stop** | Session ends | Warns about untracked commits, lists in-progress tasks |
+
+## Rules
+
+Copied to `~/.claude/rules/common/` during setup:
+
+| Rule | Purpose |
+|---|---|
+| `unified-workflow.md` | Beads-first rule, tier definitions, escalation |
+| `plugin-routing.md` | Lane separation: Beads (tracking), Superpowers (process), ECC (expertise) |
+| `development-workflow.md` | Research-first culture, GitHub search before coding |
+| `verification-template.md` | Standardized verification output format with exit codes |
+| `beads-milestones.md` | When to update beads notes (after brainstorming, planning, TDD, verification) |
+
 ## Context Profiles
 
 After setup, use these shell aliases:
@@ -59,6 +100,35 @@ After setup, use these shell aliases:
 claude-dev       # Code-first development mode
 claude-research  # Exploration and investigation mode
 claude-review    # Code review and quality analysis mode
+```
+
+## Project Structure
+
+```
+claude-workstation/
+├── commands/
+│   └── workflow.md           # /workflow command — full playbook
+├── skills/
+│   ├── analyze/SKILL.md      # /analyze — auto-tier assessment
+│   ├── setup/SKILL.md        # /setup — environment installer
+│   └── test/SKILL.md         # /test — config validation
+├── rules/common/             # Copied to ~/.claude/rules/common/
+│   ├── unified-workflow.md
+│   ├── plugin-routing.md
+│   ├── development-workflow.md
+│   ├── verification-template.md
+│   └── beads-milestones.md
+├── contexts/                 # Copied to ~/.claude/contexts/
+│   ├── dev.md
+│   ├── research.md
+│   └── review.md
+├── hooks/
+│   └── hooks.json            # SessionStart, PreCompact, Stop
+├── tests/
+│   └── validate-config.sh    # 32+ config checks
+├── .mcp.json                 # MCP server configuration
+├── CLAUDE.md                 # Project instructions
+└── AGENTS.md                 # Agent instructions (beads)
 ```
 
 ## License

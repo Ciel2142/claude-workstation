@@ -6,6 +6,10 @@ Sequence: `bd create` → then invoke skill.
 
 This applies to ALL work — design, planning, research, and code. No exceptions.
 
+## Quick Start
+
+Run `/claude-workstation:analyze "description"` to auto-assess task tier, create the beads task, and start the right workflow in one step.
+
 ## Workflow
 
 Run `/workflow` for the full development playbook with size-based routing (trivial/small/medium+).
