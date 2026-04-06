@@ -103,7 +103,7 @@ PLUGIN_CHECK=$(python3 -c "
 import json
 d = json.load(open('$HOME/.claude/settings.json'))
 plugins = d.get('enabledPlugins', {})
-needed = ['beads@beads-marketplace', 'superpowers@superpowers-marketplace', 'everything-claude-code@everything-claude-code']
+needed = ['beads@beads-marketplace', 'superpowers@superpowers-marketplace', 'ecc@everything-claude-code']
 for p in needed:
     if plugins.get(p) is True:
         print(f'FOUND:{p}')
