@@ -20,11 +20,13 @@ if ! command -v bd >/dev/null 2>&1; then
 fi
 
 # Extract current notes from bd show output.
-# Notes section starts after "NOTES" line and runs to end of output
-# (or next section header like DEPENDENCIES, DESIGN, etc.)
+# Notes section starts after "NOTES" line and runs until the next
+# all-caps section header (PARENT, BLOCKS, CHILDREN, DEPENDENCIES, etc.)
+# or end of output if NOTES is the last section.
 CURRENT_NOTES=$(bd show "$TASK_ID" 2>/dev/null \
-    | sed -n '/^NOTES$/,/^[A-Z][A-Z]*$/p' \
-    | sed '1d;$d' \
+    | sed -n '/^NOTES$/,$ p' \
+    | sed '1d' \
+    | sed '/^[A-Z][A-Z ]*$/,$d' \
     | sed '/^$/d')
 
 if [ -z "$CURRENT_NOTES" ]; then

@@ -107,7 +107,8 @@ bd update <task-id> -s in_progress
 
 Then persist the computed tier for use by `/resume`:
 ```bash
-bd update <task-id> --notes "tier: <trivial|small|medium+>"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+bash "$PLUGIN_ROOT/hooks/bd-notes-append" <task-id> "tier: <trivial|small|medium+>"
 ```
 
 ### Step 6: ROUTE
