@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .beads/hooks/configure-server.sh 2>/dev/null || true"
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start\""
           }
         ]
       }
