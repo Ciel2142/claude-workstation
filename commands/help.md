@@ -93,6 +93,7 @@ understand the root cause before writing the fix.
 
 ## Medium+ Path
 
+Core flow:
 ```
 1. EPIC       bd create --title="..." --type=epic
 2. BRAINSTORM superpowers:brainstorming
@@ -106,10 +107,7 @@ understand the root cause before writing the fix.
                bd dep add <sub-id> <epic-id>
                bd dep add <sub-id> <prev-sub-id>  (only if genuinely sequential)
                bd update <epic-id> --notes "planned-tasks: N"
-5. SPIKE      Task 0: validate architecture assumptions (see spike-phase rule)
-               bd update <epic-id> --notes "spike: <lightweight|deep>"
-6. ISOLATE    superpowers:using-git-worktrees
-7. IMPLEMENT  bd ready → claim ALL ready tasks (not just one)
+5. IMPLEMENT  bd ready → claim ALL ready tasks (not just one)
                For independent ready tasks: dispatch parallel agents
                (superpowers:dispatching-parallel-agents)
                For each sub-task:
@@ -121,10 +119,20 @@ understand the root cause before writing the fix.
                └─ bd close <sub-id>
                Scope health check every 3 closed sub-tasks.
                Repeat until bd ready shows no more sub-tasks.
-8. VERIFY     superpowers:verification-before-completion
-9. UPDATE-DOCS  /ecc:update-docs (update project documentation)
-10. FINISH     superpowers:finishing-a-development-branch
-11. CLOSE     bd close <epic-id>
+6. VERIFY     superpowers:verification-before-completion
+7. CLOSE      bd close <epic-id>
+```
+
+Use when needed:
+```
+- SPIKE        Before IMPLEMENT, when architecture assumptions are unverified
+               (see spike-phase skill)
+- WORKTREE     Before IMPLEMENT, when isolating risk on a feature branch
+               superpowers:using-git-worktrees
+- UPDATE-DOCS  After VERIFY, when public API or project docs changed
+               /ecc:update-docs
+- FINISH       After VERIFY, when on a feature branch that needs merging
+               superpowers:finishing-a-development-branch
 ```
 
 ### Sub-task Dependencies
