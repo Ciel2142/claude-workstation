@@ -5,13 +5,12 @@ A Claude Code plugin that restores your full development environment from a sing
 ## What's Included
 
 - **Unified Workflow** — Size-based routing (trivial/small/medium+) connecting Beads, Superpowers, and ECC
-- **Auto-Injected Context** — SessionStart hook delivers workflow rules (~3KB) without setup
+- **Auto-Injected Context** — SessionStart hook delivers workflow context (~4KB) without setup
 - **Auto-Tier Assessment** — `/start` scores task descriptions and routes to the right workflow automatically
 - **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
-- **MCP Servers** — context7, sequential-thinking
 - **Context Profiles** — `claude-dev`, `claude-research`, `claude-review` shell aliases
-- **Custom Rules** — Workflow routing, plugin lanes, spike phase, scope health, spec amendments, micro-tiers, structured checkpoints, verification template
+- **On-Demand Skills** — Phase-specific protocols for debugging, spike, scope health, milestones, verification
 - **Session Hooks** — SessionStart, PreCompact, and Stop hooks for beads state persistence
 - **Test Suite** — Config validation + dry-run scenarios for every workflow tier
 
@@ -57,7 +56,6 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 | `/help` | Show the full development playbook |
 | `/claude-workstation:setup` | Install dependencies and configure environment |
 | `/claude-workstation:test` | Validate configuration and run scenarios |
-| `/claude-workstation:install-rules` | Opt-in: copy rules to ~/.claude/rules/ for always-on |
 | `/claude-workstation:debugging-protocol` | Reference: debugging-first protocol for bugs |
 | `/claude-workstation:beads-milestones` | Reference: structured milestone checkpoint format |
 | `/claude-workstation:spike-phase` | Reference: architecture validation for Medium+ |
@@ -113,23 +111,6 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 | **PreCompact** | Before context compaction | Runs `bd prime` to preserve beads state |
 | **Stop** | Session ends | Warns about untracked commits, lists in-progress tasks |
 
-## Rules
-
-Copied to `~/.claude/rules/common/` during setup:
-
-| Rule | Purpose |
-|---|---|
-| `unified-workflow.md` | Beads-first rule, tier definitions, spec amendments, micro-tiers, escalation |
-| `plugin-routing.md` | Lane separation: Beads (tracking), Superpowers (process), ECC (expertise) |
-| `development-workflow.md` | Research-first culture, GitHub search before coding |
-| `verification-template.md` | Standardized verification output format with exit codes |
-| `beads-milestones.md` | Structured checkpoint format — standardized key-value milestone notes |
-| `debugging.md` | Debugging-first protocol for bugs: root cause before fix, 3-strike rule |
-| `spike-phase.md` | Architecture validation before Medium+ implementation (lightweight/deep) |
-| `scope-health.md` | Scope creep detection — warning at 1.5x, gate at 2.0x planned tasks |
-
-Rules are auto-injected via hook by default. Run `/install-rules` to opt into always-on global rules.
-
 ## Context Profiles
 
 After setup, use these shell aliases:
@@ -152,15 +133,13 @@ claude-workstation/
 │   ├── resume/SKILL.md        # /resume — continue open work
 │   ├── setup/SKILL.md         # /setup — environment installer
 │   ├── test/SKILL.md          # /test — config validation
-│   ├── install-rules/SKILL.md # /install-rules — opt-in always-on rules
 │   ├── debugging-protocol/    # On-demand: debugging-first protocol
 │   ├── beads-milestones/      # On-demand: milestone checkpoint format
 │   ├── spike-phase/           # On-demand: architecture validation
 │   ├── scope-health/          # On-demand: scope creep detection
 │   └── verification-template/ # On-demand: verification output format
-├── rules/common/              # Source of truth (used by /install-rules)
 ├── contexts/
-│   ├── workflow.md            # Condensed rules (auto-injected via hook)
+│   ├── workflow.md            # Workflow context (auto-injected via hook)
 │   ├── dev.md
 │   ├── research.md
 │   └── review.md
@@ -169,7 +148,6 @@ claude-workstation/
 │   └── session-start          # Context injection script
 ├── tests/
 │   └── validate-config.sh
-├── .mcp.json
 ├── CLAUDE.md
 └── AGENTS.md
 ```
