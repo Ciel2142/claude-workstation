@@ -5,7 +5,7 @@ A Claude Code plugin that restores your full development environment from a sing
 ## What's Included
 
 - **Unified Workflow** — Size-based routing (trivial/small/medium+) connecting Beads, Superpowers, and ECC
-- **Auto-Injected Context** — SessionStart hook delivers workflow context (~4KB) without setup
+- **Auto-Injected Context** — SessionStart hook delivers workflow context (~7KB) without setup
 - **Auto-Tier Assessment** — `/start` scores task descriptions and routes to the right workflow automatically
 - **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
@@ -107,6 +107,7 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 | Hook | When | What |
 |---|---|---|
 | **SessionStart** | Session begins | Injects condensed workflow context via `additionalContext` + configures beads server |
+| **PreToolUse** | Before Edit/Write | Warns if no active beads task exists (pre-change-gate) |
 | **Stop** | Session ends | Warns about untracked commits, lists in-progress tasks |
 
 ## Context Profiles
@@ -143,8 +144,9 @@ claude-workstation/
 │   ├── research.md
 │   └── review.md
 ├── hooks/
-│   ├── hooks.json             # SessionStart + Stop hooks
+│   ├── hooks.json             # SessionStart + PreToolUse + Stop hooks
 │   ├── session-start          # Context injection script
+│   ├── pre-change-gate        # Beads task enforcement before file edits
 │   └── stop                   # Session-end reminder script
 ├── profiles/
 │   └── aliases.sh             # Shell aliases for context profiles
