@@ -47,6 +47,7 @@ Installed by the setup skill:
 | `/help` | Show the full development playbook |
 | `/claude-workstation:setup` | Install dependencies and configure environment |
 | `/claude-workstation:test` | Validate configuration and run scenarios |
+| `/claude-workstation:status` | Show current work state — position, next task, suggested skill |
 | `/claude-workstation:debugging-protocol` | Reference: debugging-first protocol for bugs |
 | `/claude-workstation:beads-milestones` | Reference: structured milestone checkpoint format |
 | `/claude-workstation:spike-phase` | Reference: architecture validation for Medium+ |
@@ -129,7 +130,8 @@ claude-workstation/
 │   ├── beads-milestones/      # On-demand: milestone checkpoint format
 │   ├── spike-phase/           # On-demand: architecture validation
 │   ├── scope-health/          # On-demand: scope creep detection
-│   └── verification-template/ # On-demand: verification output format
+│   ├── verification-template/ # On-demand: verification output format
+│   └── status/SKILL.md        # /status — read-only work orientation
 ├── contexts/
 │   ├── workflow.md            # Workflow context (auto-injected via hook)
 │   ├── dev.md
