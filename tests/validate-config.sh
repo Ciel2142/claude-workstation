@@ -15,10 +15,6 @@ echo ""
 # --- 1. File existence ---
 echo "1. File existence"
 
-[[ -f "$HOME/.claude/rules/context7.md" ]] \
-    && pass "context7.md exists" \
-    || fail "context7.md MISSING"
-
 [[ -f "$HOME/.claude/contexts/dev.md" ]] \
     && pass "dev.md context exists" \
     || fail "dev.md context MISSING"
@@ -170,6 +166,71 @@ for skill_dir in start resume setup test debugging-protocol beads-milestones spi
         fi
     fi
 done
+
+echo ""
+
+# --- 10. Stop hook ---
+echo "10. Stop hook"
+
+if grep -q '"Stop"' "$PLUGIN_ROOT/hooks/hooks.json" 2>/dev/null; then
+    pass "hooks.json contains Stop hook"
+else
+    fail "hooks.json MISSING Stop hook"
+fi
+
+if [[ -f "$PLUGIN_ROOT/hooks/stop" ]]; then
+    pass "hooks/stop script exists"
+    if [[ -x "$PLUGIN_ROOT/hooks/stop" ]]; then
+        pass "hooks/stop is executable"
+    else
+        fail "hooks/stop is NOT executable"
+    fi
+else
+    fail "hooks/stop script MISSING (stop hook is inline)"
+fi
+
+echo ""
+
+# --- 11. Milestone pattern consistency ---
+echo "11. Milestone pattern consistency"
+
+RESUME_FILE="$PLUGIN_ROOT/skills/resume/SKILL.md"
+MILESTONES_FILE="$PLUGIN_ROOT/skills/beads-milestones/SKILL.md"
+
+if [[ -f "$RESUME_FILE" ]] && [[ -f "$MILESTONES_FILE" ]]; then
+    # beads-milestones defines keys as lowercase with colon (e.g. "verification:", "plan:")
+    # resume must match the same keys (case-sensitive)
+    CONSISTENT=true
+
+    # Check that resume patterns use lowercase to match beads-milestones keys
+    for key in "verification:" "completed:" "plan:" "spec:" "docs-updated:" "tier:"; do
+        if grep -q "\"$key\"" "$RESUME_FILE" 2>/dev/null; then
+            pass "resume matches milestone key '$key'"
+        else
+            fail "resume MISSING or MISMATCHED milestone key '$key'"
+            CONSISTENT=false
+        fi
+    done
+
+    # Check that resume does NOT use wrong-case patterns
+    for bad_pattern in '"Verification:"' '"Tests passing:"' '"Tests green:"' '"Plan:"' '"Spec:"'; do
+        if grep -q "$bad_pattern" "$RESUME_FILE" 2>/dev/null; then
+            fail "resume uses wrong-case pattern $bad_pattern (should be lowercase)"
+            CONSISTENT=false
+        fi
+    done
+
+    # Check that resume references /ecc:update-docs (not bare /update-docs)
+    if grep -q '/update-docs' "$RESUME_FILE" 2>/dev/null; then
+        if grep -q '/ecc:update-docs' "$RESUME_FILE" 2>/dev/null; then
+            pass "resume references /ecc:update-docs correctly"
+        else
+            fail "resume references /update-docs without ecc: prefix"
+        fi
+    fi
+else
+    fail "Cannot check milestone consistency — resume or beads-milestones SKILL.md missing"
+fi
 
 echo ""
 

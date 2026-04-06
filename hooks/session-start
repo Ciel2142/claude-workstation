@@ -14,7 +14,10 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # Step 1: Configure beads server mode (if applicable)
-bash .beads/hooks/configure-server.sh 2>/dev/null || true
+BEADS_CONFIGURE="${PWD}/.beads/hooks/configure-server.sh"
+if [ -x "$BEADS_CONFIGURE" ]; then
+    bash "$BEADS_CONFIGURE" 2>/dev/null || true
+fi
 
 # Step 2: Read workflow context
 WORKFLOW_CONTEXT_FILE="${PLUGIN_ROOT}/contexts/workflow.md"

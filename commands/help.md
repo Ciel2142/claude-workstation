@@ -110,7 +110,7 @@ understand the root cause before writing the fix.
                Scope health check every 3 closed sub-tasks.
                Repeat until bd ready shows no more sub-tasks.
 8. VERIFY     superpowers:verification-before-completion
-9. UPDATE-DOCS  update-docs (update project documentation)
+9. UPDATE-DOCS  /ecc:update-docs (update project documentation)
 10. FINISH     superpowers:finishing-a-development-branch
 11. CLOSE     bd close <epic-id>
 ```

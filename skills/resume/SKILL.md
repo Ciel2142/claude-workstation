@@ -101,7 +101,7 @@ After selecting a task, load context at a depth determined by the original tier.
 2. If not found, infer:
    - Task is under an epic → medium+
    - Task type is epic → medium+
-   - Task has notes referencing spec/plan files (contains `"Spec:"` or `"Plan:"`) → small
+   - Task has notes referencing spec/plan files (contains `"spec:"` or `"plan:"`) → small
    - Otherwise → trivial
 
 **Load by depth:**
@@ -126,8 +126,8 @@ Extract: commit list, changed file paths, test file paths.
 **Deep (medium+):**
 Everything from Medium, plus:
 ```bash
-# Read spec file if referenced in notes (extract path after "Spec: ")
-# Read plan file if referenced in notes (extract path after "Plan: ")
+# Read spec file if referenced in notes (extract path after "spec: ")
+# Read plan file if referenced in notes (extract path after "plan: ")
 
 # Get sub-task statuses for the parent epic
 bd list --status=open
@@ -170,11 +170,11 @@ Scan notes for milestone patterns. The latest (highest-priority) match wins:
 | Priority | Pattern in notes | Position |
 |---|---|---|
 | 1 (highest) | `"docs-updated:"` | post-update-docs |
-| 2 | `"Verification:"` | post-verification |
-| 3 | `"Tests passing:"` or `"Tests green:"` | mid-implementation |
-| 4 | `"Plan:"` | post-planning |
-| 5 | `"Spec:"` | post-brainstorming |
-| 6 | `"Debug:"` or `"Bug:"` or `"Root cause:"` | mid-debugging |
+| 2 | `"verification:"` | post-verification |
+| 3 | `"completed:"` | mid-implementation |
+| 4 | `"plan:"` | post-planning |
+| 5 | `"spec:"` | post-brainstorming |
+| 6 | `"debug:"` | mid-debugging |
 | 7 (lowest) | `"tier:"` only (no other milestones) | start |
 
 **Artifact fallback (when no milestone patterns found):**
@@ -208,7 +208,7 @@ If the notes have no recognizable milestone patterns (task created manually, or 
 | post-brainstorming | any | `/superpowers:writing-plans` |
 | post-planning | any | `/superpowers:test-driven-development` (next ready sub-task) |
 | mid-implementation | any | `/superpowers:test-driven-development` (next ready sub-task) |
-| post-verification | any | `/update-docs` |
+| post-verification | any | `/ecc:update-docs` |
 | post-update-docs | any | `/superpowers:finishing-a-development-branch` |
 
 **Print the summary:**

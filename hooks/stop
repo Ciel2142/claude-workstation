@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Stop hook for claude-workstation plugin
+#
+# Warns about untracked commits and lists in-progress tasks.
+
+set -euo pipefail
+
+# Only run if beads is initialized (project-local or global)
+BEADS_DIR="${PWD}/.beads"
+BEADS_GLOBAL="$HOME/.beads"
+
+if [ ! -d "$BEADS_DIR" ] && [ ! -d "$BEADS_GLOBAL" ]; then
+    exit 0
+fi
+
+# Check for commits in this session without beads tracking
+IN_PROGRESS=$(bd list --status=in_progress 2>/dev/null | grep -c 'beads-\|workflow-' || true)
+RECENT_COMMITS=$(git log --oneline --since='8 hours ago' 2>/dev/null | wc -l | tr -d ' ' || echo "0")
+
+if [ "$RECENT_COMMITS" -gt 0 ] && [ "$IN_PROGRESS" -eq 0 ]; then
+    echo "WARNING: This session made $RECENT_COMMITS commit(s) but has NO beads issues. Work should be tracked."
+fi
+
+# Show in-progress tasks as a reminder
+bd list --status=in_progress 2>/dev/null | head -5 || true
+
+echo "---"
+echo "Reminder: bd close <id> for completed work"

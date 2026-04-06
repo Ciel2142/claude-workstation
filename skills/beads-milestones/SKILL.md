@@ -42,8 +42,9 @@ Use one key-value pair per `bd update --notes` call. Keys are lowercase with col
 | `micro-tier:` | When claiming a sub-task | `micro-tier: micro-small` |
 | `spec-amendment:` | When spec is updated | `spec-amendment: minor -- renamed userId to user_id` |
 | `scope-check:` | After scope health triggers | `scope-check: warning -- 8/5 tasks (1.6x)` |
+| `debug:` | After debugging identifies root cause | `debug: root cause -- stale cache in session-start hook` |
 | `verification:` | After verification runs | `verification: tests 47/47, build clean, lint clean` |
-| `docs-updated:` | After /update-docs completes | `docs-updated: README, API docs refreshed` |
+| `docs-updated:` | After /ecc:update-docs completes | `docs-updated: README, API docs refreshed` |
 | `stopped:` | At session end | `stopped: Task 5 of 8, resuming with Task 6` |
 
 ## How to Update
