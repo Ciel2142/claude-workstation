@@ -15,12 +15,9 @@ This applies to ALL work — design, planning, research, and code. No exceptions
 
 Run `/help` for the full development playbook with size-based routing (trivial/small/medium+).
 
-## Rules Delivery
+## Context Delivery
 
-Workflow rules are auto-injected via SessionStart hook (~3KB). Reference skills (debugging protocol, milestones, spike phase, scope health, verification template) are loaded on demand.
-
-- **Opt-in always-on rules:** `/claude-workstation:install-rules` — copies all rules to `~/.claude/rules/`
-- **Workflow alias:** `claude-workflow` — launches Claude with workflow context
+Workflow context is auto-injected via SessionStart hook (~4KB). Phase-specific protocols (debugging, milestones, spike, scope health, verification) are delivered as on-demand skills.
 
 ## Setup
 
