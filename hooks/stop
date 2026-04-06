@@ -6,10 +6,11 @@
 set -euo pipefail
 
 # Only run if beads is initialized (project-local or global)
-BEADS_DIR="${PWD}/.beads"
+GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+BEADS_DIR="${GIT_ROOT:+$GIT_ROOT/.beads}"
 BEADS_GLOBAL="$HOME/.beads"
 
-if [ ! -d "$BEADS_DIR" ] && [ ! -d "$BEADS_GLOBAL" ]; then
+if [ -z "$BEADS_DIR" ] || { [ ! -d "$BEADS_DIR" ] && [ ! -d "$BEADS_GLOBAL" ]; }; then
     exit 0
 fi
 
@@ -22,9 +23,9 @@ fi
 # M3: Configurable time window (default: 8 hours)
 TIME_WINDOW="${BEADS_CHECK_WINDOW:-8 hours ago}"
 
-# L1: Consistent error handling — all numeric fallbacks use || echo "0"
-IN_PROGRESS=$(bd list --status=in_progress 2>/dev/null | grep -c 'beads-\|workflow-' || echo "0")
-RECENT_COMMITS=$(git log --oneline --since="$TIME_WINDOW" 2>/dev/null | wc -l | tr -d ' ' || echo "0")
+# L1: Consistent error handling — separate fallback from command substitution
+IN_PROGRESS=$(bd list --status=in_progress 2>/dev/null | grep -c 'beads-\|workflow-') || IN_PROGRESS=0
+RECENT_COMMITS=$(git log --oneline --since="$TIME_WINDOW" 2>/dev/null | wc -l | tr -d ' ') || RECENT_COMMITS=0
 
 if [ "$RECENT_COMMITS" -gt 0 ] && [ "$IN_PROGRESS" -eq 0 ]; then
     echo "WARNING: This session made $RECENT_COMMITS commit(s) but has NO beads issues. Work should be tracked."

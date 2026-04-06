@@ -46,12 +46,12 @@ else
 fi
 
 # Simulate milestone progression — each overwrites previous notes
-bd update "$EPIC_ID" --notes "Spec: docs/superpowers/specs/test-spec.md"
-bd update "$EPIC_ID" --notes "Plan: docs/superpowers/plans/test-plan.md, 3 tasks"
+bd update "$EPIC_ID" --notes "spec: docs/superpowers/specs/test-spec.md"
+bd update "$EPIC_ID" --notes "plan: docs/superpowers/plans/test-plan.md, 3 tasks"
 
-# Verify latest milestone is visible (Plan: overwrote Spec: which overwrote tier:)
+# Verify latest milestone is visible (plan: overwrote spec: which overwrote tier:)
 EPIC_NOTES=$(bd show "$EPIC_ID" 2>&1)
-if echo "$EPIC_NOTES" | grep -q "Plan:"; then
+if echo "$EPIC_NOTES" | grep -q "plan:"; then
     echo "  Latest milestone (Plan) detected: PASS"
 else
     echo "  Latest milestone NOT in notes: FAIL"; exit 1

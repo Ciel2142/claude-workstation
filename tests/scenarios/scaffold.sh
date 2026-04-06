@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
+if ! command -v bd >/dev/null 2>&1; then
+    echo "SKIP: bd not found in PATH"
+    exit 0
+fi
 echo "=== Scaffold: Creating test project ==="
 
 TEST_DIR="/tmp/workflow-test"

@@ -125,33 +125,33 @@ done
 Detect shell and append aliases if not already present.
 
 ```bash
-if [ -f "$HOME/.zshrc" ]; then
-    SHELL_RC="$HOME/.zshrc"
-elif [ -f "$HOME/.bashrc" ]; then
-    SHELL_RC="$HOME/.bashrc"
-else
+RC_FILES=()
+[[ -f "$HOME/.bashrc" ]] && RC_FILES+=("$HOME/.bashrc")
+[[ -f "$HOME/.zshrc" ]] && RC_FILES+=("$HOME/.zshrc")
+
+if [ ${#RC_FILES[@]} -eq 0 ]; then
     echo "WARNING: No .bashrc or .zshrc found. Create one first."
-    SHELL_RC=""
 fi
 
-if [ -n "$SHELL_RC" ]; then
+for SHELL_RC in "${RC_FILES[@]}"; do
+    echo "Checking $SHELL_RC..."
     for alias_name in claude-dev claude-research claude-review claude-workflow; do
         if ! grep -q "alias $alias_name=" "$SHELL_RC" 2>/dev/null; then
             case "$alias_name" in
                 claude-dev)
-                    echo "alias claude-dev='claude --system-prompt \"\$(cat ~/.claude/contexts/dev.md)\" --allow-dangerously-skip-permissions --effort high'" >> "$SHELL_RC"
+                    echo "alias claude-dev='claude --system-prompt \"\$(cat ~/.claude/contexts/dev.md)\" --effort high'" >> "$SHELL_RC"
                     echo "Added: $alias_name"
                     ;;
                 claude-research)
-                    echo "alias claude-research='claude --system-prompt \"\$(cat ~/.claude/contexts/research.md)\" --allow-dangerously-skip-permissions --effort high'" >> "$SHELL_RC"
+                    echo "alias claude-research='claude --system-prompt \"\$(cat ~/.claude/contexts/research.md)\" --effort high'" >> "$SHELL_RC"
                     echo "Added: $alias_name"
                     ;;
                 claude-review)
-                    echo "alias claude-review='claude --system-prompt \"\$(cat ~/.claude/contexts/review.md)\" --allow-dangerously-skip-permissions --effort high'" >> "$SHELL_RC"
+                    echo "alias claude-review='claude --system-prompt \"\$(cat ~/.claude/contexts/review.md)\" --effort high'" >> "$SHELL_RC"
                     echo "Added: $alias_name"
                     ;;
                 claude-workflow)
-                    echo "alias claude-workflow='claude --system-prompt \"\$(cat ~/.claude/contexts/workflow.md)\" --allow-dangerously-skip-permissions --effort high'" >> "$SHELL_RC"
+                    echo "alias claude-workflow='claude --system-prompt \"\$(cat ~/.claude/contexts/workflow.md)\" --effort high'" >> "$SHELL_RC"
                     echo "Added: $alias_name"
                     ;;
             esac
@@ -161,7 +161,7 @@ if [ -n "$SHELL_RC" ]; then
     done
     echo ""
     echo "Run 'source $SHELL_RC' or start a new terminal to use the aliases."
-fi
+done
 ```
 
 ## Step 5: Validate

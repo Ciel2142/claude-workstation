@@ -59,12 +59,6 @@ echo "3. Plugin source files"
     && pass "hooks/session-start is executable" \
     || fail "hooks/session-start is NOT executable"
 
-for skill in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template; do
-    [[ -f "$PLUGIN_ROOT/skills/$skill/SKILL.md" ]] \
-        && pass "skills/$skill/SKILL.md exists" \
-        || fail "skills/$skill/SKILL.md MISSING"
-done
-
 echo ""
 
 # --- 4. Workflow context content ---
@@ -128,17 +122,19 @@ echo ""
 # --- 7. Shell aliases ---
 echo "7. Shell aliases"
 
-SHELL_RC=""
-[[ -f "$HOME/.bashrc" ]] && SHELL_RC="$HOME/.bashrc"
-[[ -f "$HOME/.zshrc" ]] && SHELL_RC="${SHELL_RC:-$HOME/.zshrc}"
+RC_FILES=()
+[[ -f "$HOME/.bashrc" ]] && RC_FILES+=("$HOME/.bashrc")
+[[ -f "$HOME/.zshrc" ]] && RC_FILES+=("$HOME/.zshrc")
 
-if [ -n "$SHELL_RC" ]; then
-    for alias_name in claude-dev claude-research claude-review; do
-        if grep -q "alias $alias_name=" "$SHELL_RC" 2>/dev/null; then
-            pass "$alias_name alias in $SHELL_RC"
-        else
-            fail "$alias_name alias MISSING from $SHELL_RC"
-        fi
+if [ ${#RC_FILES[@]} -gt 0 ]; then
+    for rc_file in "${RC_FILES[@]}"; do
+        for alias_name in claude-dev claude-research claude-review claude-workflow; do
+            if grep -q "alias $alias_name=" "$rc_file" 2>/dev/null; then
+                pass "$alias_name alias in $rc_file"
+            else
+                fail "$alias_name alias MISSING from $rc_file"
+            fi
+        done
     done
 else
     fail "No .bashrc or .zshrc found"

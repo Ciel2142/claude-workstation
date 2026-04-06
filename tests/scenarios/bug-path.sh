@@ -38,6 +38,8 @@ divide() {\
     fi\
     # Round to nearest integer instead of truncating\
     echo $(( (a + b/2) / b ))\
+    # Note: this rounding formula works for positive divisors only.\
+    # Negative divisors and banker'\''s rounding are out of scope for this demo.\
 }' src/utils.sh
 
 # Verify GREEN
