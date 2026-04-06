@@ -8,7 +8,7 @@ A Claude Code plugin that restores your full development environment from a sing
 - **Auto-Tier Assessment** — `/start` scores task descriptions and routes to the right workflow automatically
 - **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
-- **MCP Servers** — context7, memory, exa, playwright, sequential-thinking, token-optimizer
+- **MCP Servers** — context7, sequential-thinking
 - **Context Profiles** — `claude-dev`, `claude-research`, `claude-review` shell aliases
 - **Custom Rules** — Workflow routing, plugin lanes, spike phase, scope health, spec amendments, micro-tiers, structured checkpoints, verification template
 - **Session Hooks** — SessionStart, PreCompact, and Stop hooks for beads state persistence
@@ -95,7 +95,7 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 |---|---|---|
 | **Trivial** | 1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files or new system | Epic → brainstorm → plan → sub-tasks → spike → TDD → verify → close |
+| **Medium+** | 4+ files or new system | Epic → brainstorm → plan → sub-tasks → spike → TDD → verify → update-docs → finish → close |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → close |
 
 ## Hooks
