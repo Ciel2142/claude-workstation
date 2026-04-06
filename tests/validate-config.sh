@@ -59,7 +59,7 @@ echo "3. Plugin source files"
     && pass "hooks/session-start is executable" \
     || fail "hooks/session-start is NOT executable"
 
-for skill in debugging-protocol beads-milestones spike-phase scope-health verification-template; do
+for skill in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template; do
     [[ -f "$PLUGIN_ROOT/skills/$skill/SKILL.md" ]] \
         && pass "skills/$skill/SKILL.md exists" \
         || fail "skills/$skill/SKILL.md MISSING"
@@ -84,8 +84,16 @@ echo ""
 echo "5. Hook output validity"
 
 HOOK_OUTPUT=$(CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" bash "$PLUGIN_ROOT/hooks/session-start" 2>/dev/null)
-if echo "$HOOK_OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); ctx=d['hookSpecificOutput']['additionalContext']; assert len(ctx) > 100" 2>/dev/null; then
-    pass "session-start hook produces valid JSON with additionalContext"
+if echo "$HOOK_OUTPUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+hso = d['hookSpecificOutput']
+assert 'hookEventName' in hso, 'missing hookEventName'
+assert 'additionalContext' in hso, 'missing additionalContext'
+assert isinstance(hso['additionalContext'], str), 'additionalContext not string'
+assert len(hso['additionalContext']) > 100, 'additionalContext too short'
+" 2>/dev/null; then
+    pass "session-start hook produces valid JSON with correct structure"
 else
     fail "session-start hook output INVALID"
 fi
@@ -231,6 +239,54 @@ if [[ -f "$RESUME_FILE" ]] && [[ -f "$MILESTONES_FILE" ]]; then
 else
     fail "Cannot check milestone consistency — resume or beads-milestones SKILL.md missing"
 fi
+
+echo ""
+
+# --- 12. Scenario scripts ---
+echo "12. Scenario scripts"
+
+if [ -d "$PLUGIN_ROOT/tests/scenarios" ]; then
+    for scenario in "$PLUGIN_ROOT"/tests/scenarios/*.sh; do
+        name=$(basename "$scenario")
+        if [[ -f "$scenario" ]]; then
+            pass "scenarios/$name exists"
+        else
+            fail "scenarios/$name MISSING"
+        fi
+        if [[ -x "$scenario" ]]; then
+            pass "scenarios/$name is executable"
+        else
+            fail "scenarios/$name is NOT executable"
+        fi
+    done
+else
+    fail "tests/scenarios/ directory MISSING"
+fi
+
+echo ""
+
+# --- 13. Cross-reference validation ---
+echo "13. Cross-reference validation"
+
+# Verify every skills/ directory is mentioned in README
+for skill_dir in "$PLUGIN_ROOT"/skills/*/; do
+    skill_name=$(basename "$skill_dir")
+    if grep -q "$skill_name" "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+        pass "skill $skill_name referenced in README"
+    else
+        fail "skill $skill_name NOT referenced in README"
+    fi
+done
+
+# Verify every command in commands/ is referenced in README
+for cmd_file in "$PLUGIN_ROOT"/commands/*.md; do
+    cmd_name=$(basename "$cmd_file" .md)
+    if grep -q "$cmd_name" "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+        pass "command $cmd_name referenced in README"
+    else
+        fail "command $cmd_name NOT referenced in README"
+    fi
+done
 
 echo ""
 
