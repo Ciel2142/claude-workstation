@@ -6,18 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .beads/hooks/configure-server.sh 2>/dev/null || true; bd prime 2>/dev/null || true"
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bd prime 2>/dev/null || true"
+            "command": "bash .beads/hooks/configure-server.sh 2>/dev/null || true"
           }
         ]
       }
