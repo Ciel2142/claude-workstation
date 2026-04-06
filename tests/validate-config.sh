@@ -159,7 +159,7 @@ echo ""
 # --- 8. Skill directories ---
 echo "8. Skill directories"
 
-for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template; do
+for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template status; do
     if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
         pass "skills/$skill_dir/SKILL.md exists"
     else
@@ -172,7 +172,7 @@ echo ""
 # --- 9. SKILL.md frontmatter ---
 echo "9. SKILL.md frontmatter"
 
-for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template; do
+for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template status; do
     skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
     if [[ -f "$skill_file" ]]; then
         # Extract name from YAML frontmatter
