@@ -14,9 +14,18 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # Step 1: Configure beads server mode (if applicable)
-BEADS_CONFIGURE="${PWD}/.beads/hooks/configure-server.sh"
-if [ -x "$BEADS_CONFIGURE" ]; then
-    bash "$BEADS_CONFIGURE" 2>/dev/null || true
+# M1: Use git root instead of PWD (robust across subdirectories)
+GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+if [ -n "$GIT_ROOT" ]; then
+    BEADS_CONFIGURE="$GIT_ROOT/.beads/hooks/configure-server.sh"
+else
+    BEADS_CONFIGURE=""
+fi
+# M2: Warn on failure instead of silent suppression
+if [ -n "$BEADS_CONFIGURE" ] && [ -x "$BEADS_CONFIGURE" ]; then
+    if ! bash "$BEADS_CONFIGURE" 2>/dev/null; then
+        echo "warning: beads configure-server.sh failed" >&2
+    fi
 fi
 
 # Step 2: Read workflow context
