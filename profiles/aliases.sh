@@ -4,3 +4,4 @@
 alias claude-dev='claude --system-prompt "$(cat ~/.claude/contexts/dev.md)" --allow-dangerously-skip-permissions --effort high'
 alias claude-research='claude --system-prompt "$(cat ~/.claude/contexts/research.md)" --allow-dangerously-skip-permissions --effort high'
 alias claude-review='claude --system-prompt "$(cat ~/.claude/contexts/review.md)" --allow-dangerously-skip-permissions --effort high'
+alias claude-workflow='claude --system-prompt "$(cat ~/.claude/contexts/workflow.md)" --allow-dangerously-skip-permissions --effort high'
