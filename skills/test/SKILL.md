@@ -10,7 +10,7 @@ description: >
 
 ## Quick Validation
 
-Run the automated config validation (26+ checks):
+Run the automated config validation (155+ checks):
 
 ```bash
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$(dirname "$0")")")}"
@@ -43,12 +43,12 @@ Each scenario script is self-contained and exits 0 on success, 1 on failure.
 ### Config Validation
 1. File existence (contexts, settings, plugin source files)
 2. JSON validity (settings.json)
-3. Plugin source files (workflow.md, session-start hook, 6 new skills)
+3. Plugin source files (workflow.md, session-start hook, 9 skills)
 4. Workflow context content completeness
 5. Hook output validity (produces valid JSON with additionalContext)
 6. Plugin presence (Beads, Superpowers, ECC)
 7. Shell aliases presence
-8. Skill directory completeness (all 10 skills present)
+8. Skill directory completeness (all 9 skills present)
 9. SKILL.md frontmatter name matches directory
 
 ### Dry-Run Scenarios

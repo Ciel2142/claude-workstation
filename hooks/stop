@@ -27,8 +27,13 @@ TIME_WINDOW="${BEADS_CHECK_WINDOW:-8 hours ago}"
 IN_PROGRESS=$(bd list --status=in_progress 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || IN_PROGRESS=0
 RECENT_COMMITS=$(git log --oneline --since="$TIME_WINDOW" 2>/dev/null | wc -l | tr -d ' ') || RECENT_COMMITS=0
 
+# Only warn if commits exist but NO issues at all (open, in_progress, or recently closed)
 if [ "$RECENT_COMMITS" -gt 0 ] && [ "$IN_PROGRESS" -eq 0 ]; then
-    echo "WARNING: This session made $RECENT_COMMITS commit(s) but has NO beads issues. Work should be tracked."
+    CLOSED_RECENT=$(bd list --status=closed 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || CLOSED_RECENT=0
+    OPEN_COUNT=$(bd list --status=open 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || OPEN_COUNT=0
+    if [ "$CLOSED_RECENT" -eq 0 ] && [ "$OPEN_COUNT" -eq 0 ]; then
+        echo "WARNING: This session made $RECENT_COMMITS commit(s) but has NO beads issues. Work should be tracked."
+    fi
 fi
 
 # Show in-progress tasks as a reminder

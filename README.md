@@ -89,7 +89,7 @@ Installed by the setup skill:
 
 | Tier | Signal | Flow |
 |---|---|---|
-| **Trivial** | 1 file, no behavior change | `bd create` → fix → verify → `bd close` |
+| **Trivial** | ≤1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
 | **Medium+** | 4+ files or new system | Epic → brainstorm → plan → sub-tasks → spike → TDD → verify → update-docs → finish → close |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → close |

@@ -300,8 +300,8 @@ fi
 
 echo ""
 
-# --- 11b. Context budget accuracy ---
-echo "11b. Context budget accuracy"
+# --- 11g. Context budget accuracy ---
+echo "11g. Context budget accuracy"
 
 WORKFLOW_SIZE=$(wc -c < "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null || echo 0)
 CLAUDE_MD="$PLUGIN_ROOT/CLAUDE.md"
@@ -378,7 +378,7 @@ else
     fail "tests/scenarios/ directory MISSING"
 fi
 
-# 11c. Version consistency
+# 13b. Version consistency
 PLUGIN_VERSION=$(python3 -c "import json; print(json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "unknown")
 VERSION_MISMATCH=0
 for skill_dir in "$PLUGIN_ROOT"/skills/*/; do

@@ -45,7 +45,7 @@ OUTPUT=""
 LISTING_JSON=$(bd list --status=in_progress --json 2>/dev/null || echo "")
 if [ -n "$LISTING_JSON" ] && [ "$LISTING_JSON" != "[]" ] && [ "$LISTING_JSON" != "null" ]; then
     # Extract first task ID from JSON array
-    TASK_ID=$(printf '%s' "$LISTING_JSON" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null || echo "")
+    TASK_ID=$(printf '%s' "$LISTING_JSON" | grep -o '"id": *"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null || echo "")
 fi
 # Fallback to text parsing if JSON extraction failed
 if [ -z "${TASK_ID:-}" ]; then
