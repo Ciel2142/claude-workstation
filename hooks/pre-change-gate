@@ -50,7 +50,7 @@ fi
 # Fallback to text parsing if JSON extraction failed
 if [ -z "${TASK_ID:-}" ]; then
     LISTING=$(bd list --status=in_progress 2>/dev/null || echo "")
-    TASK_ID=$(echo "$LISTING" | grep -v 'No issues' | awk 'NR>1 && NF>0{print $1; exit}')
+    TASK_ID=$(echo "$LISTING" | grep -v 'No issues' | awk 'NR>1 && NF>0{print $1; exit}' || true)
 fi
 
 if [ -z "$TASK_ID" ]; then
