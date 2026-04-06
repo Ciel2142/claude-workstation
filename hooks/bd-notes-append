@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Append a line to beads task notes without losing existing content.
+# Usage: bd-notes-append <task-id> "key: value"
+# Reads current notes from bd show, appends new line, writes back.
+# Always exits 0 on success, 1 on failure.
+
+set -euo pipefail
+
+TASK_ID="${1:-}"
+NEW_LINE="${2:-}"
+
+if [ -z "$TASK_ID" ] || [ -z "$NEW_LINE" ]; then
+    echo "Usage: bd-notes-append <task-id> \"key: value\"" >&2
+    exit 1
+fi
+
+if ! command -v bd >/dev/null 2>&1; then
+    echo "error: bd not found in PATH" >&2
+    exit 1
+fi
+
+# Extract current notes from bd show output.
+# Notes section starts after "NOTES" line and runs to end of output
+# (or next section header like DEPENDENCIES, DESIGN, etc.)
+CURRENT_NOTES=$(bd show "$TASK_ID" 2>/dev/null \
+    | sed -n '/^NOTES$/,/^[A-Z][A-Z]*$/p' \
+    | sed '1d;$d' \
+    | sed '/^$/d')
+
+if [ -z "$CURRENT_NOTES" ]; then
+    bd update "$TASK_ID" --notes "$NEW_LINE"
+else
+    bd update "$TASK_ID" --notes "${CURRENT_NOTES}
+${NEW_LINE}"
+fi
