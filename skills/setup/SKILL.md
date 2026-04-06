@@ -50,7 +50,6 @@ needed = {
     'ecc@everything-claude-code': 'ECC',
     'superpowers@superpowers-marketplace': 'Superpowers',
     'beads@beads-marketplace': 'Beads',
-    'context7@claude-plugins-official': 'Context7',
     'hookify@claude-plugins-official': 'Hookify',
     'playwright@claude-plugins-official': 'Playwright',
     'code-simplifier@claude-plugins-official': 'Code Simplifier',

@@ -11,7 +11,7 @@ A Claude Code plugin that restores your full development environment from a sing
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
 - **Context Profiles** — `claude-dev`, `claude-research`, `claude-review`, `claude-workflow` shell aliases
 - **On-Demand Skills** — Phase-specific protocols for debugging, spike, scope health, milestones, verification
-- **Session Hooks** — SessionStart, PreCompact, and Stop hooks for beads state persistence
+- **Session Hooks** — SessionStart and Stop hooks for beads state persistence
 - **Test Suite** — Config validation + dry-run scenarios for every workflow tier
 
 ## Install
@@ -38,14 +38,13 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | superpowers-marketplace | Development process skills — brainstorming, planning, TDD, code review, verification, debugging |
 | [ECC](https://github.com/affaan-m/everything-claude-code) | everything-claude-code | Language-specific and domain-specific skills, agents, patterns, and coding standards |
 | [mgrep](https://github.com/mixedbread-ai/mgrep) *(optional)* | Mixedbread-Grep | Semantic code and web search using Mixedbread AI embeddings — replaces built-in Grep, Glob, and WebSearch with natural language search |
-| Context7 | claude-plugins-official | Real-time library and framework documentation lookup via MCP |
-| Hookify | claude-plugins-official | Create and manage hooks to prevent unwanted agent behaviors |
-| Playwright | claude-plugins-official | Browser automation for E2E testing and visual verification |
-| Code Simplifier | claude-plugins-official | Simplifies and refines code for clarity, consistency, and maintainability |
-| Code Review | claude-plugins-official | Automated code review for quality, security, and best practices |
-| Security Guidance | claude-plugins-official | Security vulnerability detection and remediation guidance |
-| Commit Commands | claude-plugins-official | Git commit, push, and PR creation workflows |
-| Frontend Design | claude-plugins-official | Create distinctive, production-grade frontend interfaces |
+| Hookify *(optional)* | claude-plugins-official | Create and manage hooks to prevent unwanted agent behaviors |
+| Playwright *(optional)* | claude-plugins-official | Browser automation for E2E testing and visual verification |
+| Code Simplifier *(optional)* | claude-plugins-official | Simplifies and refines code for clarity, consistency, and maintainability |
+| Code Review *(optional)* | claude-plugins-official | Automated code review for quality, security, and best practices |
+| Security Guidance *(optional)* | claude-plugins-official | Security vulnerability detection and remediation guidance |
+| Commit Commands *(optional)* | claude-plugins-official | Git commit, push, and PR creation workflows |
+| Frontend Design *(optional)* | claude-plugins-official | Create distinctive, production-grade frontend interfaces |
 
 ## Commands & Skills
 
@@ -108,7 +107,6 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 | Hook | When | What |
 |---|---|---|
 | **SessionStart** | Session begins | Injects condensed workflow context via `additionalContext` + configures beads server |
-| **PreCompact** | Before context compaction | Runs `bd prime` to preserve beads state |
 | **Stop** | Session ends | Warns about untracked commits, lists in-progress tasks |
 
 ## Context Profiles
@@ -145,9 +143,13 @@ claude-workstation/
 │   └── review.md
 ├── hooks/
 │   ├── hooks.json             # SessionStart + Stop hooks
-│   └── session-start          # Context injection script
+│   ├── session-start          # Context injection script
+│   └── stop                   # Session-end reminder script
+├── profiles/
+│   └── aliases.sh             # Shell aliases for context profiles
 ├── tests/
-│   └── validate-config.sh
+│   ├── validate-config.sh     # Config validation
+│   └── scenarios/             # Workflow dry-run scenario scripts
 ├── CLAUDE.md
 └── AGENTS.md
 ```
