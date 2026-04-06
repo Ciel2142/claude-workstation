@@ -11,6 +11,7 @@ survives session crashes and context compaction.
 - After spike: note findings
 - After each sub-task: note progress
 - After verification: note results
+- After updating docs: note what was updated
 - At session end: note where you stopped
 
 ## Standardized Format
@@ -33,6 +34,7 @@ Use one key-value pair per `bd update --notes` call. Keys are lowercase with col
 | `spec-amendment:` | When spec is updated | `spec-amendment: minor -- renamed userId to user_id` |
 | `scope-check:` | After scope health triggers | `scope-check: warning -- 8/5 tasks (1.6x)` |
 | `verification:` | After verification runs | `verification: tests 47/47, build clean, lint clean` |
+| `docs-updated:` | After /update-docs completes | `docs-updated: README, API docs refreshed` |
 | `stopped:` | At session end | `stopped: Task 5 of 8, resuming with Task 6` |
 
 ## How to Update

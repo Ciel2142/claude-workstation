@@ -3,6 +3,7 @@
   "backend": "dolt",
   "dolt_mode": "server",
   "dolt_server_host": "192.168.2.34",
+  "dolt_server_port": 3307,
   "dolt_server_user": "root",
   "dolt_database": "claude_workstation",
   "project_id": "be1c1db2-060c-4294-8888-66a56b59fba7"

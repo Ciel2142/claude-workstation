@@ -169,12 +169,13 @@ Scan notes for milestone patterns. The latest (highest-priority) match wins:
 
 | Priority | Pattern in notes | Position |
 |---|---|---|
-| 1 (highest) | `"Verification:"` | post-verification |
-| 2 | `"Tests passing:"` or `"Tests green:"` | mid-implementation |
-| 3 | `"Plan:"` | post-planning |
-| 4 | `"Spec:"` | post-brainstorming |
-| 5 | `"Debug:"` or `"Bug:"` or `"Root cause:"` | mid-debugging |
-| 6 (lowest) | `"tier:"` only (no other milestones) | start |
+| 1 (highest) | `"docs-updated:"` | post-update-docs |
+| 2 | `"Verification:"` | post-verification |
+| 3 | `"Tests passing:"` or `"Tests green:"` | mid-implementation |
+| 4 | `"Plan:"` | post-planning |
+| 5 | `"Spec:"` | post-brainstorming |
+| 6 | `"Debug:"` or `"Bug:"` or `"Root cause:"` | mid-debugging |
+| 7 (lowest) | `"tier:"` only (no other milestones) | start |
 
 **Artifact fallback (when no milestone patterns found):**
 
@@ -207,7 +208,8 @@ If the notes have no recognizable milestone patterns (task created manually, or 
 | post-brainstorming | any | `/superpowers:writing-plans` |
 | post-planning | any | `/superpowers:test-driven-development` (next ready sub-task) |
 | mid-implementation | any | `/superpowers:test-driven-development` (next ready sub-task) |
-| post-verification | any | `/superpowers:finishing-a-development-branch` |
+| post-verification | any | `/update-docs` |
+| post-update-docs | any | `/superpowers:finishing-a-development-branch` |
 
 **Print the summary:**
 
