@@ -81,4 +81,4 @@ bd dep add <new-id> <current-id> --type=discovered-from
 ```
 Finish current task first, then `bd ready`.
 
-Run `/workflow` for detailed step-by-step flows.
+Run `/help` for detailed step-by-step flows.

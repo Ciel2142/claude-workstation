@@ -10,4 +10,4 @@ When both apply: Superpowers drives the process, ECC provides language/domain ex
 
 ## Connected Flow
 
-These plugins are connected through the unified workflow. See `unified-workflow.md` (auto-loaded) for size-based routing. Run `/workflow` for the full playbook.
+These plugins are connected through the unified workflow. See `unified-workflow.md` (auto-loaded) for size-based routing. Run `/help` for the full playbook.

@@ -1,6 +1,6 @@
 # Development Workflow
 
-> The full development flow (task creation → brainstorming → planning → TDD → review → verification → close) is defined in `unified-workflow.md` and available via `/workflow`.
+> The full development flow (task creation → brainstorming → planning → TDD → review → verification → close) is defined in `unified-workflow.md` and available via `/help`.
 
 ## Research & Reuse (mandatory before any new implementation)
 

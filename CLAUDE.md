@@ -13,7 +13,7 @@ This applies to ALL work — design, planning, research, and code. No exceptions
 
 ## Workflow
 
-Run `/workflow` for the full development playbook with size-based routing (trivial/small/medium+).
+Run `/help` for the full development playbook with size-based routing (trivial/small/medium+).
 
 ## Setup
 

@@ -53,7 +53,7 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 |---|---|
 | `/claude-workstation:start` | Auto-assess task tier, create beads task, start the right workflow |
 | `/claude-workstation:resume` | Resume open work — load context, detect position, continue workflow |
-| `/workflow` | Show the full development playbook |
+| `/help` | Show the full development playbook |
 | `/claude-workstation:setup` | Install dependencies and configure environment |
 | `/claude-workstation:test` | Validate configuration and run scenarios |
 
@@ -136,7 +136,7 @@ claude-review    # Code review and quality analysis mode
 ```
 claude-workstation/
 ├── commands/
-│   └── workflow.md           # /workflow command — full playbook
+│   └── help.md               # /help command — full playbook
 ├── skills/
 │   ├── start/SKILL.md         # /start — auto-tier assessment & workflow start
 │   ├── resume/SKILL.md        # /resume — continue open work

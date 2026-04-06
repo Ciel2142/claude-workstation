@@ -1,5 +1,5 @@
 ---
-description: Show the unified development workflow (Beads + Superpowers + ECC)
+description: Show the unified development workflow and command reference
 ---
 
 # Unified Development Workflow

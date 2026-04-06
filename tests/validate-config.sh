@@ -117,10 +117,10 @@ else
     fail "plugin-routing.md does NOT reference unified-workflow.md"
 fi
 
-if grep -q "/workflow" "$HOME/.claude/rules/common/plugin-routing.md" 2>/dev/null; then
-    pass "plugin-routing.md references /workflow command"
+if grep -q "/help" "$HOME/.claude/rules/common/plugin-routing.md" 2>/dev/null; then
+    pass "plugin-routing.md references /help command"
 else
-    fail "plugin-routing.md does NOT reference /workflow command"
+    fail "plugin-routing.md does NOT reference /help command"
 fi
 
 if grep -q "unified-workflow.md" "$HOME/.claude/rules/common/development-workflow.md" 2>/dev/null; then
