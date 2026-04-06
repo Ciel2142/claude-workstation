@@ -22,10 +22,10 @@ fi
 
 # --- Cache ---
 
-CACHE="/tmp/.beads-gate-${USER}"
+CACHE="/tmp/.beads-gate-${USER:-$(id -un)}"
 
 if [ -f "$CACHE" ]; then
-    CACHE_MOD=$(stat -c %Y "$CACHE" 2>/dev/null || echo 0)
+    CACHE_MOD=$(stat -c %Y "$CACHE" 2>/dev/null || stat -f %m "$CACHE" 2>/dev/null || echo 0)
     NOW=$(date +%s)
     if [ $(( NOW - CACHE_MOD )) -lt 60 ]; then
         cat "$CACHE"
