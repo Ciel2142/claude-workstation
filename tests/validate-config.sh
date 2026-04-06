@@ -63,7 +63,7 @@ echo "3. Plugin source files"
     && pass "hooks/session-start is executable" \
     || fail "hooks/session-start is NOT executable"
 
-for skill in debugging-protocol beads-milestones spike-phase scope-health verification-template install-rules; do
+for skill in debugging-protocol beads-milestones spike-phase scope-health verification-template; do
     [[ -f "$PLUGIN_ROOT/skills/$skill/SKILL.md" ]] \
         && pass "skills/$skill/SKILL.md exists" \
         || fail "skills/$skill/SKILL.md MISSING"
@@ -74,7 +74,7 @@ echo ""
 # --- 4. Workflow context content ---
 echo "4. Workflow context content"
 
-for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests"; do
+for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests" "Spec Amendments" "Micro-tiers" "Skill References"; do
     if grep -q "$keyword" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
         pass "workflow.md contains '$keyword'"
     else
@@ -145,7 +145,7 @@ echo ""
 # --- 8. Skill directories ---
 echo "8. Skill directories"
 
-for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template install-rules; do
+for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template; do
     if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
         pass "skills/$skill_dir/SKILL.md exists"
     else
@@ -158,7 +158,7 @@ echo ""
 # --- 9. SKILL.md frontmatter ---
 echo "9. SKILL.md frontmatter"
 
-for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template install-rules; do
+for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template; do
     skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
     if [[ -f "$skill_file" ]]; then
         # Extract name from YAML frontmatter
