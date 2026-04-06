@@ -25,6 +25,31 @@ Before invoking ANY Superpowers skill (brainstorming, writing-plans, TDD, code-r
 - No completion claims without verification output
 - No trusting subagent reports without own verification
 
+## Spec Amendments
+
+When implementation reveals the spec is wrong, amend it — don't silently deviate.
+
+**Minor (agent self-approves):** Naming mismatches, missing edge case detail,
+clarifying ambiguous wording, parameter type corrections to match existing code.
+- Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
+- Continue without interruption.
+
+**Material (requires human approval):** Different algorithm, adding/dropping features,
+new dependencies, changed API shape, architectural changes.
+- Stop implementing and present:
+  ```
+  Spec amendment needed (material):
+    Section: <which part>
+    Current: <what spec says>
+    Proposed: <what it should say>
+    Reason: <what implementation revealed>
+    Approve? [Y/n/discuss]
+  ```
+- Wait for approval. On yes: update spec, commit, log: `spec-amendment: material -- <what changed>, approved by human`
+- Resume implementation.
+
+Applies to Small and Medium+ tiers. Trivial tasks have no spec.
+
 ## Side Quests
 
 Discover something unrelated mid-work:
