@@ -106,15 +106,6 @@ A restart is required after updates take effect.
 
 **If the user says no**, skip to Step 3.
 
-## Workflow Rules
-
-Rules are auto-injected via the SessionStart hook — no manual copy needed.
-
-To opt into always-on global rules (adds ~15KB to every session's context):
-```bash
-/claude-workstation:install-rules
-```
-
 ## Step 3: Copy Context Profiles
 
 ```bash
