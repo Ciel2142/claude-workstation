@@ -34,5 +34,8 @@ fi
 # Show in-progress tasks as a reminder
 bd list --status=in_progress 2>/dev/null | head -5 || true
 
+# Clean up pre-change-gate cache
+rm -f "/tmp/.beads-gate-${USER}"
+
 echo "---"
 echo "Reminder: bd close <id> for completed work"

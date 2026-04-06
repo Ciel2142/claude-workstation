@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Pre-change gate: nudges agent to create beads task before file edits.
+# Registered as PreToolUse hook for Edit and Write in hooks.json.
+# Always exits 0 — warns but never blocks.
+
+set -euo pipefail
+
+# --- Guards ---
+
+# Only run if beads is initialized (project-local or global)
+GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+BEADS_DIR="${GIT_ROOT:+$GIT_ROOT/.beads}"
+
+if [ -z "$BEADS_DIR" ] || { [ ! -d "$BEADS_DIR" ] && [ ! -d "$HOME/.beads" ]; }; then
+    exit 0
+fi
+
+# Check bd availability
+if ! command -v bd >/dev/null 2>&1; then
+    exit 0
+fi
+
+# --- Cache ---
+
+CACHE="/tmp/.beads-gate-${USER}"
+
+if [ -f "$CACHE" ]; then
+    CACHE_MOD=$(stat -c %Y "$CACHE" 2>/dev/null || echo 0)
+    NOW=$(date +%s)
+    if [ $(( NOW - CACHE_MOD )) -lt 60 ]; then
+        cat "$CACHE"
+        exit 0
+    fi
+fi
+
+# --- Check ---
+
+OUTPUT=""
+LISTING=$(bd list --status=in_progress 2>/dev/null || echo "")
+TASK_ID=$(echo "$LISTING" | grep -v 'No issues' | awk 'NF>0{print $1; exit}')
+
+if [ -z "$TASK_ID" ]; then
+    OUTPUT=$(printf '%s\n%s' \
+        "WARNING: No active beads task. Create one before modifying files:" \
+        "   bd create --title=\"...\" --type=task")
+else
+    NOTES=$(bd show "$TASK_ID" 2>/dev/null || echo "")
+    if ! echo "$NOTES" | grep -q 'tier:'; then
+        OUTPUT="WARNING: Active task ($TASK_ID) has no tier assessment. Run /claude-workstation:start to assess."
+    fi
+fi
+
+# --- Cache and output ---
+
+printf '%s' "$OUTPUT" > "$CACHE"
+
+if [ -n "$OUTPUT" ]; then
+    echo "$OUTPUT"
+fi
+
+exit 0

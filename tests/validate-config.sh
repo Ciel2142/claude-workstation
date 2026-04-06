@@ -385,6 +385,58 @@ done
 
 echo ""
 
+# --- 15. Pre-change gate hook ---
+echo "15. Pre-change gate hook"
+
+# 15a. hooks.json has PreToolUse entries
+if python3 -c "
+import json
+d = json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))
+hooks = d['hooks']
+assert 'PreToolUse' in hooks, 'PreToolUse not found'
+entries = hooks['PreToolUse']
+matchers = [e['matcher'] for e in entries]
+assert 'Edit' in matchers, 'Edit matcher not found'
+assert 'Write' in matchers, 'Write matcher not found'
+for e in entries:
+    for h in e['hooks']:
+        assert 'type' in h, 'hook entry missing type'
+        assert 'command' in h, 'hook entry missing command'
+        assert 'pre-change-gate' in h['command'], 'command does not reference pre-change-gate'
+" 2>/dev/null; then
+    pass "hooks.json has PreToolUse entries for Edit and Write"
+else
+    fail "hooks.json MISSING PreToolUse entries for Edit and Write"
+fi
+
+# 15b. pre-change-gate script exists and is executable
+if [[ -f "$PLUGIN_ROOT/hooks/pre-change-gate" ]]; then
+    pass "hooks/pre-change-gate exists"
+    if [[ -x "$PLUGIN_ROOT/hooks/pre-change-gate" ]]; then
+        pass "hooks/pre-change-gate is executable"
+    else
+        fail "hooks/pre-change-gate is NOT executable"
+    fi
+else
+    fail "hooks/pre-change-gate MISSING"
+fi
+
+# 15c. pre-change-gate exits 0 outside a beads project (guard clause)
+if (cd /tmp && bash "$PLUGIN_ROOT/hooks/pre-change-gate") 2>/dev/null; then
+    pass "hooks/pre-change-gate exits 0 outside beads project"
+else
+    fail "hooks/pre-change-gate does NOT exit 0 outside beads project"
+fi
+
+# 15d. stop hook cleans up cache file
+if grep -q 'beads-gate' "$PLUGIN_ROOT/hooks/stop" 2>/dev/null; then
+    pass "hooks/stop includes cache cleanup for beads-gate"
+else
+    fail "hooks/stop MISSING cache cleanup for beads-gate"
+fi
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"
