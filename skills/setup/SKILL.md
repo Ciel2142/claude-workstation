@@ -106,42 +106,16 @@ A restart is required after updates take effect.
 
 **If the user says no**, skip to Step 3.
 
-## Step 3: Copy Custom Rules
+## Workflow Rules
 
-Copy rules from the plugin to the user's rules directory. Skip if destination is newer.
+Rules are auto-injected via the SessionStart hook — no manual copy needed.
 
+To opt into always-on global rules (adds ~15KB to every session's context):
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$(dirname "$0")")")}"
-RULES_COMMON_SRC="$PLUGIN_ROOT/rules/common"
-RULES_COMMON_DST="$HOME/.claude/rules/common"
-RULES_SRC="$PLUGIN_ROOT/rules"
-RULES_DST="$HOME/.claude/rules"
-
-mkdir -p "$RULES_COMMON_DST"
-
-for file in unified-workflow.md plugin-routing.md development-workflow.md verification-template.md beads-milestones.md debugging.md spike-phase.md scope-health.md; do
-    src="$RULES_COMMON_SRC/$file"
-    dst="$RULES_COMMON_DST/$file"
-    if [ ! -f "$dst" ] || [ "$src" -nt "$dst" ]; then
-        cp "$src" "$dst"
-        echo "Copied: common/$file"
-    else
-        echo "Skipped (destination newer): common/$file"
-    fi
-done
-
-# context7.md lives at rules root, not in common/
-src="$RULES_SRC/context7.md"
-dst="$RULES_DST/context7.md"
-if [ ! -f "$dst" ] || [ "$src" -nt "$dst" ]; then
-    cp "$src" "$dst"
-    echo "Copied: context7.md"
-else
-    echo "Skipped (destination newer): context7.md"
-fi
+/claude-workstation:install-rules
 ```
 
-## Step 4: Copy Context Profiles
+## Step 3: Copy Context Profiles
 
 ```bash
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$(dirname "$0")")")}"
@@ -156,7 +130,7 @@ for file in dev.md research.md review.md; do
 done
 ```
 
-## Step 5: Append Shell Aliases
+## Step 4: Append Shell Aliases
 
 Detect shell and append aliases if not already present.
 
@@ -171,7 +145,7 @@ else
 fi
 
 if [ -n "$SHELL_RC" ]; then
-    for alias_name in claude-dev claude-research claude-review; do
+    for alias_name in claude-dev claude-research claude-review claude-workflow; do
         if ! grep -q "alias $alias_name=" "$SHELL_RC" 2>/dev/null; then
             case "$alias_name" in
                 claude-dev)
@@ -186,6 +160,10 @@ if [ -n "$SHELL_RC" ]; then
                     echo "alias claude-review='claude --system-prompt \"\$(cat ~/.claude/contexts/review.md)\" --allow-dangerously-skip-permissions --effort high'" >> "$SHELL_RC"
                     echo "Added: $alias_name"
                     ;;
+                claude-workflow)
+                    echo "alias claude-workflow='claude --system-prompt \"\$(cat ~/.claude/contexts/workflow.md)\" --allow-dangerously-skip-permissions --effort high'" >> "$SHELL_RC"
+                    echo "Added: $alias_name"
+                    ;;
             esac
         else
             echo "Skipped (already present): $alias_name"
@@ -196,22 +174,7 @@ if [ -n "$SHELL_RC" ]; then
 fi
 ```
 
-## Step 6: Check ECC Rules
-
-```bash
-ECC_RULES="$HOME/.claude/rules/common/coding-style.md"
-if [ -f "$ECC_RULES" ]; then
-    echo "OK: ECC rules are installed"
-else
-    echo ""
-    echo "NOTE: ECC language-specific rules are not installed."
-    echo "Run ECC's installer to add them:"
-    echo "  bash ~/.claude/plugins/cache/everything-claude-code/everything-claude-code/*/install.sh"
-    echo ""
-fi
-```
-
-## Step 7: Validate
+## Step 5: Validate
 
 Run the validation script:
 
