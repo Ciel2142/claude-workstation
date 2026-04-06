@@ -335,6 +335,26 @@ else
     fail "commands/help.md MISSING"
 fi
 
+# 12b. Consistency: workflow.md sections reflected in help.md
+for keyword in "Spec Amendments" "Micro-tier" "Sub-task Dependencies"; do
+    if grep -q "$keyword" "$HELP_FILE" 2>/dev/null; then
+        pass "help.md covers workflow.md section '$keyword'"
+    else
+        fail "help.md MISSING workflow.md section '$keyword'"
+    fi
+done
+
+# 12c. Consistency: tier definitions match
+for tier_signal in "≤1 file" "1-3 files" "4+ files"; do
+    WF_HAS=$(grep -c "$tier_signal" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null || echo 0)
+    HELP_HAS=$(grep -c "$tier_signal" "$HELP_FILE" 2>/dev/null || echo 0)
+    if (( WF_HAS > 0 && HELP_HAS > 0 )); then
+        pass "tier signal '$tier_signal' consistent across workflow.md and help.md"
+    elif (( WF_HAS > 0 && HELP_HAS == 0 )); then
+        fail "tier signal '$tier_signal' in workflow.md but MISSING from help.md"
+    fi
+done
+
 echo ""
 
 # --- 13. Scenario scripts ---

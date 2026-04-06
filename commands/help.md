@@ -138,6 +138,25 @@ When creating sub-tasks from the plan:
   table can be built in parallel — the table creation is the dependency, not the
   endpoints on each other
 
+### Sub-task Micro-tiers
+
+Each sub-task gets a micro-tier that determines ceremony level:
+
+| Micro-tier | Signal | Ceremony |
+|---|---|---|
+| **Micro-trivial** | Config, wiring, exports, type files, boilerplate. No logic. | Micro-TDD (one assertion) → commit. Batch review every 3 tasks. |
+| **Micro-small** | Single-concern logic, one function/method, straightforward. | Full TDD (red-green-refactor) → commit. Batch review every 3 tasks. |
+| **Micro-complex** | New algorithm, security-sensitive, public API, cross-cutting. | Full TDD → individual code review → commit. |
+
+When claiming a sub-task, assess its micro-tier: `bd update <sub-id> --notes "micro-tier: <tier>"`
+
+### Spec Amendments
+
+When implementation reveals the spec is wrong, amend it — don't silently deviate.
+
+- **Minor (agent self-approves):** Naming mismatches, missing edge case detail, clarifying ambiguous wording. Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
+- **Material (requires human approval):** Different algorithm, adding/dropping features, new dependencies, changed API shape. Stop and present the change, wait for approval.
+
 ---
 
 ## Escalation
