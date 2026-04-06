@@ -4,7 +4,7 @@ All work follows a size-based flow: Beads (tracking) + Superpowers (process) + E
 
 ## Beads-First Rule
 
-Before invoking ANY Superpowers skill, create a beads task first. Sequence: `bd create` → then invoke skill. This applies to ALL work — design, planning, research, and code.
+Before making ANY change to the codebase — editing files, deleting files, running destructive commands, or invoking Superpowers skills — create a beads task first. Sequence: `bd create` → then work. No work without a beads task. No exceptions.
 
 ## Task Sizing
 
@@ -19,11 +19,42 @@ Escalation only upward — never downgrade.
 
 ## Hard Rules
 
-- No work without a beads task
+- No codebase changes (edit, delete, write, destructive commands) without a beads task
 - No Superpowers skill invocation without an active beads task
 - No production code without a failing test (Small/Medium+)
 - No completion claims without verification output
 - No trusting subagent reports without own verification
+
+## Pre-Change Gate
+
+Before ANY file change (edit, delete, write, shell command), verify in order:
+1. **Task Boundary** — Is this a shift from discussion to action? If yes → `bd create` + tier assessment first.
+2. **Beads task exists?** — No task = no change. No exceptions.
+3. **Scope confirmed this turn?** — Restate specific files/changes, get explicit "yes." Prior intent ("yeah", "go ahead", "just do it") does NOT count as confirmation.
+
+If any box is unchecked, stop. Tell the user: "This is a new task — let me create a beads task and assess the tier before proceeding."
+
+## Scope Confirmation
+
+Before implementing changes, restate what you will change and confirm with the user. This applies when:
+- The user requests a change in conversational flow (not via `/start`)
+- The change involves deleting, renaming, or restructuring files
+- The request could refer to more than one file, directory, or component — if so, it is ambiguous by definition
+
+Does NOT apply when executing confirmed plan sub-tasks within a Medium+ epic — those already have approved scope.
+
+Format: "I'll [verb] [specific file paths or named artifacts]. Confirm?" — then wait. Do not use category names ("the profiles") — list actual files.
+
+## Task Boundary
+
+When conversation shifts from research/discussion to implementation ("let's do it", "go ahead", "remove that", or similar intent to begin changes), treat it as a new task. Stop and run the workflow entry point:
+1. Create a beads task (`bd create`)
+2. Assess the tier
+3. Follow the tier's flow
+
+Words like "just", "quickly", "simply" do NOT reduce scope or create exceptions. When you feel the urge to act immediately, that urge is the signal to stop and follow the gate.
+
+Conversational momentum is not a reason to skip the workflow.
 
 ## Spec Amendments
 

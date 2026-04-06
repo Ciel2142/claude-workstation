@@ -120,7 +120,23 @@ for file in dev.md research.md review.md; do
 done
 ```
 
-## Step 4: Append Shell Aliases
+Note: `workflow.md` is NOT copied — it is delivered automatically via the SessionStart hook.
+
+## Step 4: Clean Up Stale Aliases
+
+Remove the deprecated `claude-workflow` alias (now delivered via SessionStart hook).
+
+```bash
+for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    [ -f "$SHELL_RC" ] || continue
+    if grep -q "alias claude-workflow=" "$SHELL_RC" 2>/dev/null; then
+        sed -i '/alias claude-workflow=/d' "$SHELL_RC"
+        echo "Removed stale alias: claude-workflow from $SHELL_RC"
+    fi
+done
+```
+
+## Step 5: Append Shell Aliases
 
 Detect shell and append aliases if not already present.
 
@@ -130,7 +146,7 @@ for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
     [ -f "$SHELL_RC" ] || continue
     FOUND_RC=1
     echo "Checking $SHELL_RC..."
-    for alias_name in claude-dev claude-research claude-review claude-workflow; do
+    for alias_name in claude-dev claude-research claude-review; do
         if ! grep -q "alias $alias_name=" "$SHELL_RC" 2>/dev/null; then
             case "$alias_name" in
                 claude-dev)
@@ -143,10 +159,6 @@ for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
                     ;;
                 claude-review)
                     echo "alias claude-review='claude --system-prompt \"\$(cat ~/.claude/contexts/review.md)\" --effort high'" >> "$SHELL_RC"
-                    echo "Added: $alias_name"
-                    ;;
-                claude-workflow)
-                    echo "alias claude-workflow='claude --system-prompt \"\$(cat ~/.claude/contexts/workflow.md)\" --effort high'" >> "$SHELL_RC"
                     echo "Added: $alias_name"
                     ;;
             esac
@@ -163,7 +175,7 @@ if [ "$FOUND_RC" -eq 0 ]; then
 fi
 ```
 
-## Step 5: Validate
+## Step 6: Validate
 
 Run the validation script:
 

@@ -64,7 +64,7 @@ echo ""
 # --- 4. Workflow context content ---
 echo "4. Workflow context content"
 
-for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests" "Spec Amendments" "Micro-tiers" "Skill References"; do
+for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests" "Spec Amendments" "Micro-tiers" "Skill References" "Scope Confirmation" "Task Boundary"; do
     if grep -q "$keyword" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
         pass "workflow.md contains '$keyword'"
     else
@@ -128,7 +128,7 @@ RC_FILES=()
 
 if [ ${#RC_FILES[@]} -gt 0 ]; then
     for rc_file in "${RC_FILES[@]}"; do
-        for alias_name in claude-dev claude-research claude-review claude-workflow; do
+        for alias_name in claude-dev claude-research claude-review; do
             if grep -q "alias $alias_name=" "$rc_file" 2>/dev/null; then
                 pass "$alias_name alias in $rc_file"
             else

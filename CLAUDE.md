@@ -1,10 +1,8 @@
 ## Beads-First Rule
 
-Before invoking ANY Superpowers skill (brainstorming, writing-plans, TDD, code-review, debugging, verification, etc.), create a beads task first.
+Before making ANY change to the codebase — editing files, deleting files, running destructive commands, or invoking Superpowers skills — create a beads task first.
 
-Sequence: `bd create` → then invoke skill.
-
-This applies to ALL work — design, planning, research, and code. No exceptions.
+Sequence: `bd create` → then work. No work without a beads task. No exceptions.
 
 ## Quick Start
 

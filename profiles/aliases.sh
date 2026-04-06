@@ -8,4 +8,3 @@
 alias claude-dev='claude --system-prompt "$(cat ~/.claude/contexts/dev.md)" --effort high'
 alias claude-research='claude --system-prompt "$(cat ~/.claude/contexts/research.md)" --effort high'
 alias claude-review='claude --system-prompt "$(cat ~/.claude/contexts/review.md)" --effort high'
-alias claude-workflow='claude --system-prompt "$(cat ~/.claude/contexts/workflow.md)" --effort high'

@@ -9,7 +9,7 @@ A Claude Code plugin that restores your full development environment from a sing
 - **Auto-Tier Assessment** — `/start` scores task descriptions and routes to the right workflow automatically
 - **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
-- **Context Profiles** — `claude-dev`, `claude-research`, `claude-review`, `claude-workflow` shell aliases
+- **Context Profiles** — `claude-dev`, `claude-research`, `claude-review` shell aliases
 - **On-Demand Skills** — Phase-specific protocols for debugging, spike, scope health, milestones, verification
 - **Session Hooks** — SessionStart and Stop hooks for beads state persistence
 - **Test Suite** — Config validation + dry-run scenarios for every workflow tier
@@ -117,8 +117,9 @@ After setup, use these shell aliases:
 claude-dev       # Code-first development mode
 claude-research  # Exploration and investigation mode
 claude-review    # Code review and quality analysis mode
-claude-workflow   # Workflow rules context (same as auto-injected hook)
 ```
+
+Note: Workflow context is auto-injected via the SessionStart hook — no alias needed.
 
 ## Project Structure
 
