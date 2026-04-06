@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# SessionStart hook for claude-workstation plugin
+#
+# 1. Configures beads server mode (if env vars set)
+# 2. Injects condensed workflow context via additionalContext
+#
+# Output format follows Claude Code's hookSpecificOutput convention.
+# Uses printf instead of heredoc to work around bash 5.3+ heredoc hang.
+# See: https://github.com/obra/superpowers/issues/571
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Step 1: Configure beads server mode (if applicable)
+bash .beads/hooks/configure-server.sh 2>/dev/null || true
+
+# Step 2: Read workflow context
+WORKFLOW_CONTEXT_FILE="${PLUGIN_ROOT}/contexts/workflow.md"
+if [ ! -f "$WORKFLOW_CONTEXT_FILE" ]; then
+    exit 0
+fi
+
+WORKFLOW_CONTENT=$(cat "$WORKFLOW_CONTEXT_FILE")
+
+# Step 3: Escape for JSON embedding
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+escaped_content=$(escape_for_json "$WORKFLOW_CONTENT")
+
+# Step 4: Output structured JSON for Claude Code
+# Claude Code sets CLAUDE_PLUGIN_ROOT without COPILOT_CLI
+# Cursor sets CURSOR_PLUGIN_ROOT (may also set CLAUDE_PLUGIN_ROOT)
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+    printf '{\n  "additional_context": "%s"\n}\n' "$escaped_content"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+    printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$escaped_content"
+else
+    printf '{\n  "additionalContext": "%s"\n}\n' "$escaped_content"
+fi
+
+exit 0
