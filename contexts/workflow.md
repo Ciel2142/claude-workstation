@@ -25,6 +25,45 @@ Escalation only upward — never downgrade.
 - No completion claims without verification output
 - No trusting subagent reports without own verification
 
+## Spec Amendments
+
+When implementation reveals the spec is wrong, amend it — don't silently deviate.
+
+**Minor (agent self-approves):** Naming mismatches, missing edge case detail, clarifying ambiguous wording, parameter type corrections to match existing code.
+- Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
+- Continue without interruption.
+
+**Material (requires human approval):** Different algorithm, adding/dropping features, new dependencies, changed API shape, architectural changes.
+- Stop implementing and present the change, wait for approval.
+- Log: `spec-amendment: material -- <what changed>, approved by human`
+
+Applies to Small and Medium+ tiers. Trivial tasks have no spec.
+
+## Sub-task Micro-tiers
+
+Within a Medium+ epic, each sub-task gets a micro-tier that determines ceremony level.
+
+| Micro-tier | Signal | Ceremony |
+|---|---|---|
+| **Micro-trivial** | Config, wiring, exports, type files, boilerplate. No logic. | Micro-TDD (one assertion) → commit. Batch review every 3 tasks. |
+| **Micro-small** | Single-concern logic, one function/method, straightforward. | Full TDD (red-green-refactor) → commit. Batch review every 3 tasks. |
+| **Micro-complex** | New algorithm, security-sensitive, public API, cross-cutting. | Full TDD → individual code review → commit. |
+
+When claiming a sub-task, assess its micro-tier. Log: `micro-tier: <micro-trivial|micro-small|micro-complex>`
+
+**Micro-TDD:** One assertion proving the wiring works (import resolves, config parses, type compiles).
+
+**Batch review cadence:** After every 3rd non-complex task, dispatch one batch code review. Micro-complex tasks get individual reviews and reset the batch counter.
+
+## Skill References
+
+On-demand skills for specific workflow phases — invoke when reaching that step:
+- **Bug work** → `/claude-workstation:debugging-protocol` (root cause before fix, 3-strike rule)
+- **Spike phase** (Medium+) → `/claude-workstation:spike-phase` (lightweight or deep validation)
+- **Every 3rd sub-task** (Medium+) → `/claude-workstation:scope-health` (scope creep detection)
+- **Milestone notes** → `/claude-workstation:beads-milestones` (standardized checkpoint format)
+- **Verification** → `/claude-workstation:verification-template` (output format with exit codes)
+
 ## Plugin Routing
 
 - **Beads** → all persistent task/issue tracking (`bd` commands). No TodoWrite for persistent work.
