@@ -230,50 +230,72 @@ fi
 
 echo ""
 
-# --- 11. Milestone pattern consistency ---
-echo "11. Milestone pattern consistency"
+# --- 11. Milestone schema validation ---
+echo "11. Milestone schema validation"
 
 RESUME_FILE="$PLUGIN_ROOT/skills/resume/SKILL.md"
 MILESTONES_FILE="$PLUGIN_ROOT/skills/beads-milestones/SKILL.md"
 
 if [[ -f "$RESUME_FILE" ]] && [[ -f "$MILESTONES_FILE" ]]; then
-    # beads-milestones defines keys as lowercase with colon (e.g. "verification:", "plan:")
-    # resume must match the same keys (case-sensitive)
-    CONSISTENT=true
 
-    # Check that resume patterns use lowercase to match beads-milestones keys
-    for key in "verification:" "completed:" "plan:" "spec:" "docs-updated:" "tier:"; do
+    # 11a. Extract canonical keys from beads-milestones table (source of truth)
+    # Keys are in backtick-quoted format: `key:` in the markdown table
+    CANONICAL_KEYS=$(grep -oP '`\K[a-z][a-z0-9-]*:(?=`)' "$MILESTONES_FILE" | sort -u)
+    CANONICAL_COUNT=$(echo "$CANONICAL_KEYS" | wc -l)
+
+    if (( CANONICAL_COUNT >= 10 )); then
+        pass "beads-milestones defines $CANONICAL_COUNT canonical keys"
+    else
+        fail "beads-milestones has only $CANONICAL_COUNT keys (expected ≥10)"
+    fi
+
+    # 11b. Verify resume references the routing-critical keys
+    # These are the keys resume uses for position detection (lines 172-178)
+    for key in "docs-updated:" "verification:" "completed:" "plan:" "spec:" "tier:"; do
         if grep -q "\"$key\"" "$RESUME_FILE" 2>/dev/null; then
             pass "resume matches milestone key '$key'"
         else
-            fail "resume MISSING or MISMATCHED milestone key '$key'"
-            CONSISTENT=false
+            fail "resume MISSING routing key '$key'"
         fi
     done
 
-    # Check that resume does NOT use wrong-case patterns
+    # 11c. Verify all canonical keys are lowercase (schema rule)
+    while IFS= read -r key; do
+        if [[ "$key" =~ ^[a-z][a-z0-9-]*:$ ]]; then
+            pass "milestone key '$key' is lowercase"
+        else
+            fail "milestone key '$key' violates lowercase schema"
+        fi
+    done <<< "$CANONICAL_KEYS"
+
+    # 11d. Check resume does NOT use wrong-case patterns
     for bad_pattern in '"Verification:"' '"Tests passing:"' '"Tests green:"' '"Plan:"' '"Spec:"'; do
         if grep -q "$bad_pattern" "$RESUME_FILE" 2>/dev/null; then
             fail "resume uses wrong-case pattern $bad_pattern (should be lowercase)"
-            CONSISTENT=false
         fi
     done
 
-    # Check that resume references /ecc:update-docs (not bare /update-docs)
+    # 11e. Check resume references /ecc:update-docs correctly
     if grep -q '/ecc:update-docs' "$RESUME_FILE" 2>/dev/null; then
         pass "resume references /ecc:update-docs correctly"
     else
         fail "resume MISSING /ecc:update-docs reference"
     fi
 
-    # Check no bare /update-docs without ecc: prefix
     if grep '/update-docs' "$RESUME_FILE" 2>/dev/null | grep -qv '/ecc:update-docs'; then
         fail "resume references bare /update-docs without ecc: prefix"
     else
         pass "resume has no bare /update-docs references"
     fi
+
+    # 11f. Verify beads-milestones rules section exists
+    if grep -q "Don't invent new keys" "$MILESTONES_FILE" 2>/dev/null; then
+        pass "beads-milestones enforces closed key set"
+    else
+        fail "beads-milestones MISSING 'Don't invent new keys' rule"
+    fi
 else
-    fail "Cannot check milestone consistency — resume or beads-milestones SKILL.md missing"
+    fail "Cannot check milestone schema — resume or beads-milestones SKILL.md missing"
 fi
 
 echo ""
