@@ -47,7 +47,7 @@ import sys, json
 d = json.load(sys.stdin)
 plugins = d.get('enabledPlugins', {})
 needed = {
-    'everything-claude-code@everything-claude-code': 'ECC',
+    'ecc@everything-claude-code': 'ECC',
     'superpowers@superpowers-marketplace': 'Superpowers',
     'beads@beads-marketplace': 'Beads',
     'context7@claude-plugins-official': 'Context7',
