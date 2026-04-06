@@ -49,15 +49,15 @@ Use one key-value pair per `bd update --notes` call. Keys are lowercase with col
 
 ## How to Update
 
-```
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
-bash "$PLUGIN_ROOT/hooks/bd-notes-append" <id> "key: value"
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "key: value"
 ```
 
 The wrapper reads current notes and appends — no need to include previous
-milestones manually.
+milestones manually. `CLAUDE_PLUGIN_ROOT` is set by Claude Code when running
+within a plugin context.
 
-If the wrapper is not available, fall back to cumulative update:
+If the wrapper is not available (outside plugin context), fall back to cumulative update:
 ```
 bd update <id> --notes "<all previous lines>
 <new line>"
