@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/../lib.sh"
 echo "=== Init Persistence: Tier stored in notes ==="
 TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
 # Simulate /init for a trivial task — init writes tier to notes
-TRIV_ID=$(bd create --title="Fix whitespace in utils" --type=task --priority=4 2>&1 | grep -oP 'workflow-test-\w+')
+TRIV_ID=$(extract_id "$(bd create --title="Fix whitespace in utils" --type=task --priority=4 2>&1)")
 bd update "$TRIV_ID" --notes "tier: trivial"
 
 # Verify tier was persisted
@@ -19,7 +20,7 @@ fi
 bd close "$TRIV_ID" --reason="Tier persistence test"
 
 # Simulate /init for a small task
-SMALL_ID=$(bd create --title="Add modulo function" --type=task --priority=3 2>&1 | grep -oP 'workflow-test-\w+')
+SMALL_ID=$(extract_id "$(bd create --title="Add modulo function" --type=task --priority=3 2>&1)")
 bd update "$SMALL_ID" --notes "tier: small"
 
 SMALL_NOTES=$(bd show "$SMALL_ID" 2>&1)
@@ -35,7 +36,7 @@ bd close "$SMALL_ID" --reason="Tier persistence test"
 # Note: bd update --notes replaces (not appends), so each milestone overwrites
 # the previous. Resume handles this by checking latest milestone first, and
 # falling back to task type inference for tier when tier: note is overwritten.
-EPIC_ID=$(bd create --title="Add string operations" --type=epic --priority=2 2>&1 | grep -oP 'workflow-test-\w+')
+EPIC_ID=$(extract_id "$(bd create --title="Add string operations" --type=epic --priority=2 2>&1)")
 bd update "$EPIC_ID" --notes "tier: medium+"
 
 # Verify tier is set initially

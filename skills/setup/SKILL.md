@@ -89,10 +89,15 @@ Note: `workflow.md` is NOT copied — it is delivered automatically via the Sess
 Remove the deprecated `claude-workflow` alias (now delivered via SessionStart hook).
 
 ```bash
+# Cross-platform sed in-place (BSD macOS requires -i '' for no backup)
+sedi() {
+    if [[ "$OSTYPE" == darwin* ]]; then sed -i '' "$@"; else sed -i "$@"; fi
+}
+
 for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
     [ -f "$SHELL_RC" ] || continue
     if grep -q "alias claude-workflow=" "$SHELL_RC" 2>/dev/null; then
-        sed -i '/alias claude-workflow=/d' "$SHELL_RC"
+        sedi '/alias claude-workflow=/d' "$SHELL_RC"
         echo "Removed stale alias: claude-workflow from $SHELL_RC"
     fi
 done

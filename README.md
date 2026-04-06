@@ -139,6 +139,7 @@ claude-workstation/
 │   └── review.md
 ├── hooks/
 │   ├── hooks.json             # SessionStart + PreToolUse + Stop hooks
+│   ├── bd-notes-append        # Safe notes append wrapper (prevents data loss)
 │   ├── session-start          # Context injection script
 │   ├── pre-change-gate        # Beads task enforcement before file edits
 │   └── stop                   # Session-end reminder script

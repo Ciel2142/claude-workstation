@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/../lib.sh"
 echo "=== Bug Path: Fix divide rounding ==="
 TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
 # Create bug
-ID=$(bd create --title="Bug: divide truncates instead of rounding" --type=bug --priority=2 2>&1 | grep -oP 'workflow-test-\w+')
+ID=$(extract_id "$(bd create --title="Bug: divide truncates instead of rounding" --type=bug --priority=2 2>&1)")
 bd update "$ID" --claim
 
 # DEBUG phase: identify root cause
@@ -14,7 +15,7 @@ bd update "$ID" --notes "Debug: root cause is bash integer division truncates to
 
 # TDD RED: write regression test that exposes the bug
 # Better test: divide 7 2 should be 4 (rounded) but bash gives 3 (truncated)
-sed -i '/^\[/i \
+sedi '/^\[/i \
 assert_eq "divide rounds 7\/2 to nearest" "4" "$(divide 7 2)"' tests/run.sh
 
 red_output=$(bash tests/run.sh 2>&1 || true)
@@ -25,7 +26,7 @@ else
 fi
 
 # TDD GREEN: fix the divide function to round to nearest integer
-sed -i '/^divide() {/,/^}/ c\
+sedi '/^divide() {/,/^}/ c\
 divide() {\
     local a="$1"\
     local b="$2"\

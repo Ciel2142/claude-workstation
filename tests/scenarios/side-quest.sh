@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/../lib.sh"
 echo "=== Side Quest: Discover issue mid-work ==="
 TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
-MAIN_ID=$(bd create --title="Add subtract function" --type=task --priority=3 2>&1 | grep -oP 'workflow-test-\w+')
+MAIN_ID=$(extract_id "$(bd create --title="Add subtract function" --type=task --priority=3 2>&1)")
 bd update "$MAIN_ID" --claim
 
 # Discover unrelated issue
-SIDE_ID=$(bd create --title="Found: greet function missing docstring" --type=bug --priority=4 2>&1 | grep -oP 'workflow-test-\w+')
+SIDE_ID=$(extract_id "$(bd create --title="Found: greet function missing docstring" --type=bug --priority=4 2>&1)")
 bd dep add "$SIDE_ID" "$MAIN_ID" --type=discovered-from
 
 # Finish main task first
-sed -i '/^\[/i \
+sedi '/^\[/i \
 assert_eq "subtract returns difference" "2" "$(subtract 5 3)"' tests/run.sh
 
 cat >> src/utils.sh << 'FUNC'

@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/../lib.sh"
 echo "=== Escalation: Trivial -> Small ==="
 TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
-ID=$(bd create --title="Fix greet function output format" --type=task --priority=3 2>&1 | grep -oP 'workflow-test-\w+')
+ID=$(extract_id "$(bd create --title="Fix greet function output format" --type=task --priority=3 2>&1)")
 
 # Discover it needs behavior change + test = escalate to small
-sed -i '/^\[/i \
+sedi '/^\[/i \
 assert_eq "greet handles empty name" "Hello, stranger!" "$(greet "")"' tests/run.sh
 
 # RED (capture output first to avoid pipefail masking grep result)
@@ -17,7 +18,7 @@ if echo "$red_output" | grep -q "FAIL"; then
 fi
 
 # GREEN
-sed -i 's/local name="$1"/local name="${1:-stranger}"/' src/utils.sh
+sedi 's/local name="$1"/local name="${1:-stranger}"/' src/utils.sh
 
 bash tests/run.sh
 echo "  GREEN confirmed"

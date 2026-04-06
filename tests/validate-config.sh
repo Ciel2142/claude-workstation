@@ -240,7 +240,7 @@ if [[ -f "$RESUME_FILE" ]] && [[ -f "$MILESTONES_FILE" ]]; then
 
     # 11a. Extract canonical keys from beads-milestones table (source of truth)
     # Keys are in backtick-quoted format: `key:` in the markdown table
-    CANONICAL_KEYS=$(grep -oP '`\K[a-z][a-z0-9-]*:(?=`)' "$MILESTONES_FILE" | sort -u)
+    CANONICAL_KEYS=$(grep -o '`[a-z][a-z0-9-]*:`' "$MILESTONES_FILE" | sed 's/`//g' | sort -u)
     CANONICAL_COUNT=$(echo "$CANONICAL_KEYS" | wc -l)
 
     if (( CANONICAL_COUNT >= 10 )); then
@@ -306,7 +306,7 @@ echo "11g. Context budget accuracy"
 WORKFLOW_SIZE=$(wc -c < "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null || echo 0)
 CLAUDE_MD="$PLUGIN_ROOT/CLAUDE.md"
 if [[ -f "$CLAUDE_MD" ]] && grep -q '~[0-9]' "$CLAUDE_MD" 2>/dev/null; then
-    STATED_KB=$(grep -oP '~\K[0-9]+' "$CLAUDE_MD" | head -1)
+    STATED_KB=$(grep -o '~[0-9][0-9]*' "$CLAUDE_MD" | sed 's/~//' | head -1)
     ACTUAL_KB=$(( (WORKFLOW_SIZE + 512) / 1024 ))
     if (( ACTUAL_KB <= STATED_KB + 1 )); then
         pass "CLAUDE.md context budget (~${STATED_KB}KB) matches actual (${ACTUAL_KB}KB)"
@@ -573,6 +573,58 @@ if [[ -f "$PLUGIN_ROOT/README.md" ]]; then
     fi
 else
     fail "README.md MISSING"
+fi
+
+echo ""
+
+# --- 18. macOS portability (BSD compatibility) ---
+echo "18. macOS portability"
+
+# 18a. No GNU-only 'sed -i' in shell scripts
+# BSD sed (macOS) requires 'sed -i ""' or a helper; bare 'sed -i' + expression crashes.
+# Allowed: sedi() helper, sed -i '' (BSD-form), sed -i.bak (backup suffix), comments.
+# Excluded: lib.sh (the portability helper itself), validate-config.sh (this file).
+BARE_SED_FILES=()
+while IFS= read -r shfile; do
+    [[ -z "$shfile" ]] && continue
+    # Skip the portability helper and this validation script
+    case "$shfile" in
+        */lib.sh|*/validate-config.sh) continue ;;
+    esac
+    # Check non-comment lines for bare 'sed -i' followed by expression start
+    if grep -v '^\s*#' "$shfile" | grep -qE "sed -i [\"'/]" 2>/dev/null; then
+        # Exclude lines that use the BSD-compatible form: sed -i ''
+        if grep -v '^\s*#' "$shfile" | grep -E "sed -i [\"'/]" | grep -qvE "sed -i ''" 2>/dev/null; then
+            BARE_SED_FILES+=("$shfile")
+        fi
+    fi
+done < <(find "$PLUGIN_ROOT" -name '*.sh' -type f 2>/dev/null)
+
+if [[ ${#BARE_SED_FILES[@]} -eq 0 ]]; then
+    pass "no GNU-only sed -i in shell scripts (macOS compatible)"
+else
+    fail "${#BARE_SED_FILES[@]} file(s) use bare 'sed -i' (crashes on macOS BSD sed)"
+fi
+
+# 18b. No grep -P (Perl regex) in shell scripts
+# macOS grep does not support -P. Use POSIX ERE (-E) or -o with sed instead.
+# Excluded: validate-config.sh (this file — test description mentions the pattern).
+GREP_P_FILES=()
+while IFS= read -r shfile; do
+    [[ -z "$shfile" ]] && continue
+    case "$shfile" in
+        */validate-config.sh) continue ;;
+    esac
+    # Check non-comment lines for grep with -P flag
+    if grep -v '^\s*#' "$shfile" | grep -qE 'grep\s+-[a-zA-Z]*P' 2>/dev/null; then
+        GREP_P_FILES+=("$shfile")
+    fi
+done < <(find "$PLUGIN_ROOT" -name '*.sh' -type f 2>/dev/null)
+
+if [[ ${#GREP_P_FILES[@]} -eq 0 ]]; then
+    pass "no grep -P in shell scripts (macOS compatible)"
+else
+    fail "${#GREP_P_FILES[@]} file(s) use grep -P (not available on macOS)"
 fi
 
 echo ""

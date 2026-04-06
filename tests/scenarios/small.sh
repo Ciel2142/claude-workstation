@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/../lib.sh"
 echo "=== Small Tier: Add input validation ==="
 TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
-ID=$(bd create --title="Add input validation to add function" --type=bug --priority=2 2>&1 | grep -oP 'workflow-test-\w+')
+ID=$(extract_id "$(bd create --title="Add input validation to add function" --type=bug --priority=2 2>&1)")
 bd update "$ID" --claim
 
 # RED — add failing tests
 # Note: set +u before add calls prevents fatal nounset errors from bash arithmetic
 # indirection ($(( a + b )) where a="abc" → looks up unset $abc → nounset kills subshell)
-sed -i '/^\[/i \
+sedi '/^\[/i \
 assert_eq "add rejects non-numeric first arg" "error" "$(set +u; add "abc" 3 2>/dev/null || echo "error")"\
 assert_eq "add rejects non-numeric second arg" "error" "$(set +u; add 3 "xyz" 2>/dev/null || echo "error")"\
 assert_eq "add still works with valid input" "7" "$(add 3 4)"' tests/run.sh
@@ -24,7 +25,7 @@ else
 fi
 
 # GREEN — add validation
-sed -i '/^add() {/,/^}/ c\
+sedi '/^add() {/,/^}/ c\
 add() {\
     local a="$1"\
     local b="$2"\
