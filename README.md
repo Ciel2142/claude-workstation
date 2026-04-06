@@ -10,7 +10,7 @@ A Claude Code plugin that restores your full development environment from a sing
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
 - **MCP Servers** — context7, memory, exa, playwright, sequential-thinking, token-optimizer
 - **Context Profiles** — `claude-dev`, `claude-research`, `claude-review` shell aliases
-- **Custom Rules** — Workflow routing, plugin lanes, verification template, milestone tracking
+- **Custom Rules** — Workflow routing, plugin lanes, spike phase, scope health, spec amendments, micro-tiers, structured checkpoints, verification template
 - **Session Hooks** — SessionStart, PreCompact, and Stop hooks for beads state persistence
 - **Test Suite** — Config validation + dry-run scenarios for every workflow tier
 
@@ -95,7 +95,7 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 |---|---|---|
 | **Trivial** | 1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files or new system | Epic → brainstorm → plan → sub-tasks → TDD → verify → close |
+| **Medium+** | 4+ files or new system | Epic → brainstorm → plan → sub-tasks → spike → TDD → verify → close |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → close |
 
 ## Hooks
@@ -112,12 +112,14 @@ Copied to `~/.claude/rules/common/` during setup:
 
 | Rule | Purpose |
 |---|---|
-| `unified-workflow.md` | Beads-first rule, tier definitions, escalation |
+| `unified-workflow.md` | Beads-first rule, tier definitions, spec amendments, micro-tiers, escalation |
 | `plugin-routing.md` | Lane separation: Beads (tracking), Superpowers (process), ECC (expertise) |
 | `development-workflow.md` | Research-first culture, GitHub search before coding |
 | `verification-template.md` | Standardized verification output format with exit codes |
-| `beads-milestones.md` | When to update beads notes (after brainstorming, planning, TDD, verification) |
+| `beads-milestones.md` | Structured checkpoint format — standardized key-value milestone notes |
 | `debugging.md` | Debugging-first protocol for bugs: root cause before fix, 3-strike rule |
+| `spike-phase.md` | Architecture validation before Medium+ implementation (lightweight/deep) |
+| `scope-health.md` | Scope creep detection — warning at 1.5x, gate at 2.0x planned tasks |
 
 ## Context Profiles
 
@@ -146,7 +148,9 @@ claude-workstation/
 │   ├── development-workflow.md
 │   ├── verification-template.md
 │   ├── beads-milestones.md
-│   └── debugging.md
+│   ├── debugging.md
+│   ├── spike-phase.md
+│   └── scope-health.md
 ├── contexts/                 # Copied to ~/.claude/contexts/
 │   ├── dev.md
 │   ├── research.md
@@ -154,7 +158,7 @@ claude-workstation/
 ├── hooks/
 │   └── hooks.json            # SessionStart, PreCompact, Stop
 ├── tests/
-│   └── validate-config.sh    # 32+ config checks
+│   └── validate-config.sh    # 50 config checks
 ├── .mcp.json                 # MCP server configuration
 ├── CLAUDE.md                 # Project instructions
 └── AGENTS.md                 # Agent instructions (beads)
