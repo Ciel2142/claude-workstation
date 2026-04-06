@@ -4,6 +4,18 @@ description: Show the unified development workflow and command reference
 
 # Unified Development Workflow
 
+## Pre-Change Gate
+
+Before ANY file change, verify in order:
+
+1. **Task Boundary** — Shifting from discussion to action? → `bd create` + tier assessment first.
+2. **Beads task exists?** — No task = no changes. No exceptions.
+3. **Scope Confirmation** — Restate specific files/changes, get explicit "yes" this turn. Prior intent ("yeah", "go ahead") does NOT count.
+
+If any box is unchecked, stop and tell the user.
+
+---
+
 ## Step Zero: Create a Beads Task
 
 **BEFORE anything else — before sizing, before invoking any skill:**

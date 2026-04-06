@@ -64,7 +64,7 @@ echo ""
 # --- 4. Workflow context content ---
 echo "4. Workflow context content"
 
-for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests" "Spec Amendments" "Micro-tiers" "Skill References" "Scope Confirmation" "Task Boundary"; do
+for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests" "Spec Amendments" "Micro-tiers" "Skill References" "Scope Confirmation" "Task Boundary" "Pre-Change Gate"; do
     if grep -q "$keyword" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
         pass "workflow.md contains '$keyword'"
     else
@@ -90,6 +90,20 @@ assert len(hso['additionalContext']) > 100, 'additionalContext too short'
     pass "session-start hook produces valid JSON with correct structure"
 else
     fail "session-start hook output INVALID"
+fi
+
+# Verify JSON escaping preserves content with special characters
+if echo "$HOOK_OUTPUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+ctx = d['hookSpecificOutput']['additionalContext']
+assert 'Pre-Change Gate' in ctx, 'Pre-Change Gate missing from escaped content'
+assert 'Scope Confirmation' in ctx, 'Scope Confirmation missing from escaped content'
+assert '\"yes\"' not in ctx or 'yes' in ctx, 'quote escaping corrupted content'
+" 2>/dev/null; then
+    pass "session-start hook JSON escaping preserves content correctly"
+else
+    fail "session-start hook JSON escaping CORRUPTS content"
 fi
 
 echo ""
@@ -176,10 +190,24 @@ echo ""
 # --- 10. Stop hook ---
 echo "10. Stop hook"
 
-if grep -q '"Stop"' "$PLUGIN_ROOT/hooks/hooks.json" 2>/dev/null; then
-    pass "hooks.json contains Stop hook"
+if python3 -c "
+import json
+d = json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))
+hooks = d['hooks']
+assert 'SessionStart' in hooks, 'SessionStart hook not found'
+assert 'Stop' in hooks, 'Stop hook not found'
+for name in ('SessionStart', 'Stop'):
+    entries = hooks[name]
+    assert isinstance(entries, list), f'{name} must be a list'
+    for group in entries:
+        assert 'hooks' in group, f'{name} group missing hooks array'
+        for h in group['hooks']:
+            assert 'type' in h, f'{name} hook entry missing type'
+            assert 'command' in h, f'{name} hook entry missing command'
+" 2>/dev/null; then
+    pass "hooks.json is valid JSON with correct structure (SessionStart + Stop)"
 else
-    fail "hooks.json MISSING Stop hook"
+    fail "hooks.json structure INVALID"
 fi
 
 if [[ -f "$PLUGIN_ROOT/hooks/stop" ]]; then
@@ -191,6 +219,13 @@ if [[ -f "$PLUGIN_ROOT/hooks/stop" ]]; then
     fi
 else
     fail "hooks/stop script MISSING (stop hook is inline)"
+fi
+
+# Stop hook should run without error (outside git repo = early exit is OK)
+if bash "$PLUGIN_ROOT/hooks/stop" 2>/dev/null; then
+    pass "hooks/stop runs without error"
+else
+    fail "hooks/stop exits with error"
 fi
 
 echo ""
@@ -225,12 +260,17 @@ if [[ -f "$RESUME_FILE" ]] && [[ -f "$MILESTONES_FILE" ]]; then
     done
 
     # Check that resume references /ecc:update-docs (not bare /update-docs)
-    if grep -q '/update-docs' "$RESUME_FILE" 2>/dev/null; then
-        if grep -q '/ecc:update-docs' "$RESUME_FILE" 2>/dev/null; then
-            pass "resume references /ecc:update-docs correctly"
-        else
-            fail "resume references /update-docs without ecc: prefix"
-        fi
+    if grep -q '/ecc:update-docs' "$RESUME_FILE" 2>/dev/null; then
+        pass "resume references /ecc:update-docs correctly"
+    else
+        fail "resume MISSING /ecc:update-docs reference"
+    fi
+
+    # Check no bare /update-docs without ecc: prefix
+    if grep '/update-docs' "$RESUME_FILE" 2>/dev/null | grep -qv '/ecc:update-docs'; then
+        fail "resume references bare /update-docs without ecc: prefix"
+    else
+        pass "resume has no bare /update-docs references"
     fi
 else
     fail "Cannot check milestone consistency — resume or beads-milestones SKILL.md missing"
@@ -238,8 +278,45 @@ fi
 
 echo ""
 
-# --- 12. Scenario scripts ---
-echo "12. Scenario scripts"
+# --- 11b. Context budget accuracy ---
+echo "11b. Context budget accuracy"
+
+WORKFLOW_SIZE=$(wc -c < "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null || echo 0)
+CLAUDE_MD="$PLUGIN_ROOT/CLAUDE.md"
+if [[ -f "$CLAUDE_MD" ]] && grep -q '~[0-9]' "$CLAUDE_MD" 2>/dev/null; then
+    STATED_KB=$(grep -oP '~\K[0-9]+' "$CLAUDE_MD" | head -1)
+    ACTUAL_KB=$(( (WORKFLOW_SIZE + 512) / 1024 ))
+    if (( ACTUAL_KB <= STATED_KB + 1 )); then
+        pass "CLAUDE.md context budget (~${STATED_KB}KB) matches actual (${ACTUAL_KB}KB)"
+    else
+        fail "CLAUDE.md says ~${STATED_KB}KB but workflow.md is ${ACTUAL_KB}KB"
+    fi
+else
+    pass "No context budget claim found in CLAUDE.md (skipped)"
+fi
+
+echo ""
+
+# --- 12. help.md gate rules ---
+echo "12. help.md gate rules"
+
+HELP_FILE="$PLUGIN_ROOT/commands/help.md"
+if [[ -f "$HELP_FILE" ]]; then
+    for keyword in "Pre-Change Gate" "Scope Confirmation" "Task Boundary"; do
+        if grep -q "$keyword" "$HELP_FILE" 2>/dev/null; then
+            pass "help.md references '$keyword'"
+        else
+            fail "help.md MISSING '$keyword'"
+        fi
+    done
+else
+    fail "commands/help.md MISSING"
+fi
+
+echo ""
+
+# --- 13. Scenario scripts ---
+echo "13. Scenario scripts"
 
 if [ -d "$PLUGIN_ROOT/tests/scenarios" ]; then
     for scenario in "$PLUGIN_ROOT"/tests/scenarios/*.sh; do
@@ -261,8 +338,8 @@ fi
 
 echo ""
 
-# --- 13. Cross-reference validation ---
-echo "13. Cross-reference validation"
+# --- 14. Cross-reference validation ---
+echo "14. Cross-reference validation"
 
 # Verify every skills/ directory is mentioned in README
 for skill_dir in "$PLUGIN_ROOT"/skills/*/; do
