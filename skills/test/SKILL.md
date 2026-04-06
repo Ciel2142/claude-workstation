@@ -39,14 +39,15 @@ Each scenario script is self-contained and exits 0 on success, 1 on failure.
 ## What Gets Tested
 
 ### Config Validation
-1. File existence (rules, commands, contexts, settings)
+1. File existence (contexts, settings, plugin source files)
 2. JSON validity (settings.json)
-3. Plugin presence (Beads, Superpowers, ECC)
-4. Hook safety (commands don't error in non-beads projects)
-5. Cross-references (plugin-routing and development-workflow reference unified-workflow)
-6. No duplicate workflow definitions
-7. Content completeness (all tiers, escalation, beads-first)
-8. Shell aliases presence
+3. Plugin source files (workflow.md, session-start hook, 6 new skills)
+4. Workflow context content completeness
+5. Hook output validity (produces valid JSON with additionalContext)
+6. Plugin presence (Beads, Superpowers, ECC)
+7. Shell aliases presence
+8. Skill directory completeness (all 10 skills present)
+9. SKILL.md frontmatter name matches directory
 
 ### Dry-Run Scenarios
 - **Trivial:** bd create -> fix -> verify -> bd close
