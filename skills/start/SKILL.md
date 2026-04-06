@@ -1,13 +1,13 @@
 ---
-name: init
-version: 1.1.0
+name: start
+version: 1.2.0
 description: >
   Auto-assess task tier and start the right workflow. Takes a description,
   scores it, creates the beads task, and invokes the first skill.
   TRIGGER: When starting any new work, or when the user describes a task.
 ---
 
-# Init: Auto-Tier Assessment & Workflow Routing
+# Start: Auto-Tier Assessment & Workflow Routing
 
 Takes a task description, assesses its complexity tier, creates the appropriate
 beads task, and auto-invokes the first workflow skill for that tier.
@@ -16,9 +16,9 @@ beads task, and auto-invokes the first workflow skill for that tier.
 
 The user provides a description and optional flags:
 
-- `/claude-workstation:init "Add rate limiting to all API endpoints"`
-- `/claude-workstation:init -p 0 "Critical production outage"`
-- `/claude-workstation:init --side-quest "Found: tokens aren't rotated"`
+- `/claude-workstation:start "Add rate limiting to all API endpoints"`
+- `/claude-workstation:start -p 0 "Critical production outage"`
+- `/claude-workstation:start --side-quest "Found: tokens aren't rotated"`
 
 ## Flow
 

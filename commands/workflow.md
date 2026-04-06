@@ -14,7 +14,7 @@ bd create --title="..." --type=task|bug|feature|epic
 
 The beads task is the anchor. Everything else flows from it. No exceptions — design work, research, planning, and code all get tracked.
 
-**Or use `/claude-workstation:init`** to auto-assess the tier, create the task, and start the right flow in one step.
+**Or use `/claude-workstation:start`** to auto-assess the tier, create the task, and start the right flow in one step.
 
 ---
 

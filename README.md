@@ -5,7 +5,7 @@ A Claude Code plugin that restores your full development environment from a sing
 ## What's Included
 
 - **Unified Workflow** — Size-based routing (trivial/small/medium+) connecting Beads, Superpowers, and ECC
-- **Auto-Tier Assessment** — `/init` scores task descriptions and routes to the right workflow automatically
+- **Auto-Tier Assessment** — `/start` scores task descriptions and routes to the right workflow automatically
 - **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
 - **MCP Servers** — context7, memory, exa, playwright, sequential-thinking, token-optimizer
@@ -51,25 +51,25 @@ Installed by the setup skill (mgrep is offered as an optional add-on):
 
 | Command | What it does |
 |---|---|
-| `/claude-workstation:init` | Auto-assess task tier, create beads task, start the right workflow |
+| `/claude-workstation:start` | Auto-assess task tier, create beads task, start the right workflow |
 | `/claude-workstation:resume` | Resume open work — load context, detect position, continue workflow |
 | `/workflow` | Show the full development playbook |
 | `/claude-workstation:setup` | Install dependencies and configure environment |
 | `/claude-workstation:test` | Validate configuration and run scenarios |
 
-### `/init` — Start New Work
+### `/start` — Begin New Work
 
 ```bash
-/claude-workstation:init "Fix the login validation bug"
+/claude-workstation:start "Fix the login validation bug"
 # → Scores description → Small → creates task → starts TDD
 
-/claude-workstation:init "Design a new notification system"
+/claude-workstation:start "Design a new notification system"
 # → Scores description → Medium+ → creates epic → starts brainstorming
 
-/claude-workstation:init "Fix typo in README"
+/claude-workstation:start "Fix typo in README"
 # → Scores description → Trivial → creates task → "Go fix it"
 
-/claude-workstation:init --side-quest "Found: tokens aren't rotated"
+/claude-workstation:start --side-quest "Found: tokens aren't rotated"
 # → Detects side-quest → creates bug → links to current task → parks it
 ```
 
@@ -136,7 +136,7 @@ claude-workstation/
 ├── commands/
 │   └── workflow.md           # /workflow command — full playbook
 ├── skills/
-│   ├── init/SKILL.md          # /init — auto-tier assessment & workflow start
+│   ├── start/SKILL.md         # /start — auto-tier assessment & workflow start
 │   ├── resume/SKILL.md        # /resume — continue open work
 │   ├── setup/SKILL.md        # /setup — environment installer
 │   └── test/SKILL.md         # /test — config validation

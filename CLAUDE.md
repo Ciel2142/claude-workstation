@@ -8,7 +8,7 @@ This applies to ALL work — design, planning, research, and code. No exceptions
 
 ## Quick Start
 
-- **New work:** `/claude-workstation:init "description"` — assess tier, create task, start workflow
+- **New work:** `/claude-workstation:start "description"` — assess tier, create task, start workflow
 - **Resume work:** `/claude-workstation:resume` — pick up open tasks, load context, continue workflow
 
 ## Workflow

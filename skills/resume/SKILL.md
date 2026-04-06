@@ -48,7 +48,7 @@ bd list --status=open
 1. Exactly 1 `in_progress` task → auto-select it, skip to Step 3
 2. Multiple `in_progress` tasks → show list, user picks
 3. 0 `in_progress` but open tasks exist → show list, user picks
-4. Nothing open → print: "Nothing to resume. Use `/claude-workstation:init` to start new work." and STOP
+4. Nothing open → print: "Nothing to resume. Use `/claude-workstation:start` to start new work." and STOP
 
 **Display format** (when showing the list):
 
@@ -97,7 +97,7 @@ After selecting a task, load context at a depth determined by the original tier.
 
 **Determine tier:**
 
-1. Check beads notes for `"tier: <value>"` (set by `/init`)
+1. Check beads notes for `"tier: <value>"` (set by `/start`)
 2. If not found, infer:
    - Task is under an epic → medium+
    - Task type is epic → medium+
