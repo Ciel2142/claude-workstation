@@ -108,31 +108,25 @@ done
 Detect shell and append aliases if not already present.
 
 ```bash
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$(dirname "$0")")")}"
+ALIASES_FILE="$PLUGIN_ROOT/profiles/aliases.sh"
+
 FOUND_RC=0
 for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
     [ -f "$SHELL_RC" ] || continue
     FOUND_RC=1
     echo "Checking $SHELL_RC..."
-    for alias_name in claude-dev claude-research claude-review; do
+    # Read alias definitions from profiles/aliases.sh (single source of truth)
+    while IFS= read -r line; do
+        [[ "$line" =~ ^alias\ ([a-z-]+)= ]] || continue
+        alias_name="${BASH_REMATCH[1]}"
         if ! grep -q "alias $alias_name=" "$SHELL_RC" 2>/dev/null; then
-            case "$alias_name" in
-                claude-dev)
-                    echo "alias claude-dev='claude --system-prompt \"\$(cat ~/.claude/contexts/dev.md)\" --effort high'" >> "$SHELL_RC"
-                    echo "Added: $alias_name"
-                    ;;
-                claude-research)
-                    echo "alias claude-research='claude --system-prompt \"\$(cat ~/.claude/contexts/research.md)\" --effort high'" >> "$SHELL_RC"
-                    echo "Added: $alias_name"
-                    ;;
-                claude-review)
-                    echo "alias claude-review='claude --system-prompt \"\$(cat ~/.claude/contexts/review.md)\" --effort high'" >> "$SHELL_RC"
-                    echo "Added: $alias_name"
-                    ;;
-            esac
+            echo "$line" >> "$SHELL_RC"
+            echo "Added: $alias_name"
         else
             echo "Skipped (already present): $alias_name"
         fi
-    done
+    done < "$ALIASES_FILE"
     echo ""
     echo "Run 'source $SHELL_RC' or start a new terminal to use the aliases."
 done

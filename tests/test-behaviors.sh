@@ -141,6 +141,55 @@ else
     pass "1c. no args — exits 1 as expected"
 fi
 
+# 1d. All-caps freetext in notes should NOT be truncated
+rm -f "$CAPTURE_FILE"
+export BD_SHOW_OUTPUT="TITLE
+Test task
+NOTES
+tier: small
+IMPORTANT NOTE
+plan: docs/plan.md
+STATUS
+open"
+PATH="$TMPDIR_BD:$PATH" \
+    bash "$PLUGIN_ROOT/hooks/bd-notes-append" "task-123" "completed: 1" 2>/dev/null
+if [[ -f "$CAPTURE_FILE" ]]; then
+    CAPTURED=$(cat "$CAPTURE_FILE")
+    if echo "$CAPTURED" | grep -q "IMPORTANT NOTE" && echo "$CAPTURED" | grep -q "plan: docs/plan.md" && echo "$CAPTURED" | grep -q "completed: 1"; then
+        pass "1d. all-caps freetext — preserves content without truncation"
+    else
+        fail "1d. all-caps freetext — truncated at all-caps line, got: $(printf '%q' "$CAPTURED")"
+    fi
+else
+    fail "1d. all-caps freetext — capture file not written"
+fi
+
+# 1e. DEPENDS ON section header should stop note extraction
+rm -f "$CAPTURE_FILE"
+export BD_SHOW_OUTPUT="TITLE
+Test task
+NOTES
+tier: medium+
+plan: docs/plan.md
+DEPENDS ON
+  other-task-123
+STATUS
+open"
+PATH="$TMPDIR_BD:$PATH" \
+    bash "$PLUGIN_ROOT/hooks/bd-notes-append" "task-123" "completed: 1" 2>/dev/null
+if [[ -f "$CAPTURE_FILE" ]]; then
+    CAPTURED=$(cat "$CAPTURE_FILE")
+    if echo "$CAPTURED" | grep -q "plan: docs/plan.md" \
+       && echo "$CAPTURED" | grep -q "completed: 1" \
+       && ! echo "$CAPTURED" | grep -q "other-task-123"; then
+        pass "1e. DEPENDS ON header — stops extraction, does not leak into notes"
+    else
+        fail "1e. DEPENDS ON header — leaked dependency data into notes, got: $(printf '%q' "$CAPTURED")"
+    fi
+else
+    fail "1e. DEPENDS ON header — capture file not written"
+fi
+
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -372,6 +421,72 @@ if echo "$STOP_OUT" | grep -qE "WARNING.*NO beads issues"; then
     fail "4b. commits + closed task — should NOT warn about NO beads issues, got: $(printf '%q' "$STOP_OUT")"
 else
     pass "4b. commits + closed task — no spurious 'NO beads issues' warning"
+fi
+
+# 4c. Commits exist + no issues at all — should warn
+rm -f "$GATE_CACHE"
+export GIT_LOG_OUTPUT="abc1234 feat: do something"
+export BD_LIST_IN_PROGRESS="No issues found."
+export BD_LIST_CLOSED="No issues found."
+export BD_LIST_OPEN="No issues found."
+STOP_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_STOP:$PATH" \
+    bash "$PLUGIN_ROOT/hooks/stop" 2>/dev/null || true)
+if echo "$STOP_OUT" | grep -qE "WARNING.*NO beads issues"; then
+    pass "4c. commits + no issues — warns about NO beads issues"
+else
+    fail "4c. commits + no issues — expected WARNING about 'NO beads issues', got: $(printf '%q' "$STOP_OUT")"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
+# Section 5: Session-start output branches (M3)
+# ---------------------------------------------------------------------------
+echo "5. session-start output branches"
+
+# 5a. Cursor branch: CURSOR_PLUGIN_ROOT set
+CURSOR_OUT=$(CURSOR_PLUGIN_ROOT="$PLUGIN_ROOT" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" \
+    bash "$PLUGIN_ROOT/hooks/session-start" 2>/dev/null || echo "")
+if echo "$CURSOR_OUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+assert 'additional_context' in d, 'missing additional_context key'
+assert isinstance(d['additional_context'], str), 'additional_context not string'
+assert len(d['additional_context']) > 100, 'additional_context too short'
+" 2>/dev/null; then
+    pass "5a. Cursor branch — produces {additional_context: ...} format"
+else
+    fail "5a. Cursor branch — wrong JSON format"
+fi
+
+# 5b. Copilot CLI branch: COPILOT_CLI set (no CURSOR_PLUGIN_ROOT)
+COPILOT_OUT=$(COPILOT_CLI="1" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" \
+    bash "$PLUGIN_ROOT/hooks/session-start" 2>/dev/null || echo "")
+if echo "$COPILOT_OUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+assert 'additionalContext' in d, 'missing additionalContext key'
+assert 'hookSpecificOutput' not in d, 'should not have hookSpecificOutput'
+assert isinstance(d['additionalContext'], str), 'additionalContext not string'
+" 2>/dev/null; then
+    pass "5b. Copilot CLI branch — produces {additionalContext: ...} format"
+else
+    fail "5b. Copilot CLI branch — wrong JSON format"
+fi
+
+# 5c. Claude Code branch (default): only CLAUDE_PLUGIN_ROOT set
+CC_OUT=$(CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" \
+    bash "$PLUGIN_ROOT/hooks/session-start" 2>/dev/null || echo "")
+if echo "$CC_OUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+assert 'hookSpecificOutput' in d, 'missing hookSpecificOutput'
+hso = d['hookSpecificOutput']
+assert 'additionalContext' in hso, 'missing additionalContext in hookSpecificOutput'
+" 2>/dev/null; then
+    pass "5c. Claude Code branch — produces {hookSpecificOutput: {additionalContext: ...}} format"
+else
+    fail "5c. Claude Code branch — wrong JSON format"
 fi
 
 echo ""

@@ -10,7 +10,7 @@ description: >
 
 ## Quick Validation
 
-Run the automated config validation (161+ checks):
+Run the automated config validation (170+ checks):
 
 ```bash
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$(dirname "$0")")")}"

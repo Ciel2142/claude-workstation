@@ -172,7 +172,7 @@ When implementation reveals the spec is wrong, amend it — don't silently devia
 If work grows beyond current tier, stop and escalate:
 
 - **Trivial → Small:** Add TDD and review before continuing.
-- **Small → Medium+:** Stop. Create an epic, brainstorm, plan, decompose into sub-tasks. Then continue from step 6 (IMPLEMENT).
+- **Small → Medium+:** Stop. Create an epic, brainstorm, plan, decompose into sub-tasks. Then continue from step 5 (IMPLEMENT).
 
 Never skip tiers downward.
 

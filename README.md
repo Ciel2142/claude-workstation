@@ -146,7 +146,9 @@ claude-workstation/
 ├── profiles/
 │   └── aliases.sh             # Shell aliases for context profiles
 ├── tests/
-│   ├── validate-config.sh     # Config validation
+│   ├── validate-config.sh     # Config validation (170+ checks)
+│   ├── test-behaviors.sh      # Behavioral tests for hooks and position detection
+│   ├── lib.sh                 # Cross-platform test helpers
 │   └── scenarios/             # Workflow dry-run scenario scripts
 ├── CLAUDE.md
 └── AGENTS.md

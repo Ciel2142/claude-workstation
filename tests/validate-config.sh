@@ -629,6 +629,93 @@ fi
 
 echo ""
 
+# --- 19. help.md escalation step reference ---
+echo "19. help.md escalation step reference"
+
+HELP_FILE="$PLUGIN_ROOT/commands/help.md"
+if [[ -f "$HELP_FILE" ]]; then
+    # B1: Escalation "Small → Medium+" must reference step 5 (IMPLEMENT), not step 6 (VERIFY)
+    if grep -q 'step 5 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
+        pass "escalation references 'step 5 (IMPLEMENT)' correctly"
+    else
+        fail "escalation does NOT reference 'step 5 (IMPLEMENT)' — may point to wrong step"
+    fi
+    # Negative: ensure old wrong reference is gone
+    if grep -q 'step 6 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
+        fail "escalation still references 'step 6 (IMPLEMENT)' (step 6 is VERIFY, not IMPLEMENT)"
+    else
+        pass "no stale 'step 6 (IMPLEMENT)' reference"
+    fi
+else
+    fail "commands/help.md MISSING"
+fi
+
+echo ""
+
+# --- 20. Alias consistency ---
+echo "20. Alias consistency"
+
+ALIASES_FILE="$PLUGIN_ROOT/profiles/aliases.sh"
+SETUP_SKILL="$PLUGIN_ROOT/skills/setup/SKILL.md"
+
+if [[ -f "$ALIASES_FILE" ]] && [[ -f "$SETUP_SKILL" ]]; then
+    # F1: Setup skill must reference profiles/aliases.sh as single source of truth
+    # (not hardcode alias definitions inline)
+    if grep -q 'profiles/aliases.sh' "$SETUP_SKILL" 2>/dev/null; then
+        pass "setup skill references profiles/aliases.sh (single source of truth)"
+    else
+        fail "setup skill does NOT reference profiles/aliases.sh — aliases may drift"
+    fi
+
+    # Verify aliases.sh contains all expected alias names
+    for alias_name in claude-dev claude-research claude-review; do
+        if grep -q "alias $alias_name=" "$ALIASES_FILE" 2>/dev/null; then
+            pass "profiles/aliases.sh defines $alias_name"
+        else
+            fail "profiles/aliases.sh MISSING $alias_name definition"
+        fi
+    done
+else
+    fail "Cannot check alias consistency — aliases.sh or setup/SKILL.md missing"
+fi
+
+echo ""
+
+# --- 21. README test file references ---
+echo "21. README test file references"
+
+if [[ -f "$PLUGIN_ROOT/README.md" ]]; then
+    # M1: README project structure should list test-behaviors.sh and lib.sh
+    for test_file in test-behaviors.sh lib.sh; do
+        if grep -q "$test_file" "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+            pass "README references $test_file"
+        else
+            fail "README MISSING reference to $test_file"
+        fi
+    done
+else
+    fail "README.md MISSING"
+fi
+
+echo ""
+
+# --- 22. Context file tool references ---
+echo "22. Context file tool references"
+
+RESEARCH_FILE="$PLUGIN_ROOT/contexts/research.md"
+if [[ -f "$RESEARCH_FILE" ]]; then
+    # I1: Should reference "Agent" tool, not stale "Task" tool name
+    if grep -q 'Task with' "$RESEARCH_FILE" 2>/dev/null; then
+        fail "research.md uses stale 'Task with' tool reference (should be 'Agent')"
+    else
+        pass "research.md does not use stale 'Task' tool name"
+    fi
+else
+    fail "contexts/research.md MISSING"
+fi
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"

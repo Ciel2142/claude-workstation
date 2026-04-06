@@ -20,7 +20,7 @@ Focus: Understanding before acting
 - Read for understanding code
 - Grep, Glob for finding patterns
 - WebSearch, WebFetch for external docs
-- Task with Explore agent for codebase questions
+- Explore agent for codebase questions
 
 ## Output
 Findings first, recommendations second
