@@ -29,6 +29,12 @@ Add two sections between "Hard Rules" and "Plugin Routing":
 
 Source: `rules/common/unified-workflow.md` lines 28-73. Condensed to remove the verbose material amendment template block — keep intent, criteria, and log format.
 
+Add a **Skill References** section mapping workflow steps to on-demand skills. Without rules in context, the connection between workflow step names (e.g. "spike", "verify") and plugin skills is implicit — Claude sees the step name in the hook context and the skill trigger phrase in the skill listing, but never an explicit "invoke this skill at this step." Two skills are especially weak without explicit references:
+- **scope-health** — requires counting sub-task completions (every 3rd), won't trigger spontaneously
+- **beads-milestones** — needs to know which milestones warrant updates, not just that the skill exists
+
+The section should be ~5-6 lines mapping: bug work → debugging-protocol, spike → spike-phase, every 3rd sub-task → scope-health, milestone notes → beads-milestones, verification → verification-template.
+
 ### 2. Delete redundant files
 
 | Path | Reason |
