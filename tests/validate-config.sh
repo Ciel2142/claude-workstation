@@ -214,6 +214,54 @@ fi
 
 echo ""
 
+# --- 10b. Workflow v2 rules ---
+echo "10b. Workflow v2 rules"
+
+[[ -f "$HOME/.claude/rules/common/spike-phase.md" ]] \
+    && pass "spike-phase.md exists" \
+    || fail "spike-phase.md MISSING (run /claude-workstation:setup)"
+
+[[ -f "$HOME/.claude/rules/common/scope-health.md" ]] \
+    && pass "scope-health.md exists" \
+    || fail "scope-health.md MISSING (run /claude-workstation:setup)"
+
+echo ""
+
+# --- 11b. Workflow v2 content ---
+echo "11b. Workflow v2 content"
+
+if grep -q "Spec Amendments" "$HOME/.claude/rules/common/unified-workflow.md" 2>/dev/null; then
+    pass "unified-workflow.md contains Spec Amendments"
+else
+    fail "unified-workflow.md MISSING Spec Amendments section"
+fi
+
+if grep -q "Micro-tiers" "$HOME/.claude/rules/common/unified-workflow.md" 2>/dev/null; then
+    pass "unified-workflow.md contains Micro-tiers"
+else
+    fail "unified-workflow.md MISSING Micro-tiers section"
+fi
+
+if grep -q "spike" "$HOME/.claude/rules/common/spike-phase.md" 2>/dev/null; then
+    pass "spike-phase.md contains spike content"
+else
+    fail "spike-phase.md MISSING spike content"
+fi
+
+if grep -q "planned-tasks" "$HOME/.claude/rules/common/scope-health.md" 2>/dev/null; then
+    pass "scope-health.md contains planned-tasks baseline"
+else
+    fail "scope-health.md MISSING planned-tasks baseline"
+fi
+
+if grep -q "Standardized Format" "$HOME/.claude/rules/common/beads-milestones.md" 2>/dev/null; then
+    pass "beads-milestones.md has structured checkpoint format"
+else
+    fail "beads-milestones.md MISSING structured checkpoint format"
+fi
+
+echo ""
+
 # --- 12. Skill directories ---
 echo "12. Skill directories"
 

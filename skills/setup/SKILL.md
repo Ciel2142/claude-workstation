@@ -119,7 +119,7 @@ RULES_DST="$HOME/.claude/rules"
 
 mkdir -p "$RULES_COMMON_DST"
 
-for file in unified-workflow.md plugin-routing.md development-workflow.md verification-template.md beads-milestones.md debugging.md; do
+for file in unified-workflow.md plugin-routing.md development-workflow.md verification-template.md beads-milestones.md debugging.md spike-phase.md scope-health.md; do
     src="$RULES_COMMON_SRC/$file"
     dst="$RULES_COMMON_DST/$file"
     if [ ! -f "$dst" ] || [ "$src" -nt "$dst" ]; then
