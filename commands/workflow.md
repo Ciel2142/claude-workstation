@@ -85,27 +85,45 @@ understand the root cause before writing the fix.
 1. EPIC       bd create --title="..." --type=epic
 2. BRAINSTORM superpowers:brainstorming
                Output: design doc in docs/superpowers/specs/
-               bd update <epic-id> --notes "Spec: <path>"
+               bd update <epic-id> --notes "spec: <path>"
 3. PLAN       superpowers:writing-plans
                Output: plan in docs/superpowers/plans/
-               bd update <epic-id> --notes "Plan: <path>, N sub-tasks"
+               bd update <epic-id> --notes "plan: <path>"
 4. SUB-TASKS  For each plan step:
                bd create --title="Step N: ..." --type=task
                bd dep add <sub-id> <epic-id>
-               bd dep add <sub-id> <prev-sub-id>  (if sequential)
-5. ISOLATE    superpowers:using-git-worktrees
-6. IMPLEMENT  bd ready → pick next → bd update <sub-id> -s in_progress
+               bd dep add <sub-id> <prev-sub-id>  (only if genuinely sequential)
+               bd update <epic-id> --notes "planned-tasks: N"
+5. SPIKE      Task 0: validate architecture assumptions (see spike-phase rule)
+               bd update <epic-id> --notes "spike: <lightweight|deep>"
+6. ISOLATE    superpowers:using-git-worktrees
+7. IMPLEMENT  bd ready → claim ALL ready tasks (not just one)
+               For independent ready tasks: dispatch parallel agents
+               (superpowers:dispatching-parallel-agents)
                For each sub-task:
-               ├─ superpowers:test-driven-development
+               ├─ Assess micro-tier (see Sub-task Micro-tiers rule)
+               ├─ bd update <sub-id> --notes "micro-tier: <tier>"
+               ├─ TDD per micro-tier (micro/full)
                ├─ Commit after each green
-               ├─ bd update <sub-id> --notes "Tests passing: <summary>"
-               ├─ superpowers:requesting-code-review
+               ├─ Code review per micro-tier (individual/batch)
                └─ bd close <sub-id>
+               Scope health check every 3 closed sub-tasks.
                Repeat until bd ready shows no more sub-tasks.
-7. VERIFY     superpowers:verification-before-completion
-8. FINISH     superpowers:finishing-a-development-branch
-9. CLOSE      bd close <epic-id>
+8. VERIFY     superpowers:verification-before-completion
+9. FINISH     superpowers:finishing-a-development-branch
+10. CLOSE     bd close <epic-id>
 ```
+
+### Sub-task Dependencies
+
+When creating sub-tasks from the plan:
+- Default to independent (no deps between sub-tasks) unless one task genuinely
+  needs another's output
+- Only add `bd dep` when Task B literally cannot start without Task A's artifacts
+  (schema it reads, interface it imports, config it loads)
+- "Conceptually related" is NOT a dependency. Two endpoints that share a database
+  table can be built in parallel — the table creation is the dependency, not the
+  endpoints on each other
 
 ---
 

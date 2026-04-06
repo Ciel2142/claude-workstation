@@ -12,7 +12,7 @@ Before invoking ANY Superpowers skill (brainstorming, writing-plans, TDD, code-r
 |---|---|---|
 | **Trivial** | ≤1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → worktree → TDD → review → verify → finish → `bd close` |
+| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → spike → worktree → TDD → review → verify → finish → `bd close` |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → `bd close` |
 
 **Escalation only upward.** If work grows beyond current tier, stop and escalate — never downgrade.
