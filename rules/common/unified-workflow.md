@@ -50,6 +50,28 @@ new dependencies, changed API shape, architectural changes.
 
 Applies to Small and Medium+ tiers. Trivial tasks have no spec.
 
+## Sub-task Micro-tiers
+
+Within a Medium+ epic, each sub-task gets a micro-tier that determines ceremony level.
+
+| Micro-tier | Signal | Ceremony |
+|---|---|---|
+| **Micro-trivial** | Config, wiring, exports, type files, boilerplate. No logic. | Micro-TDD (one assertion) -> commit. Batch review every 3 tasks. |
+| **Micro-small** | Single-concern logic, one function/method, straightforward. | Full TDD (red-green-refactor) -> commit. Batch review every 3 tasks. |
+| **Micro-complex** | New algorithm, security-sensitive, public API, cross-cutting. | Full TDD -> individual code review -> commit. |
+
+**Assignment:** When claiming a sub-task, assess its micro-tier from the plan description.
+Log: `micro-tier: <micro-trivial|micro-small|micro-complex>`
+
+**Micro-TDD:** One assertion proving the wiring works:
+- Import resolves: `expect(() => require('./newModule')).not.toThrow()`
+- Config parses: `expect(loadConfig()).toHaveProperty('newKey')`
+- Type compiles: `tsc --noEmit` passes
+
+**Batch review cadence:** After every 3rd non-complex task, dispatch one batch code
+review covering all changes since the last review. Micro-complex tasks get individual
+reviews and reset the batch counter to 0.
+
 ## Side Quests
 
 Discover something unrelated mid-work:
