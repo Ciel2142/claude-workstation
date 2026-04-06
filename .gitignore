@@ -3,3 +3,9 @@
 .dolt/
 *.db
 .beads-credential-key
+
+# Editor and OS temps
+.DS_Store
+*~
+*.swp
+*.swo
