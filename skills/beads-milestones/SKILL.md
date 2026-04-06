@@ -50,20 +50,25 @@ Use one key-value pair per `bd update --notes` call. Keys are lowercase with col
 ## How to Update
 
 ```
-bd update <id> --notes "<key>: <value>"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+bash "$PLUGIN_ROOT/hooks/bd-notes-append" <id> "key: value"
 ```
 
-To preserve earlier milestones, include all active state in each call:
+The wrapper reads current notes and appends — no need to include previous
+milestones manually.
+
+If the wrapper is not available, fall back to cumulative update:
 ```
-bd update <id> --notes "tier: medium+
-spec: docs/specs/auth-design.md
-plan: docs/plans/auth.md"
+bd update <id> --notes "<all previous lines>
+<new line>"
 ```
+Each `bd update --notes` call **replaces** previous notes, so include all
+milestone state in the fallback.
 
 ## Rules
 
-- Each `bd update --notes` call **replaces** previous notes (does NOT append)
-- Include all milestone state in every update to avoid losing earlier entries
+- Use `bd-notes-append` wrapper when available (reads + appends automatically)
+- If using raw `bd update --notes`, each call **replaces** previous notes — include all milestone state
 - Keys are lowercase, colon-separated, no quotes needed
 - `/resume` matches by prefix — consistent format makes detection reliable
 - Backward compatible with older free-text notes
