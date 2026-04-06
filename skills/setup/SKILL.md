@@ -125,15 +125,10 @@ done
 Detect shell and append aliases if not already present.
 
 ```bash
-RC_FILES=()
-[[ -f "$HOME/.bashrc" ]] && RC_FILES+=("$HOME/.bashrc")
-[[ -f "$HOME/.zshrc" ]] && RC_FILES+=("$HOME/.zshrc")
-
-if [ ${#RC_FILES[@]} -eq 0 ]; then
-    echo "WARNING: No .bashrc or .zshrc found. Create one first."
-fi
-
-for SHELL_RC in "${RC_FILES[@]}"; do
+FOUND_RC=0
+for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    [ -f "$SHELL_RC" ] || continue
+    FOUND_RC=1
     echo "Checking $SHELL_RC..."
     for alias_name in claude-dev claude-research claude-review claude-workflow; do
         if ! grep -q "alias $alias_name=" "$SHELL_RC" 2>/dev/null; then
@@ -162,6 +157,10 @@ for SHELL_RC in "${RC_FILES[@]}"; do
     echo ""
     echo "Run 'source $SHELL_RC' or start a new terminal to use the aliases."
 done
+
+if [ "$FOUND_RC" -eq 0 ]; then
+    echo "WARNING: No .bashrc or .zshrc found. Create one first."
+fi
 ```
 
 ## Step 5: Validate
