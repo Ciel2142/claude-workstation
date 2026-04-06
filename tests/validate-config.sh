@@ -457,6 +457,65 @@ fi
 
 echo ""
 
+# --- 16. Setup skill plugin list ---
+echo "16. Setup skill — no optional plugins"
+
+SETUP_SKILL="$PLUGIN_ROOT/skills/setup/SKILL.md"
+if [[ -f "$SETUP_SKILL" ]]; then
+    # Required plugins that MUST be present
+    for required in "ecc@everything-claude-code" "superpowers@superpowers-marketplace" "beads@beads-marketplace"; do
+        if grep -q "$required" "$SETUP_SKILL" 2>/dev/null; then
+            pass "setup lists required plugin $required"
+        else
+            fail "setup MISSING required plugin $required"
+        fi
+    done
+
+    # Optional plugins that must NOT be present (overshadowed by ECC)
+    for optional in "hookify@claude-plugins-official" "playwright@claude-plugins-official" "code-simplifier@claude-plugins-official" "code-review@claude-plugins-official" "security-guidance@claude-plugins-official" "commit-commands@claude-plugins-official" "frontend-design@claude-plugins-official"; do
+        if grep -q "$optional" "$SETUP_SKILL" 2>/dev/null; then
+            fail "setup still references optional plugin $optional (should be removed)"
+        else
+            pass "setup does not reference optional $optional"
+        fi
+    done
+
+    # Step 2b (mgrep optional section) should not exist
+    if grep -q "Step 2b" "$SETUP_SKILL" 2>/dev/null; then
+        fail "setup still has Step 2b (mgrep optional section — should be removed)"
+    else
+        pass "setup does not have Step 2b"
+    fi
+else
+    fail "setup skill MISSING at $SETUP_SKILL"
+fi
+
+echo ""
+
+# --- 17. README dependencies — no optional plugins ---
+echo "17. README — no optional plugin rows"
+
+if [[ -f "$PLUGIN_ROOT/README.md" ]]; then
+    for optional_name in "Hookify" "Playwright" "Code Simplifier" "Code Review" "Security Guidance" "Commit Commands" "Frontend Design"; do
+        if grep -q "$optional_name.*optional" "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+            fail "README still lists optional plugin '$optional_name'"
+        else
+            pass "README does not list optional '$optional_name'"
+        fi
+    done
+
+    # mgrep optional row should be removed
+    if grep -q "mgrep.*optional" "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+        fail "README still lists mgrep as optional"
+    else
+        pass "README does not list mgrep as optional"
+    fi
+else
+    fail "README.md MISSING"
+fi
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"

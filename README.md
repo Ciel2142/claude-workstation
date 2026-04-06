@@ -30,21 +30,13 @@ A Claude Code plugin that restores your full development environment from a sing
 
 ## Dependencies
 
-Installed by the setup skill (mgrep is offered as an optional add-on):
+Installed by the setup skill:
 
 | Plugin | Marketplace | Purpose |
 |---|---|---|
 | [Beads](https://github.com/steveyegge/beads) | beads-marketplace | Dolt-powered issue tracker with dependencies, milestones, and persistent task state across sessions |
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | superpowers-marketplace | Development process skills — brainstorming, planning, TDD, code review, verification, debugging |
 | [ECC](https://github.com/affaan-m/everything-claude-code) | everything-claude-code | Language-specific and domain-specific skills, agents, patterns, and coding standards |
-| [mgrep](https://github.com/mixedbread-ai/mgrep) *(optional)* | Mixedbread-Grep | Semantic code and web search using Mixedbread AI embeddings — replaces built-in Grep, Glob, and WebSearch with natural language search |
-| Hookify *(optional)* | claude-plugins-official | Create and manage hooks to prevent unwanted agent behaviors |
-| Playwright *(optional)* | claude-plugins-official | Browser automation for E2E testing and visual verification |
-| Code Simplifier *(optional)* | claude-plugins-official | Simplifies and refines code for clarity, consistency, and maintainability |
-| Code Review *(optional)* | claude-plugins-official | Automated code review for quality, security, and best practices |
-| Security Guidance *(optional)* | claude-plugins-official | Security vulnerability detection and remediation guidance |
-| Commit Commands *(optional)* | claude-plugins-official | Git commit, push, and PR creation workflows |
-| Frontend Design *(optional)* | claude-plugins-official | Create distinctive, production-grade frontend interfaces |
 
 ## Commands & Skills
 

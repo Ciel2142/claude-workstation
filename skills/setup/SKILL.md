@@ -49,14 +49,7 @@ plugins = d.get('enabledPlugins', {})
 needed = {
     'ecc@everything-claude-code': 'ECC',
     'superpowers@superpowers-marketplace': 'Superpowers',
-    'beads@beads-marketplace': 'Beads',
-    'hookify@claude-plugins-official': 'Hookify',
-    'playwright@claude-plugins-official': 'Playwright',
-    'code-simplifier@claude-plugins-official': 'Code Simplifier',
-    'code-review@claude-plugins-official': 'Code Review',
-    'security-guidance@claude-plugins-official': 'Security Guidance',
-    'commit-commands@claude-plugins-official': 'Commit Commands',
-    'frontend-design@claude-plugins-official': 'Frontend Design'
+    'beads@beads-marketplace': 'Beads'
 }
 for key, name in needed.items():
     status = plugins.get(key)
@@ -73,37 +66,6 @@ For any MISSING plugins, install using `/plugin install <key>`.
 
 For any UPDATE plugins, update using `/plugin update <key>`.
 A restart is required after updates take effect.
-
-## Step 2b: Optional — mgrep (Semantic Search)
-
-**Ask the user before proceeding:**
-
-> **Would you like to install mgrep (semantic search)?**
->
-> mgrep replaces the built-in Grep, Glob, and WebSearch tools with semantic search powered by Mixedbread AI embeddings. Instead of exact pattern matching, you describe what you're looking for in natural language and it finds semantically relevant code and files.
->
-> **Why install it:**
-> - Natural language code search — find code by intent, not exact strings
-> - Semantic web search — `mgrep --web --answer "query"` replaces WebSearch
-> - Better for exploratory searches when you don't know exact function/variable names
->
-> **Caveat:** Once installed, mgrep overrides all built-in search tools (Grep, Glob, WebSearch). If you prefer exact pattern matching for precision work, you may want to skip this.
->
-> Install mgrep? (yes/no)
-
-**If the user says yes:**
-
-1. Register the marketplace:
-   ```bash
-   /plugin marketplace add https://github.com/mixedbread-ai/mgrep
-   ```
-
-2. Install the plugin:
-   ```bash
-   /plugin install mgrep@Mixedbread-Grep
-   ```
-
-**If the user says no**, skip to Step 3.
 
 ## Step 3: Copy Context Profiles
 
