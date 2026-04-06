@@ -26,11 +26,13 @@ PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$(dirname "$0")")")}"
 SCENARIOS="$PLUGIN_ROOT/tests/scenarios"
 
 bash "$SCENARIOS/scaffold.sh"
+bash "$SCENARIOS/init-persistence.sh"
 bash "$SCENARIOS/trivial.sh"
 bash "$SCENARIOS/small.sh"
 bash "$SCENARIOS/medium-plus.sh"
 bash "$SCENARIOS/escalation.sh"
 bash "$SCENARIOS/side-quest.sh"
+bash "$SCENARIOS/bug-path.sh"
 bash "$SCENARIOS/cleanup.sh"
 ```
 

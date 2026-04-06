@@ -24,7 +24,7 @@ fi
 TIME_WINDOW="${BEADS_CHECK_WINDOW:-8 hours ago}"
 
 # L1: Consistent error handling — separate fallback from command substitution
-IN_PROGRESS=$(bd list --status=in_progress 2>/dev/null | grep -c 'beads-\|workflow-') || IN_PROGRESS=0
+IN_PROGRESS=$(bd list --status=in_progress 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || IN_PROGRESS=0
 RECENT_COMMITS=$(git log --oneline --since="$TIME_WINDOW" 2>/dev/null | wc -l | tr -d ' ') || RECENT_COMMITS=0
 
 if [ "$RECENT_COMMITS" -gt 0 ] && [ "$IN_PROGRESS" -eq 0 ]; then

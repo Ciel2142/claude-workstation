@@ -64,7 +64,7 @@ echo ""
 # --- 4. Workflow context content ---
 echo "4. Workflow context content"
 
-for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests" "Spec Amendments" "Micro-tiers" "Skill References" "Scope Confirmation" "Task Boundary" "Pre-Change Gate"; do
+for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests" "Spec Amendments" "Micro-tiers" "Skill References" "Scope Confirmation" "Task Boundary" "Pre-Change Gate" "Hard Rules"; do
     if grep -q "$keyword" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
         pass "workflow.md contains '$keyword'"
     else

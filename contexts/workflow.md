@@ -19,7 +19,6 @@ Escalation only upward — never downgrade.
 
 ## Hard Rules
 
-- No codebase changes (edit, delete, write, destructive commands) without a beads task
 - No Superpowers skill invocation without an active beads task
 - No production code without a failing test (Small/Medium+)
 - No completion claims without verification output
@@ -42,6 +41,8 @@ Before implementing changes, restate what you will change and confirm with the u
 - The request could refer to more than one file, directory, or component — if so, it is ambiguous by definition
 
 Does NOT apply when executing confirmed plan sub-tasks within a Medium+ epic — those already have approved scope.
+
+Does NOT apply when invoked via `/claude-workstation:start` — the start skill handles its own scope assessment.
 
 Format: "I'll [verb] [specific file paths or named artifacts]. Confirm?" — then wait. Do not use category names ("the profiles") — list actual files.
 
@@ -115,7 +116,7 @@ Before any new implementation:
 ## Side Quests
 
 Discover something unrelated mid-work:
-```
+```bash
 bd create --title="Found: <issue>" --type=bug
 bd dep add <new-id> <current-id> --type=discovered-from
 ```

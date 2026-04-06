@@ -1,6 +1,6 @@
 ---
 name: start
-version: 1.2.0
+version: 1.0.0
 description: >
   Auto-assess task tier and start the right workflow. Takes a description,
   scores it, creates the beads task, and invokes the first skill.
