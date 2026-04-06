@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 echo "=== Medium+ Tier: Calculator operations ==="
-cd /tmp/workflow-test
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+cd "$TEST_DIR"
 
 # Epic
 EPIC=$(bd create --title="Add calculator operations" --type=epic --priority=2 2>&1 | grep -oP 'workflow-test-\w+')

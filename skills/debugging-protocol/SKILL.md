@@ -1,6 +1,6 @@
 ---
 name: debugging-protocol
-version: 1.0.0
+version: 1.2.0
 description: >
   Debugging-first protocol for bugs. Root cause analysis before fixes,
   3-strike rule, systematic debugging workflow.

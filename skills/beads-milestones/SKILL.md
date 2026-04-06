@@ -1,6 +1,6 @@
 ---
 name: beads-milestones
-version: 1.0.0
+version: 1.2.0
 description: >
   Structured checkpoint format for beads milestone notes. Standardized
   key-value pairs for workflow progress tracking.
@@ -53,9 +53,17 @@ Use one key-value pair per `bd update --notes` call. Keys are lowercase with col
 bd update <id> --notes "<key>: <value>"
 ```
 
+To preserve earlier milestones, include all active state in each call:
+```
+bd update <id> --notes "tier: medium+
+spec: docs/specs/auth-design.md
+plan: docs/plans/auth.md"
+```
+
 ## Rules
 
-- One key-value per `bd update --notes` call (beads appends, doesn't replace)
+- Each `bd update --notes` call **replaces** previous notes (does NOT append)
+- Include all milestone state in every update to avoid losing earlier entries
 - Keys are lowercase, colon-separated, no quotes needed
 - `/resume` matches by prefix — consistent format makes detection reliable
 - Backward compatible with older free-text notes

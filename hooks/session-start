@@ -21,20 +21,22 @@ if [ -n "$GIT_ROOT" ]; then
 else
     BEADS_CONFIGURE=""
 fi
-# M2: Warn on failure instead of silent suppression
+# C2: Capture stderr on failure instead of suppressing with 2>/dev/null
 if [ -n "$BEADS_CONFIGURE" ] && [ -x "$BEADS_CONFIGURE" ]; then
-    if ! bash "$BEADS_CONFIGURE" 2>/dev/null; then
-        echo "warning: beads configure-server.sh failed" >&2
+    CONFIGURE_ERR=""
+    if ! CONFIGURE_ERR=$(bash "$BEADS_CONFIGURE" 2>&1); then
+        echo "warning: beads configure-server.sh failed${CONFIGURE_ERR:+: $CONFIGURE_ERR}" >&2
     fi
 fi
 
 # Step 2: Read workflow context
+# B1: Output warning JSON instead of silent exit when workflow.md is missing
 WORKFLOW_CONTEXT_FILE="${PLUGIN_ROOT}/contexts/workflow.md"
 if [ ! -f "$WORKFLOW_CONTEXT_FILE" ]; then
-    exit 0
+    WORKFLOW_CONTENT="warning: workflow.md not found at ${WORKFLOW_CONTEXT_FILE} — workflow context not injected"
+else
+    WORKFLOW_CONTENT=$(cat "$WORKFLOW_CONTEXT_FILE")
 fi
-
-WORKFLOW_CONTENT=$(cat "$WORKFLOW_CONTEXT_FILE")
 
 # Step 3: Escape for JSON embedding
 escape_for_json() {

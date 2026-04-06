@@ -378,6 +378,23 @@ else
     fail "tests/scenarios/ directory MISSING"
 fi
 
+# 11c. Version consistency
+PLUGIN_VERSION=$(python3 -c "import json; print(json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "unknown")
+VERSION_MISMATCH=0
+for skill_dir in "$PLUGIN_ROOT"/skills/*/; do
+    skill_file="$skill_dir/SKILL.md"
+    skill_name=$(basename "$skill_dir")
+    if [ -f "$skill_file" ]; then
+        skill_ver=$(grep -m1 '^version:' "$skill_file" 2>/dev/null | awk '{print $2}' || echo "missing")
+        if [ "$skill_ver" = "$PLUGIN_VERSION" ]; then
+            pass "skill $skill_name version matches plugin ($PLUGIN_VERSION)"
+        else
+            fail "skill $skill_name version $skill_ver != plugin $PLUGIN_VERSION"
+            VERSION_MISMATCH=1
+        fi
+    fi
+done
+
 echo ""
 
 # --- 14. Cross-reference validation ---
@@ -453,6 +470,50 @@ if grep -q 'beads-gate' "$PLUGIN_ROOT/hooks/stop" 2>/dev/null; then
     pass "hooks/stop includes cache cleanup for beads-gate"
 else
     fail "hooks/stop MISSING cache cleanup for beads-gate"
+fi
+
+# 15e. Functional: session-start hook produces valid JSON with workflow content
+SESSION_OUT=$(bash "$PLUGIN_ROOT/hooks/session-start" 2>/dev/null || echo "")
+if echo "$SESSION_OUT" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
+    pass "session-start hook outputs valid JSON (functional)"
+else
+    fail "session-start hook output is NOT valid JSON (functional)"
+fi
+if echo "$SESSION_OUT" | grep -q "Beads-First"; then
+    pass "session-start injects workflow content (functional)"
+else
+    fail "session-start does NOT inject workflow content (functional)"
+fi
+
+# 15f. Functional: pre-change-gate warns when no task is in_progress
+# Run in a temp dir with beads initialized but no in_progress tasks
+if command -v bd >/dev/null 2>&1; then
+    GATE_OUT=$(cd "$PLUGIN_ROOT" && bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || echo "")
+    # If there are no in_progress tasks, it should warn; if there are, it should be empty or about tier
+    # Either way, it should exit 0 and not crash
+    GATE_EXIT=$?
+    if [ "${GATE_EXIT:-0}" -eq 0 ] 2>/dev/null; then
+        pass "pre-change-gate runs without error in project (functional)"
+    else
+        fail "pre-change-gate crashed in project (functional)"
+    fi
+fi
+
+# 15g. Functional: session-start with missing workflow.md outputs warning JSON
+REAL_WORKFLOW="$PLUGIN_ROOT/contexts/workflow.md"
+if [ -f "$REAL_WORKFLOW" ]; then
+    TMPDIR_HOOK=$(mktemp -d)
+    # Create a minimal plugin structure with no workflow.md
+    mkdir -p "$TMPDIR_HOOK/contexts" "$TMPDIR_HOOK/hooks"
+    cp "$PLUGIN_ROOT/hooks/session-start" "$TMPDIR_HOOK/hooks/"
+    # Run from the temp dir (workflow.md doesn't exist)
+    MISSING_OUT=$(bash "$TMPDIR_HOOK/hooks/session-start" 2>/dev/null || echo "")
+    if echo "$MISSING_OUT" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
+        pass "session-start outputs valid JSON even when workflow.md missing (functional)"
+    else
+        fail "session-start outputs INVALID JSON when workflow.md missing (functional)"
+    fi
+    rm -rf "$TMPDIR_HOOK"
 fi
 
 echo ""

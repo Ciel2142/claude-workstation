@@ -6,8 +6,9 @@ if ! command -v bd >/dev/null 2>&1; then
 fi
 echo "=== Scaffold: Creating test project ==="
 
-TEST_DIR="/tmp/workflow-test"
-rm -rf "$TEST_DIR"
+# F2: Use mktemp for isolated test directories; share path via coordination file
+TEST_DIR=$(mktemp -d "${TMPDIR:-/tmp}/workflow-test.XXXXXX")
+echo "$TEST_DIR" > "${TMPDIR:-/tmp}/.workflow-test-dir"
 mkdir -p "$TEST_DIR/src" "$TEST_DIR/tests"
 cd "$TEST_DIR"
 git init

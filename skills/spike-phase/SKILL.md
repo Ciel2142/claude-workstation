@@ -1,6 +1,6 @@
 ---
 name: spike-phase
-version: 1.0.0
+version: 1.2.0
 description: >
   Architecture validation before Medium+ implementation. Lightweight or
   deep spike to confirm assumptions and identify risks.
@@ -41,8 +41,9 @@ documented. ~30-60 minutes.
    - Read the spec and plan
    - For each integration point: verify the file paths exist, the interfaces match
      what the plan assumes, and the data flows as described
-   - For deep spikes: build a minimal proof-of-concept for the riskiest integration,
-     then discard the code
+   - For deep spikes: build a minimal proof-of-concept for the riskiest integration
+     (pick the one with the most unknowns, the least-familiar external dependency,
+     or the highest blast radius if it fails), then discard the code
 
 4. Record findings in the epic's beads notes:
    ```

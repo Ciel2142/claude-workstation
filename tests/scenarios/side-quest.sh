@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 echo "=== Side Quest: Discover issue mid-work ==="
-cd /tmp/workflow-test
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+cd "$TEST_DIR"
 
 MAIN_ID=$(bd create --title="Add subtract function" --type=task --priority=3 2>&1 | grep -oP 'workflow-test-\w+')
 bd update "$MAIN_ID" --claim

@@ -1,6 +1,6 @@
 ---
 name: verification-template
-version: 1.0.0
+version: 1.2.0
 description: >
   Standardized verification output format with exit codes. Use when running
   verification-before-completion to produce consistent output.

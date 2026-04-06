@@ -1,6 +1,6 @@
 ---
 name: scope-health
-version: 1.0.0
+version: 1.2.0
 description: >
   Scope creep detection for Medium+ epics. Warning at 1.5x, gate at 2.0x
   planned tasks. Escalation ladder with re-plan/split/continue options.
@@ -24,8 +24,8 @@ This is the denominator for all future ratio calculations.
 
 ## Measurements
 
-- **Task ratio:** `(total created sub-tasks) / (planned-tasks from notes)`
-- **Discovery count:** Sub-tasks created after the initial plan
+- **Task ratio:** `(total created sub-tasks) / (planned-tasks from notes)` — e.g., 12 actual / 8 planned = 1.5x
+- **Discovery count:** Sub-tasks created after the initial plan (total - planned)
 
 ## Escalation Ladder
 

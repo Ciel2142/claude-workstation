@@ -1,6 +1,6 @@
 ---
 name: resume
-version: 1.0.0
+version: 1.2.0
 description: >
   Resume open work. Lists tasks grouped by epic, loads context at tier-appropriate
   depth, detects workflow position, and routes to the correct next skill.
@@ -33,6 +33,9 @@ Extract from arguments:
 - **--dry flag**: If present, show summary and suggested skill but do not invoke anything
 
 ### Step 2: SELECT
+
+**Pre-check:** If `bd` is not available or errors on `bd list`, stop and tell the user:
+"Cannot reach beads. Run `bd doctor` to diagnose, or `bd init` to initialize."
 
 **If a task-id was provided**, skip to Step 3 with that task.
 
@@ -102,7 +105,7 @@ After selecting a task, load context at a depth determined by the original tier.
    - Task is under an epic → medium+
    - Task type is epic → medium+
    - Task has notes referencing spec/plan files (contains `"spec:"` or `"plan:"`) → small
-   - Otherwise → trivial
+   - Otherwise → **default to trivial** (safest: minimal ceremony, can always escalate)
 
 **Load by depth:**
 

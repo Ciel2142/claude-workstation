@@ -21,13 +21,18 @@ if ! command -v bd >/dev/null 2>&1; then
 fi
 
 # --- Cache ---
+# C1: Per-project cache avoids cross-project collisions in parallel sessions
+# F4: Guard against negative cache age from clock skew
 
-CACHE="/tmp/.beads-gate-${USER:-$(id -un)}"
+BEADS_PATH="${BEADS_DIR:-$HOME/.beads}"
+PROJECT_HASH=$(printf '%s' "$BEADS_PATH" | md5sum 2>/dev/null | cut -c1-8 || printf '%s' "$BEADS_PATH" | md5 2>/dev/null | cut -c1-8 || echo "default")
+CACHE="/tmp/.beads-gate-${USER:-$(id -un)}-${PROJECT_HASH}"
 
 if [ -f "$CACHE" ]; then
     CACHE_MOD=$(stat -c %Y "$CACHE" 2>/dev/null || stat -f %m "$CACHE" 2>/dev/null || echo 0)
     NOW=$(date +%s)
-    if [ $(( NOW - CACHE_MOD )) -lt 60 ]; then
+    CACHE_AGE=$(( NOW - CACHE_MOD ))
+    if [ "$CACHE_AGE" -ge 0 ] && [ "$CACHE_AGE" -lt 60 ]; then
         cat "$CACHE"
         exit 0
     fi
@@ -35,9 +40,18 @@ fi
 
 # --- Check ---
 
+# B2: Use --json for robust parsing, with text fallback
 OUTPUT=""
-LISTING=$(bd list --status=in_progress 2>/dev/null || echo "")
-TASK_ID=$(echo "$LISTING" | grep -v 'No issues' | awk 'NF>0{print $1; exit}')
+LISTING_JSON=$(bd list --status=in_progress --json 2>/dev/null || echo "")
+if [ -n "$LISTING_JSON" ] && [ "$LISTING_JSON" != "[]" ] && [ "$LISTING_JSON" != "null" ]; then
+    # Extract first task ID from JSON array
+    TASK_ID=$(printf '%s' "$LISTING_JSON" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null || echo "")
+fi
+# Fallback to text parsing if JSON extraction failed
+if [ -z "${TASK_ID:-}" ]; then
+    LISTING=$(bd list --status=in_progress 2>/dev/null || echo "")
+    TASK_ID=$(echo "$LISTING" | grep -v 'No issues' | awk 'NR>1 && NF>0{print $1; exit}')
+fi
 
 if [ -z "$TASK_ID" ]; then
     OUTPUT=$(printf '%s\n%s' \

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 echo "=== Small Tier: Add input validation ==="
-cd /tmp/workflow-test
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+cd "$TEST_DIR"
 
 ID=$(bd create --title="Add input validation to add function" --type=bug --priority=2 2>&1 | grep -oP 'workflow-test-\w+')
 bd update "$ID" --claim

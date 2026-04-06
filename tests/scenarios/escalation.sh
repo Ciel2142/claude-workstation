@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 echo "=== Escalation: Trivial -> Small ==="
-cd /tmp/workflow-test
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+cd "$TEST_DIR"
 
 ID=$(bd create --title="Fix greet function output format" --type=task --priority=3 2>&1 | grep -oP 'workflow-test-\w+')
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 echo "=== Init Persistence: Tier stored in notes ==="
-cd /tmp/workflow-test
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+cd "$TEST_DIR"
 
 # Simulate /init for a trivial task — init writes tier to notes
 TRIV_ID=$(bd create --title="Fix whitespace in utils" --type=task --priority=4 2>&1 | grep -oP 'workflow-test-\w+')
@@ -45,16 +46,25 @@ else
     echo "  Medium+ tier NOT in notes: FAIL"; exit 1
 fi
 
-# Simulate milestone progression — each overwrites previous notes
-bd update "$EPIC_ID" --notes "spec: docs/superpowers/specs/test-spec.md"
-bd update "$EPIC_ID" --notes "plan: docs/superpowers/plans/test-plan.md, 3 tasks"
+# Simulate milestone progression — cumulative approach (recommended by beads-milestones skill)
+# Each update includes ALL prior milestone state to avoid data loss
+bd update "$EPIC_ID" --notes "tier: medium+
+spec: docs/superpowers/specs/test-spec.md"
+bd update "$EPIC_ID" --notes "tier: medium+
+spec: docs/superpowers/specs/test-spec.md
+plan: docs/superpowers/plans/test-plan.md, 3 tasks"
 
-# Verify latest milestone is visible (plan: overwrote spec: which overwrote tier:)
+# Verify ALL milestones are visible (cumulative update preserves history)
 EPIC_NOTES=$(bd show "$EPIC_ID" 2>&1)
 if echo "$EPIC_NOTES" | grep -q "plan:"; then
     echo "  Latest milestone (Plan) detected: PASS"
 else
     echo "  Latest milestone NOT in notes: FAIL"; exit 1
+fi
+if echo "$EPIC_NOTES" | grep -q "tier: medium+"; then
+    echo "  Tier preserved in cumulative update: PASS"
+else
+    echo "  Tier lost in cumulative update: FAIL"; exit 1
 fi
 
 # Verify tier inference fallback: epic type → medium+ (since tier: was overwritten)

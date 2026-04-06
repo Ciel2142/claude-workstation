@@ -1,6 +1,6 @@
 ---
 name: start
-version: 1.0.0
+version: 1.2.0
 description: >
   Auto-assess task tier and start the right workflow. Takes a description,
   scores it, creates the beads task, and invokes the first skill.
@@ -95,6 +95,10 @@ Create the beads task:
 ```bash
 bd create --title="<description>" --type=<task|epic> -p <priority>
 ```
+
+If `bd create` fails (beads not initialized, offline, or command error), stop and tell
+the user: "Failed to create beads task. Run `bd doctor` to diagnose, or `bd init` if
+beads is not set up for this project."
 
 Then set it to in-progress:
 ```bash

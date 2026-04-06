@@ -195,6 +195,15 @@ Superpowers drives the process. ECC provides expertise within it.
 
 ---
 
+## After Closing a Task
+
+After `bd close <id>`:
+1. `git add <files> && git commit` — commit related code changes
+2. `git push` — push to remote
+3. `bd ready` — see what's next (unblocked tasks)
+4. If nothing ready: `bd list --status=open` — check remaining work
+5. If all done: session complete — ensure all commits pushed
+
 ## Anti-Patterns
 
 - No code without a beads task
