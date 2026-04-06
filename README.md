@@ -92,7 +92,7 @@ Installed by the setup skill:
 |---|---|---|
 | **Trivial** | ≤1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files or new system | Epic → brainstorm → plan → sub-tasks → spike → TDD → verify → update-docs → finish → close |
+| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → TDD → verify → `bd close` (+ spike, worktree, update-docs, finish when applicable) |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → close |
 
 ## Hooks
@@ -126,12 +126,12 @@ claude-workstation/
 │   ├── resume/SKILL.md        # /resume — continue open work
 │   ├── setup/SKILL.md         # /setup — environment installer
 │   ├── test/SKILL.md          # /test — config validation
+│   ├── status/SKILL.md        # /status — read-only work orientation
 │   ├── debugging-protocol/    # On-demand: debugging-first protocol
 │   ├── beads-milestones/      # On-demand: milestone checkpoint format
 │   ├── spike-phase/           # On-demand: architecture validation
 │   ├── scope-health/          # On-demand: scope creep detection
-│   ├── verification-template/ # On-demand: verification output format
-│   └── status/SKILL.md        # /status — read-only work orientation
+│   └── verification-template/ # On-demand: verification output format
 ├── contexts/
 │   ├── workflow.md            # Workflow context (auto-injected via hook)
 │   ├── dev.md

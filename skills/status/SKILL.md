@@ -76,7 +76,7 @@ Map position to suggested skill (same as /resume routing):
 |---|---|
 | start (epic) | `/superpowers:brainstorming` |
 | start (task, small) | `/superpowers:test-driven-development` |
-| start (task, trivial) | Go fix it, then `bd close <id>` |
+| start (task, trivial) | Go fix it, then verify and `bd close <id>` |
 | start (bug) | `/superpowers:systematic-debugging` |
 | mid-debugging | `/superpowers:systematic-debugging` |
 | post-brainstorming | `/superpowers:writing-plans` |
