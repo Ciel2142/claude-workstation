@@ -81,11 +81,13 @@ Within a Medium+ epic, each sub-task gets a micro-tier that determines ceremony 
 | **Micro-small** | Single-concern logic, one function/method. NOT any of: new algorithm, security-sensitive, public API, cross-cutting (those are micro-complex). | Full TDD (red-green-refactor) → commit. Batch review every 3 tasks. |
 | **Micro-complex** | New algorithm, security-sensitive, public API, cross-cutting. | Full TDD → individual code review → commit. |
 
-When claiming a sub-task, assess its micro-tier. If the sub-task creates or modifies any function/method body with conditional logic, loops, or error handling, it is NOT micro-trivial. Log: `micro-tier: <micro-trivial|micro-small|micro-complex>`
+When claiming a sub-task, assess its micro-tier AND review level. If the sub-task creates or modifies any function/method body with conditional logic, loops, or error handling, it is NOT micro-trivial. Then run the review level gate (`/claude-workstation:review-level-gate`) to determine Standard or Consensus review. Log: `micro-tier: <micro-trivial|micro-small|micro-complex>, review-level: <standard|consensus>`
 
 **Micro-TDD:** One assertion proving the wiring works (import resolves, config parses, type compiles).
 
 **Batch review cadence:** After every 3rd non-complex task, dispatch one batch code review. Micro-complex tasks get individual reviews and reset the batch counter.
+
+**Review level gate:** After micro-tier assessment, evaluate objective signals (security, API surface, cross-domain, supply-chain, infrastructure) against the sub-task description. Any signal → Consensus review (dual independent, santa-method). No signals → Standard review (single reviewer). Consensus tasks always get individual review and reset the batch counter.
 
 ## Skill References
 
@@ -96,6 +98,7 @@ On-demand skills for specific workflow phases — invoke when reaching that step
 - **Compaction** (Medium+) → After closing each sub-task in a long session, consider `/compact` — beads milestones ensure recovery. Log `stopped:` milestone before compacting.
 - **Milestone notes** → `/claude-workstation:beads-milestones` (standardized checkpoint format)
 - **Verification** → `/claude-workstation:verification-template` (output format with exit codes)
+- **Review level gate** (Medium+) → `/claude-workstation:review-level-gate` (Standard vs Consensus review intensity at claim-time)
 
 ## Plugin Routing
 

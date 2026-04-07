@@ -653,6 +653,44 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 8: workflow.md review-level-gate integration
+# ---------------------------------------------------------------------------
+echo ""
+echo "8. workflow.md review-level-gate integration"
+
+WORKFLOW_FILE="$PLUGIN_ROOT/contexts/workflow.md"
+
+# 8a. Workflow references review-level-gate skill
+if grep -q 'review-level-gate' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "8a. workflow.md references review-level-gate"
+else
+    fail "8a. workflow.md does not reference review-level-gate"
+fi
+
+# 8b. Workflow mentions claim-time gate
+if grep -qi 'review.level.*gate\|review.*level.*claim' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "8b. workflow.md mentions review level at claim-time"
+else
+    fail "8b. workflow.md does not mention review level at claim-time"
+fi
+
+# 8c. Workflow mentions Standard and Consensus
+if grep -q 'Standard' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'Consensus' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "8c. workflow.md defines Standard and Consensus levels"
+else
+    fail "8c. workflow.md missing Standard and/or Consensus"
+fi
+
+# 8d. Skill references section includes review-level-gate
+if grep -q 'review-level-gate' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "8d. skill references include review-level-gate"
+else
+    fail "8d. skill references missing review-level-gate"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
