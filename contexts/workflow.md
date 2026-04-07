@@ -93,6 +93,7 @@ On-demand skills for specific workflow phases — invoke when reaching that step
 - **Bug work** → `/claude-workstation:debugging-protocol` (root cause before fix, 3-strike rule)
 - **Spike eval** (Medium+, mandatory) → `/claude-workstation:spike-phase` (evaluate triggers → execute if any fire)
 - **Scope health** (Medium+) → `/claude-workstation:scope-health` — after closing any sub-task, query `bd list --status=closed` count for the epic. If `count % 3 == 0`, invoke scope-health.
+- **Compaction** (Medium+) → After closing each sub-task in a long session, consider `/compact` — beads milestones ensure recovery. Log `stopped:` milestone before compacting.
 - **Milestone notes** → `/claude-workstation:beads-milestones` (standardized checkpoint format)
 - **Verification** → `/claude-workstation:verification-template` (output format with exit codes)
 

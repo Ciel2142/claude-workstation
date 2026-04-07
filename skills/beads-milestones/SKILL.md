@@ -22,6 +22,7 @@ survives session crashes and context compaction.
 - After verification: note results
 - After updating docs: note what was updated
 - At session end: note where you stopped
+- Before manual compaction: note where you are (`stopped:` key) so recovery is seamless
 
 ## Standardized Format
 
