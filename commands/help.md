@@ -10,7 +10,7 @@ Before ANY file change, verify in order:
 
 1. **Task Boundary** — Shifting from discussion to action? → `bd create` + tier assessment first.
 2. **Beads task exists?** — No task = no changes. No exceptions.
-3. **Scope Confirmation** — Restate specific files/changes, get explicit "yes" this turn. Prior intent ("yeah", "go ahead") does NOT count.
+3. **Scope confirmed this turn?** — Restate specific files/changes, get explicit "yes" this turn. Prior intent ("yeah", "go ahead", "just do it") does NOT count as confirmation. Exceptions: confirmed plan sub-tasks within a Medium+ epic; `/start` invocations.
 
 If any box is unchecked, stop and tell the user.
 
@@ -37,6 +37,7 @@ The beads task is the anchor. Everything else flows from it. No exceptions — d
 | **Trivial** | ≤1 file, no behavior change | Typo, config tweak, formatting, comment |
 | **Small** | 1-3 files, single concern | Bug fix, small feature, focused refactor |
 | **Medium+** | 4+ files, OR new system/component, OR cross-cutting | New feature, API, architectural change |
+| **Bug** | Any tier, type=bug | See Bug Path below |
 
 ---
 
@@ -163,8 +164,8 @@ When claiming a sub-task, assess its micro-tier: `bd update <sub-id> --notes "mi
 
 When implementation reveals the spec is wrong, amend it — don't silently deviate.
 
-- **Minor (agent self-approves):** Naming mismatches, missing edge case detail, clarifying ambiguous wording. Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
-- **Material (requires human approval):** Different algorithm, adding/dropping features, new dependencies, changed API shape. Stop and present the change, wait for approval.
+- **Minor (agent self-approves):** Naming mismatches, missing edge case detail, clarifying ambiguous wording, parameter type corrections to match existing code. Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
+- **Material (requires human approval):** Different algorithm, adding/dropping features, new dependencies, changed API shape, architectural changes. Stop and present the change, wait for approval. Log: `spec-amendment: material -- <what changed>, approved by human`
 
 ---
 
@@ -173,7 +174,7 @@ When implementation reveals the spec is wrong, amend it — don't silently devia
 If work grows beyond current tier, stop and escalate:
 
 - **Trivial → Small:** Add TDD and review before continuing.
-- **Small → Medium+:** Stop. Create an epic, brainstorm, plan, decompose into sub-tasks. Then continue from step 5 (IMPLEMENT).
+- **Small → Medium+:** Stop. Create an epic, brainstorm, plan, decompose into sub-tasks. Then continue from step 6 (IMPLEMENT).
 
 Never skip tiers downward.
 
@@ -183,9 +184,9 @@ Never skip tiers downward.
 
 When tests fail during VERIFY, classify before acting:
 
-- **Type A (implementation bug):** File to fix is in your confirmed scope → fix in current task.
-- **Type B (collateral breakage):** File to fix is NOT in your confirmed scope, even if your change caused it → side-quest.
-- **Type C (unrelated failure):** Unrelated test failed → side-quest, park it.
+- **Type A (implementation bug):** The file to fix is one already in your confirmed scope → Fix within current task.
+- **Type B (collateral breakage):** The file to fix is NOT in your confirmed scope, even if your change caused the failure → Side-quest: create bug, link, fix under its own task.
+- **Type C (unrelated failure):** A test unrelated to your changes failed → Side-quest: create bug, park it, do NOT fix now.
 
 The test: "Is the file I need to edit in my confirmed scope?" If no → side-quest.
 

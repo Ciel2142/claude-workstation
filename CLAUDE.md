@@ -15,7 +15,7 @@ Run `/help` for the full development playbook with size-based routing (trivial/s
 
 ## Context Delivery
 
-Workflow context is auto-injected via SessionStart hook (~7KB). Phase-specific protocols (debugging, milestones, spike, scope health, verification) are delivered as on-demand skills.
+Workflow context is auto-injected via SessionStart hook (~8KB). Phase-specific protocols (debugging, milestones, spike, scope health, verification) are delivered as on-demand skills.
 
 ## Setup
 

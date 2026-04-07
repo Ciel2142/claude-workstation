@@ -324,7 +324,7 @@ echo "12. help.md gate rules"
 
 HELP_FILE="$PLUGIN_ROOT/commands/help.md"
 if [[ -f "$HELP_FILE" ]]; then
-    for keyword in "Pre-Change Gate" "Scope Confirmation" "Task Boundary"; do
+    for keyword in "Pre-Change Gate" "Scope confirmed" "Task Boundary"; do
         if grep -q "$keyword" "$HELP_FILE" 2>/dev/null; then
             pass "help.md references '$keyword'"
         else
@@ -634,17 +634,17 @@ echo "19. help.md escalation step reference"
 
 HELP_FILE="$PLUGIN_ROOT/commands/help.md"
 if [[ -f "$HELP_FILE" ]]; then
-    # B1: Escalation "Small → Medium+" must reference step 5 (IMPLEMENT), not step 6 (VERIFY)
-    if grep -q 'step 5 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
-        pass "escalation references 'step 5 (IMPLEMENT)' correctly"
+    # B1: Escalation "Small → Medium+" must reference step 6 (IMPLEMENT) — step 5 is SPIKE-EVAL, step 7 is VERIFY
+    if grep -q 'step 6 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
+        pass "escalation references 'step 6 (IMPLEMENT)' correctly"
     else
-        fail "escalation does NOT reference 'step 5 (IMPLEMENT)' — may point to wrong step"
+        fail "escalation does NOT reference 'step 6 (IMPLEMENT)' — may point to wrong step"
     fi
     # Negative: ensure old wrong reference is gone
-    if grep -q 'step 6 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
-        fail "escalation still references 'step 6 (IMPLEMENT)' (step 6 is VERIFY, not IMPLEMENT)"
+    if grep -q 'step 5 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
+        fail "escalation still references 'step 5 (IMPLEMENT)' (step 5 is now SPIKE-EVAL, not IMPLEMENT)"
     else
-        pass "no stale 'step 6 (IMPLEMENT)' reference"
+        pass "no stale 'step 5 (IMPLEMENT)' reference"
     fi
 else
     fail "commands/help.md MISSING"
