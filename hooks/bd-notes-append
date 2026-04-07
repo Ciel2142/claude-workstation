@@ -29,14 +29,13 @@ BD_SHOW_OUTPUT=$(bd show "$TASK_ID" 2>&1) || {
 # Notes section starts after "NOTES" line and runs until the next
 # all-caps section header (PARENT, BLOCKS, CHILDREN, DEPENDENCIES, etc.)
 # or end of output if NOTES is the last section.
-# Extract notes between NOTES header and next known bd-show section header.
-# Uses explicit headers (TITLE, STATUS, DEPENDS ON, BLOCKED BY, etc.)
-# instead of generic ^[A-Z ]+$ to avoid truncating all-caps freetext in notes.
+# F7: Extract notes between NOTES header and next bd-show section header.
+# Uses explicit headers to avoid truncating all-caps freetext in notes.
+# If beads adds new section headers, add them here to prevent leakage.
 CURRENT_NOTES=$(printf '%s\n' "$BD_SHOW_OUTPUT" \
     | sed -n '/^NOTES$/,$ p' \
     | sed '1d' \
-    | sed '/^\(TITLE\|STATUS\|PRIORITY\|TYPE\|PARENT\|CHILDREN\|BLOCKS\|BLOCKED BY\|DEPENDS ON\|DEPENDENCIES\|LABELS\|ASSIGNEE\|CREATED\|UPDATED\|ACCEPTANCE CRITERIA\|DESIGN\)$/,$d' \
-    | sed '/^$/d')
+    | sed '/^\(TITLE\|STATUS\|PRIORITY\|TYPE\|PARENT\|CHILDREN\|BLOCKS\|BLOCKED BY\|DEPENDS ON\|DEPENDENCIES\|LABELS\|ASSIGNEE\|CREATED\|UPDATED\|ACCEPTANCE CRITERIA\|DESIGN\|COMMENTS\|HISTORY\|ATTACHMENTS\|METADATA\|DESCRIPTION\|DUE\|DEFER\)$/,$d')
 
 if [ -z "$CURRENT_NOTES" ]; then
     bd update "$TASK_ID" --notes "$NEW_LINE"

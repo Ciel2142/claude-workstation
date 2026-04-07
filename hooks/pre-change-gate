@@ -72,9 +72,11 @@ fi
 
 # --- Cache and output ---
 
-# Symlink guard on write
+# F4: Atomic write — prevents stale reads during parallel session races
 [ -L "$CACHE" ] && rm -f "$CACHE"
-printf '%s' "$OUTPUT" > "$CACHE"
+CACHE_TMP="${CACHE}.$$"
+printf '%s' "$OUTPUT" > "$CACHE_TMP"
+mv -f "$CACHE_TMP" "$CACHE"
 
 if [ -n "$OUTPUT" ]; then
     echo "$OUTPUT"

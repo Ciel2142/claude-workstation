@@ -46,12 +46,17 @@ escape_for_json() {
     s="${s//$'\n'/\\n}"
     s="${s//$'\r'/\\r}"
     s="${s//$'\t'/\\t}"
+    # F11: Strip control characters illegal in JSON per RFC 8259
+    # (form-feed, backspace, null, and other 0x00-0x1F not already handled)
+    s=$(printf '%s' "$s" | tr -d '\000-\010\013\014\016-\037')
     printf '%s' "$s"
 }
 
 escaped_content=$(escape_for_json "$WORKFLOW_CONTENT")
 
 # Step 4: Output structured JSON for Claude Code
+# F12: printf '%s' puts escaped_content in the data argument (not format string),
+# so % characters in workflow content appear literally — safe by design.
 # Claude Code sets CLAUDE_PLUGIN_ROOT without COPILOT_CLI
 # Cursor sets CURSOR_PLUGIN_ROOT (may also set CLAUDE_PLUGIN_ROOT)
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
