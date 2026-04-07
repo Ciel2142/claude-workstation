@@ -716,6 +716,71 @@ fi
 
 echo ""
 
+# ---------------------------------------------------------------------------
+# Section 23: BS coverage — enforcement documentation guards
+# Verifies that blind-spot rules remain documented in source-of-truth files.
+# These rules have no mechanical enforcement; tests ensure text survives edits.
+# ---------------------------------------------------------------------------
+echo "23. Enforcement documentation (BS coverage)"
+
+WORKFLOW="$PLUGIN_ROOT/contexts/workflow.md"
+HELP="$PLUGIN_ROOT/commands/help.md"
+
+# BS3: No skipping tiers downward
+if grep -q 'Escalation only upward' "$WORKFLOW" 2>/dev/null; then
+    pass "BS3: workflow.md contains 'Escalation only upward' rule"
+else
+    fail "BS3: workflow.md MISSING 'Escalation only upward' rule"
+fi
+
+# BS5: Collateral Breakage Rule
+if grep -q 'Collateral Breakage Rule' "$WORKFLOW" 2>/dev/null; then
+    pass "BS5: workflow.md contains Collateral Breakage Rule"
+else
+    fail "BS5: workflow.md MISSING Collateral Breakage Rule"
+fi
+
+# BS6: No production code without failing test
+if grep -q 'No production code without a failing test' "$WORKFLOW" 2>/dev/null; then
+    pass "BS6: workflow.md contains TDD-first rule"
+else
+    fail "BS6: workflow.md MISSING 'No production code without a failing test'"
+fi
+
+# BS8: Spec amendments Minor/Material criteria
+if grep -q 'do NOT alter the set of deliverables' "$WORKFLOW" 2>/dev/null; then
+    pass "BS8: workflow.md has objective Minor/Material boundary"
+else
+    fail "BS8: workflow.md MISSING objective Minor/Material spec amendment criteria"
+fi
+
+# BS9: Scope health uses bd query (not self-counting)
+if grep -q 'bd list --status=closed.*count' "$WORKFLOW" 2>/dev/null; then
+    pass "BS9: workflow.md scope-health uses bd query for counting"
+else
+    fail "BS9: workflow.md scope-health should reference bd list query, not self-counting"
+fi
+
+# BS12: Verification Failure Protocol Type A/B/C
+for type_label in "Implementation bug" "Collateral breakage" "Unrelated failure"; do
+    if grep -q "$type_label" "$WORKFLOW" 2>/dev/null; then
+        pass "BS12: workflow.md contains Verification Failure Protocol '$type_label'"
+    else
+        fail "BS12: workflow.md MISSING Verification Failure Protocol '$type_label'"
+    fi
+done
+
+# BS12 mirror: help.md should also have Type A/B/C
+for type_label in "Type A" "Type B" "Type C"; do
+    if grep -q "$type_label" "$HELP" 2>/dev/null; then
+        pass "BS12: help.md contains Verification Failure Protocol '$type_label'"
+    else
+        fail "BS12: help.md MISSING Verification Failure Protocol '$type_label'"
+    fi
+done
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"
