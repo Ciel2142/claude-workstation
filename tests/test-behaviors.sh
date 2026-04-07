@@ -688,6 +688,70 @@ else
     fail "8d. skill references missing review-level-gate"
 fi
 
+# ---------------------------------------------------------------------------
+# Section 9: review-level-gate enforcement guards
+# ---------------------------------------------------------------------------
+echo ""
+echo "9. review-level-gate enforcement"
+
+SKILL_FILE="$PLUGIN_ROOT/skills/review-level-gate/SKILL.md"
+
+# 9a. Security always triggers Consensus
+if grep -qi 'security.*consensus\|security.*no exception' "$SKILL_FILE" 2>/dev/null; then
+    pass "9a. security signal always triggers Consensus"
+else
+    fail "9a. security signal does not explicitly require Consensus"
+fi
+
+# 9b. Budget exhaustion falls back to Standard, never skips
+if grep -qi 'budget.*standard\|fall.*back.*standard\|never.*skip.*review' "$SKILL_FILE" 2>/dev/null; then
+    pass "9b. budget exhaustion falls back to Standard (never skips)"
+else
+    fail "9b. budget exhaustion behavior not documented"
+fi
+
+# 9c. Max 1 escalation per task documented
+if grep -qi 'max.*1.*escalation\|one.*escalation.*per.*task' "$SKILL_FILE" 2>/dev/null; then
+    pass "9c. max 1 escalation per task documented"
+else
+    fail "9c. max 1 escalation per task NOT documented"
+fi
+
+# 9d. Escalation is up only
+if grep -qi 'up.*only\|never.*demote\|never.*down' "$SKILL_FILE" 2>/dev/null; then
+    pass "9d. escalation up-only rule documented"
+else
+    fail "9d. escalation up-only rule NOT documented"
+fi
+
+# 9e. Consensus tasks skip batch review
+if grep -qi 'consensus.*individual\|consensus.*skip.*batch\|consensus.*reset.*batch' "$SKILL_FILE" 2>/dev/null; then
+    pass "9e. Consensus tasks skip batch / get individual review"
+else
+    fail "9e. Consensus/batch interaction not documented"
+fi
+
+# 9f. Red flags / rationalization table present
+if grep -qi 'red.flag\|rationali' "$SKILL_FILE" 2>/dev/null; then
+    pass "9f. red flags / rationalization guards present"
+else
+    fail "9f. red flags / rationalization guards missing"
+fi
+
+# 9g. Human escalation after 3 Consensus rounds
+if grep -qi 'human\|escalate.*3.*round\|3.*round.*escalat' "$SKILL_FILE" 2>/dev/null; then
+    pass "9g. human escalation after 3 rounds documented"
+else
+    fail "9g. human escalation after 3 rounds NOT documented"
+fi
+
+# 9h. Signal detection runs against task text, not code
+if grep -qi 'task.*text\|description.*plan.*text\|not.*against.*implementation\|not.*code' "$SKILL_FILE" 2>/dev/null; then
+    pass "9h. signal detection runs against task text, not code"
+else
+    fail "9h. signal detection scope (task text vs code) not documented"
+fi
+
 echo ""
 
 # ---------------------------------------------------------------------------
