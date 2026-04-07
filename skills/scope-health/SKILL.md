@@ -61,5 +61,5 @@ Scope check (after task N):
 ## After Gate Decision
 
 - **Re-plan:** Update the plan document, create/close sub-tasks as needed, update `planned-tasks:` baseline
-- **Split epic:** Create new epic for discovered work, move relevant sub-tasks, reset baseline for both
+- **Split epic:** Create new epic for discovered work, move all sub-tasks created after the original plan that are not dependencies of originally-planned sub-tasks, reset baseline for both
 - **Continue:** Acknowledge and log, no further gates until next 3-task interval

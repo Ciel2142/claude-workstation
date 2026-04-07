@@ -145,7 +145,7 @@ When a side-quest is detected:
    ```bash
    bd create --title="<description>" --type=bug -p <priority-override-or-2>
    ```
-   Type defaults to `bug`. If the side-quest is clearly a feature or task, use `--type=feature` or `--type=task` instead.
+   Type defaults to `bug` for all side-quests involving broken behavior. Only use `--type=feature` or `--type=task` if the discovery describes new functionality with no broken behavior.
 
 3. **Link it:**
    ```bash

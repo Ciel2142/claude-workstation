@@ -46,7 +46,7 @@ The beads task is the anchor. Everything else flows from it. No exceptions — d
 ```
 1. TASK     bd create --title="..." --type=task
 2. FIX      Make the change
-3. VERIFY   Run relevant check (build, lint, etc.)
+3. VERIFY   Run at minimum: build + linter. If tests exist, run them.
 4. COMMIT   Conventional commit
 5. CLOSE    bd close <id>
 ```
