@@ -65,7 +65,7 @@ After computing the total:
 
 #### Claude Override
 
-You have freedom to override the numerical score when context clearly warrants it. The matrix is a guide, not a cage. If you know from project context that a seemingly small task actually spans many files, bump it up.
+You may override the numerical score **upward only** (never downward). If you know from project context that a seemingly small task actually spans many files, bump it up. Downward overrides require human approval. Log: `tier-override: <computed> -> <new> -- <reason>`
 
 ### Step 4: ASSESS
 

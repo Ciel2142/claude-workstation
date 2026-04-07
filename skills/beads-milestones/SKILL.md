@@ -77,5 +77,5 @@ milestone state in the fallback.
 
 - Don't update after every micro-step (each brainstorming question, each test run)
 - Don't duplicate full spec/plan content — just reference the file path
-- Don't update if nothing meaningful changed since last update
+- Update at every milestone in the table above. Do NOT update between milestones
 - Don't invent new keys — use the table above

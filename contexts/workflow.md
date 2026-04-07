@@ -40,7 +40,7 @@ Before implementing changes, restate what you will change and confirm with the u
 - The change involves deleting, renaming, or restructuring files
 - The request could refer to more than one file, directory, or component — if so, it is ambiguous by definition
 
-Does NOT apply when executing confirmed plan sub-tasks within a Medium+ epic — those already have approved scope.
+Does NOT apply when the specific files being changed are listed in the plan document or in the sub-task's beads description.
 
 Does NOT apply when invoked via `/claude-workstation:start` — the start skill handles its own scope assessment.
 
@@ -61,7 +61,7 @@ Conversational momentum is not a reason to skip the workflow.
 
 When implementation reveals the spec is wrong, amend it — don't silently deviate.
 
-**Minor (agent self-approves):** Naming mismatches, missing edge case detail, clarifying ambiguous wording, parameter type corrections to match existing code.
+**Minor (agent self-approves):** Changes that do NOT alter the set of deliverables, API surface, or acceptance criteria. Examples: naming mismatches, missing edge case detail, clarifying ambiguous wording, parameter type corrections to match existing code. If any deliverable, endpoint, field, or acceptance criterion is added, removed, or functionally changed, it is Material.
 - Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
 - Continue without interruption.
 

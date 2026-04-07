@@ -10,7 +10,7 @@ Before ANY file change, verify in order:
 
 1. **Task Boundary** — Shifting from discussion to action? → `bd create` + tier assessment first.
 2. **Beads task exists?** — No task = no changes. No exceptions.
-3. **Scope confirmed this turn?** — Restate specific files/changes, get explicit "yes" this turn. Prior intent ("yeah", "go ahead", "just do it") does NOT count as confirmation. Exceptions: confirmed plan sub-tasks within a Medium+ epic; `/start` invocations.
+3. **Scope confirmed this turn?** — Restate specific files/changes, get explicit "yes" this turn. Prior intent ("yeah", "go ahead", "just do it") does NOT count as confirmation. Exceptions: files listed in the plan document or sub-task beads description; `/start` invocations.
 
 If any box is unchecked, stop and tell the user.
 
@@ -164,7 +164,7 @@ When claiming a sub-task, assess its micro-tier: `bd update <sub-id> --notes "mi
 
 When implementation reveals the spec is wrong, amend it — don't silently deviate.
 
-- **Minor (agent self-approves):** Naming mismatches, missing edge case detail, clarifying ambiguous wording, parameter type corrections to match existing code. Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
+- **Minor (agent self-approves):** Changes that do NOT alter the set of deliverables, API surface, or acceptance criteria. Examples: naming mismatches, missing edge case detail, clarifying ambiguous wording, parameter type corrections to match existing code. If any deliverable, endpoint, field, or acceptance criterion is added, removed, or functionally changed, it is Material. Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
 - **Material (requires human approval):** Different algorithm, adding/dropping features, new dependencies, changed API shape, architectural changes. Stop and present the change, wait for approval. Log: `spec-amendment: material -- <what changed>, approved by human`
 
 ---

@@ -105,7 +105,7 @@ After selecting a task, load context at a depth determined by the original tier.
    - Task is under an epic → medium+
    - Task type is epic → medium+
    - Task has notes referencing spec/plan files (contains `"spec:"` or `"plan:"`) → small
-   - Otherwise → **default to trivial** (safest: minimal ceremony, can always escalate)
+   - Otherwise → **default to small** (ensures minimum TDD + review; can escalate if needed)
 
 **Load by depth:**
 

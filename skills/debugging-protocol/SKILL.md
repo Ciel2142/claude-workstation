@@ -19,7 +19,7 @@ When working on a bug (task type `bug`), ALWAYS invoke `superpowers:systematic-d
 2. **Pattern analysis** — find working examples of similar code, compare with broken code
 3. **Hypothesis** — form a single-variable hypothesis, test it
 4. **Fix with test** — write a failing regression test that reproduces the bug, then fix (feeds into TDD)
-5. **Stop after 3 failed attempts** — if three hypotheses fail, question the architecture. The bug may be a symptom of a deeper design issue.
+5. **Stop after 3 failed attempts** — if three hypotheses fail: STOP. Log `debug: 3-strike -- <h1>, <h2>, <h3>`. Present findings to user. Do NOT attempt a fourth hypothesis without human direction.
 
 ## Workflow
 
