@@ -2,7 +2,7 @@
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 echo "=== Side Quest: Discover issue mid-work ==="
-TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
 MAIN_ID=$(extract_id "$(bd create --title="Add subtract function" --type=task --priority=3 2>&1)")

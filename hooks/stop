@@ -40,9 +40,11 @@ fi
 bd list --status=in_progress 2>/dev/null | head -5 || true
 
 # Clean up pre-change-gate cache (per-project, matches pre-change-gate naming)
+# M2: Use XDG_RUNTIME_DIR to match pre-change-gate cache location
 BEADS_PATH="${BEADS_DIR:-$BEADS_GLOBAL}"
 PROJECT_HASH=$(printf '%s' "$BEADS_PATH" | md5sum 2>/dev/null | cut -c1-8 || printf '%s' "$BEADS_PATH" | md5 2>/dev/null | cut -c1-8 || echo "default")
-rm -f "/tmp/.beads-gate-${USER:-$(id -un)}-${PROJECT_HASH}"
+CACHE_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+rm -f "${CACHE_DIR}/.beads-gate-${USER:-$(id -un)}-${PROJECT_HASH}"
 
 echo "---"
 echo "Reminder: bd close <id> for completed work"

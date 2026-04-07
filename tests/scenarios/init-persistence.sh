@@ -2,7 +2,7 @@
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 echo "=== Init Persistence: Tier stored in notes ==="
-TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
 # Simulate /init for a trivial task — init writes tier to notes

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 echo "=== Cleanup: Removing test project ==="
-COORD="${TMPDIR:-/tmp}/.workflow-test-dir"
+COORD="${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)"
 if [ -f "$COORD" ]; then
     TEST_DIR=$(cat "$COORD")
     rm -rf "$TEST_DIR"

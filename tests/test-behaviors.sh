@@ -24,7 +24,8 @@ _gate_cache() {
     project_hash=$(printf '%s' "$beads_path" | md5sum 2>/dev/null | cut -c1-8 \
         || printf '%s' "$beads_path" | md5 2>/dev/null | cut -c1-8 \
         || echo "default")
-    echo "/tmp/.beads-gate-${USER:-$(id -un)}-${project_hash}"
+    local cache_dir="${XDG_RUNTIME_DIR:-/tmp}"
+    echo "${cache_dir}/.beads-gate-${USER:-$(id -un)}-${project_hash}"
 }
 
 GATE_CACHE=$(_gate_cache)

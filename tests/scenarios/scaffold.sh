@@ -7,8 +7,12 @@ fi
 echo "=== Scaffold: Creating test project ==="
 
 # F2: Use mktemp for isolated test directories; share path via coordination file
+# L2: Coordination file uses a stable path derived from the mktemp parent,
+#     with restrictive permissions to prevent tampering on shared systems
 TEST_DIR=$(mktemp -d "${TMPDIR:-/tmp}/workflow-test.XXXXXX")
-echo "$TEST_DIR" > "${TMPDIR:-/tmp}/.workflow-test-dir"
+COORD_FILE="${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)"
+echo "$TEST_DIR" > "$COORD_FILE"
+chmod 600 "$COORD_FILE"
 mkdir -p "$TEST_DIR/src" "$TEST_DIR/tests"
 cd "$TEST_DIR"
 git init

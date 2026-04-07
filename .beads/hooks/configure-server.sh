@@ -25,31 +25,38 @@ PROJECT_ID=$(python3 -c "import json; print(json.load(open('$METADATA')).get('pr
 
 if [ -n "${BEADS_SERVER_HOST:-}" ]; then
     PORT="${BEADS_SERVER_PORT:-3307}"
-    USER="${BEADS_SERVER_USER:-root}"
+    SRV_USER="${BEADS_SERVER_USER:-root}"
 
-    cat > "$METADATA" <<EOF
-{
-  "database": "dolt",
-  "backend": "dolt",
-  "dolt_mode": "server",
-  "dolt_server_host": "$BEADS_SERVER_HOST",
-  "dolt_server_port": $PORT,
-  "dolt_server_user": "$USER",
-  "dolt_database": "$DATABASE",
-  "project_id": "$PROJECT_ID"
+    # M1: Use python3 json.dumps to avoid injection via env vars with quotes/special chars
+    python3 -c "
+import json, sys
+data = {
+    'database': 'dolt',
+    'backend': 'dolt',
+    'dolt_mode': 'server',
+    'dolt_server_host': sys.argv[1],
+    'dolt_server_port': int(sys.argv[2]),
+    'dolt_server_user': sys.argv[3],
+    'dolt_database': sys.argv[4],
+    'project_id': sys.argv[5]
 }
-EOF
+json.dump(data, open(sys.argv[6], 'w'), indent=2)
+print()  # trailing newline
+" "$BEADS_SERVER_HOST" "$PORT" "$SRV_USER" "$DATABASE" "$PROJECT_ID" "$METADATA"
     echo "$PORT" > "$BEADS_DIR/dolt-server.port"
 else
-    # Ensure embedded mode
-    cat > "$METADATA" <<EOF
-{
-  "database": "dolt",
-  "backend": "dolt",
-  "dolt_mode": "embedded",
-  "dolt_database": "$DATABASE",
-  "project_id": "$PROJECT_ID"
+    # Ensure embedded mode — safe JSON via python3
+    python3 -c "
+import json, sys
+data = {
+    'database': 'dolt',
+    'backend': 'dolt',
+    'dolt_mode': 'embedded',
+    'dolt_database': sys.argv[1],
+    'project_id': sys.argv[2]
 }
-EOF
+json.dump(data, open(sys.argv[3], 'w'), indent=2)
+print()  # trailing newline
+" "$DATABASE" "$PROJECT_ID" "$METADATA"
     rm -f "$BEADS_DIR/dolt-server.port"
 fi

@@ -2,7 +2,7 @@
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 echo "=== Small Tier: Add input validation ==="
-TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
 ID=$(extract_id "$(bd create --title="Add input validation to add function" --type=bug --priority=2 2>&1)")

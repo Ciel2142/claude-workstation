@@ -2,7 +2,7 @@
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 echo "=== Escalation: Trivial -> Small ==="
-TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir" 2>/dev/null || echo "/tmp/workflow-test")
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "/tmp/workflow-test")
 cd "$TEST_DIR"
 
 ID=$(extract_id "$(bd create --title="Fix greet function output format" --type=task --priority=3 2>&1)")

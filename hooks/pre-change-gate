@@ -24,11 +24,17 @@ fi
 # C1: Per-project cache avoids cross-project collisions in parallel sessions
 # F4: Guard against negative cache age from clock skew
 
+# M2: Use XDG_RUNTIME_DIR (per-user, not world-writable) with /tmp fallback.
+#     Check for symlinks before read/write to prevent CWE-59 attacks.
 BEADS_PATH="${BEADS_DIR:-$HOME/.beads}"
 PROJECT_HASH=$(printf '%s' "$BEADS_PATH" | md5sum 2>/dev/null | cut -c1-8 || printf '%s' "$BEADS_PATH" | md5 2>/dev/null | cut -c1-8 || echo "default")
-CACHE="/tmp/.beads-gate-${USER:-$(id -un)}-${PROJECT_HASH}"
+CACHE_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+CACHE="${CACHE_DIR}/.beads-gate-${USER:-$(id -un)}-${PROJECT_HASH}"
 
-if [ -f "$CACHE" ]; then
+# Symlink guard: remove and skip if symlink (prevents symlink attacks on shared systems)
+if [ -L "$CACHE" ]; then
+    rm -f "$CACHE"
+elif [ -f "$CACHE" ]; then
     CACHE_MOD=$(stat -c %Y "$CACHE" 2>/dev/null || stat -f %m "$CACHE" 2>/dev/null || echo 0)
     NOW=$(date +%s)
     CACHE_AGE=$(( NOW - CACHE_MOD ))
@@ -66,6 +72,8 @@ fi
 
 # --- Cache and output ---
 
+# Symlink guard on write
+[ -L "$CACHE" ] && rm -f "$CACHE"
 printf '%s' "$OUTPUT" > "$CACHE"
 
 if [ -n "$OUTPUT" ]; then

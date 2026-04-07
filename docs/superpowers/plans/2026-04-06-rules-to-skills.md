@@ -740,8 +740,10 @@ Remove the entire "## Step 6: Check ECC Rules" section (lines 199-210 — from `
 In the shell aliases section, add the `claude-workflow` case after the `claude-review` case:
 
 ```bash
+                # DEPRECATED: --allow-dangerously-skip-permissions was removed — it bypasses all
+                # tool-use confirmation prompts. See profiles/aliases.sh for the safe version.
                 claude-workflow)
-                    echo "alias claude-workflow='claude --system-prompt \"\$(cat ~/.claude/contexts/workflow.md)\" --allow-dangerously-skip-permissions --effort high'" >> "$SHELL_RC"
+                    echo "alias claude-workflow='claude --system-prompt \"\$(cat ~/.claude/contexts/workflow.md)\" --effort high'" >> "$SHELL_RC"
                     echo "Added: $alias_name"
                     ;;
 ```
@@ -918,7 +920,9 @@ git rm rules/context7.md
 Add the `claude-workflow` alias after the existing three:
 
 ```bash
-alias claude-workflow='claude --system-prompt "$(cat ~/.claude/contexts/workflow.md)" --allow-dangerously-skip-permissions --effort high'
+# DEPRECATED: --allow-dangerously-skip-permissions was removed — it bypasses all
+# tool-use confirmation prompts. See profiles/aliases.sh for the safe version.
+alias claude-workflow='claude --system-prompt "$(cat ~/.claude/contexts/workflow.md)" --effort high'
 ```
 
 - [ ] **Step 3: Update `CLAUDE.md`**
