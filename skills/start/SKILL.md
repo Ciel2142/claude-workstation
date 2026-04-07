@@ -130,6 +130,8 @@ bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "tier: <trivial|sma
 | Small | Invoke: `/superpowers:test-driven-development` |
 | Medium+ | Invoke: `/superpowers:brainstorming` |
 
+**Medium+ sub-task flow note:** When sub-tasks are claimed during execution, the orchestrator assesses both micro-tier AND review level (`/claude-workstation:review-level-gate`). This happens automatically in `superpowers:subagent-driven-development`.
+
 ---
 
 ## SIDE-QUEST FLOW

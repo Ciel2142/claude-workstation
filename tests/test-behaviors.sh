@@ -752,6 +752,21 @@ else
     fail "9h. signal detection scope (task text vs code) not documented"
 fi
 
+# ---------------------------------------------------------------------------
+# Section 10: start skill references review-level-gate
+# ---------------------------------------------------------------------------
+echo ""
+echo "10. start skill review-level-gate reference"
+
+START_FILE="$PLUGIN_ROOT/skills/start/SKILL.md"
+
+# 10a. Start skill mentions review-level-gate for Medium+
+if grep -qi 'review.level' "$START_FILE" 2>/dev/null; then
+    pass "10a. start skill references review level"
+else
+    fail "10a. start skill does not reference review level"
+fi
+
 echo ""
 
 # ---------------------------------------------------------------------------
