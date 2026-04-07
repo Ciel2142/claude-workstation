@@ -355,14 +355,23 @@ shift || true
 case "$SUBCOMMAND" in
     list)
         HAS_STATUS=""
+        HAS_CLOSED_AFTER=""
         for arg in "$@"; do
             case "$arg" in
                 --status=*) HAS_STATUS="${arg#--status=}" ;;
+                --closed-after=*) HAS_CLOSED_AFTER="${arg#--closed-after=}" ;;
             esac
         done
         case "$HAS_STATUS" in
             in_progress) echo "$BD_LIST_IN_PROGRESS" ;;
-            closed)      echo "$BD_LIST_CLOSED" ;;
+            closed)
+                # F10: when --closed-after is passed, use session-scoped result
+                if [ -n "$HAS_CLOSED_AFTER" ] && [ -n "${BD_LIST_CLOSED_RECENT+x}" ]; then
+                    echo "$BD_LIST_CLOSED_RECENT"
+                else
+                    echo "$BD_LIST_CLOSED"
+                fi
+                ;;
             open)        echo "$BD_LIST_OPEN" ;;
             *)           echo "No issues found." ;;
         esac
@@ -410,11 +419,12 @@ else
     pass "4a. clean session — no WARNING output"
 fi
 
-# 4b. Commits exist + closed task exists — should NOT warn about no beads issues
+# 4b. Commits exist + recently closed task — should NOT warn about no beads issues
 rm -f "$GATE_CACHE"
 export GIT_LOG_OUTPUT="abc1234 feat: do something"
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="  task-789  CLOSED  Implement feature"
+export BD_LIST_CLOSED_RECENT="  task-789  CLOSED  Implement feature"
 export BD_LIST_OPEN="No issues found."
 STOP_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_STOP:$PATH" \
     bash "$PLUGIN_ROOT/hooks/stop" 2>/dev/null || true)
@@ -429,6 +439,7 @@ rm -f "$GATE_CACHE"
 export GIT_LOG_OUTPUT="abc1234 feat: do something"
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="No issues found."
+export BD_LIST_CLOSED_RECENT="No issues found."
 export BD_LIST_OPEN="No issues found."
 STOP_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_STOP:$PATH" \
     bash "$PLUGIN_ROOT/hooks/stop" 2>/dev/null || true)
@@ -436,6 +447,21 @@ if echo "$STOP_OUT" | grep -qE "WARNING.*NO beads issues"; then
     pass "4c. commits + no issues — warns about NO beads issues"
 else
     fail "4c. commits + no issues — expected WARNING about 'NO beads issues', got: $(printf '%q' "$STOP_OUT")"
+fi
+
+# 4d. F10 regression: commits + historical closed task (not recent) + no in-progress — SHOULD warn
+rm -f "$GATE_CACHE"
+export GIT_LOG_OUTPUT="abc1234 feat: do something"
+export BD_LIST_IN_PROGRESS="No issues found."
+export BD_LIST_CLOSED="  task-100  CLOSED  Old historical task"
+export BD_LIST_CLOSED_RECENT="No issues found."
+export BD_LIST_OPEN="No issues found."
+STOP_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_STOP:$PATH" \
+    bash "$PLUGIN_ROOT/hooks/stop" 2>/dev/null || true)
+if echo "$STOP_OUT" | grep -qE "WARNING.*NO beads issues"; then
+    pass "4d. F10 regression: historical closed task does NOT suppress warning"
+else
+    fail "4d. F10 regression: historical closed task should NOT suppress warning, got: $(printf '%q' "$STOP_OUT")"
 fi
 
 echo ""

@@ -23,13 +23,22 @@ fi
 # M3: Configurable time window (default: 8 hours)
 TIME_WINDOW="${BEADS_CHECK_WINDOW:-8 hours ago}"
 
+# Compute absolute cutoff date for bd --closed-after (RFC3339)
+# GNU date: -d "8 hours ago"; macOS date: -v-8H (uses default window)
+CUTOFF_DATE=$(date -u -d "$TIME_WINDOW" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u -v-8H "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "")
+
 # L1: Consistent error handling — separate fallback from command substitution
 IN_PROGRESS=$(bd list --status=in_progress 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || IN_PROGRESS=0
 RECENT_COMMITS=$(git log --oneline --since="$TIME_WINDOW" 2>/dev/null | wc -l | tr -d ' ') || RECENT_COMMITS=0
 
 # Only warn if commits exist but NO issues at all (open, in_progress, or recently closed)
 if [ "$RECENT_COMMITS" -gt 0 ] && [ "$IN_PROGRESS" -eq 0 ]; then
-    CLOSED_RECENT=$(bd list --status=closed 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || CLOSED_RECENT=0
+    # F10 fix: scope closed-issue check to session time window (not all-time)
+    if [ -n "$CUTOFF_DATE" ]; then
+        CLOSED_RECENT=$(bd list --status=closed --closed-after="$CUTOFF_DATE" 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || CLOSED_RECENT=0
+    else
+        CLOSED_RECENT=$(bd list --status=closed 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || CLOSED_RECENT=0
+    fi
     OPEN_COUNT=$(bd list --status=open 2>/dev/null | grep -cv 'No issues\|^$\|Total:\|Status:') || OPEN_COUNT=0
     if [ "$CLOSED_RECENT" -eq 0 ] && [ "$OPEN_COUNT" -eq 0 ]; then
         echo "WARNING: This session made $RECENT_COMMITS commit(s) but has NO beads issues. Work should be tracked."

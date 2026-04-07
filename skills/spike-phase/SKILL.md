@@ -12,7 +12,8 @@ description: >
 ## When
 
 After the plan is written and sub-tasks are created, before the first implementation
-task. Required for all Medium+ epics.
+task. Spike evaluation is mandatory for all Medium+ epics — assess whether triggers
+fire. Execute only when triggers fire. Log: `spike-eval: <triggered|skipped> -- <reason>`
 
 ## Conditional Depth
 

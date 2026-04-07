@@ -12,7 +12,7 @@ Before making ANY change to the codebase — editing files, deleting files, runn
 |---|---|---|
 | **Trivial** | ≤1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → TDD → verify → `bd close` (+ spike, worktree, update-docs, finish when applicable) |
+| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → spike eval → TDD → verify → `bd close` (+ worktree, update-docs, finish when applicable) |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → `bd close` |
 
 Escalation only upward — never downgrade.
@@ -91,7 +91,7 @@ When claiming a sub-task, assess its micro-tier. Log: `micro-tier: <micro-trivia
 
 On-demand skills for specific workflow phases — invoke when reaching that step:
 - **Bug work** → `/claude-workstation:debugging-protocol` (root cause before fix, 3-strike rule)
-- **Spike phase** (Medium+) → `/claude-workstation:spike-phase` (lightweight or deep validation)
+- **Spike eval** (Medium+, mandatory) → `/claude-workstation:spike-phase` (evaluate triggers → execute if any fire)
 - **Every 3rd sub-task** (Medium+) → `/claude-workstation:scope-health` (scope creep detection)
 - **Milestone notes** → `/claude-workstation:beads-milestones` (standardized checkpoint format)
 - **Verification** → `/claude-workstation:verification-template` (output format with exit codes)

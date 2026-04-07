@@ -107,7 +107,10 @@ Core flow:
                bd dep add <sub-id> <epic-id>
                bd dep add <sub-id> <prev-sub-id>  (only if genuinely sequential)
                bd update <epic-id> --notes "planned-tasks: N"
-5. IMPLEMENT  bd ready → claim ALL ready tasks (not just one)
+5. SPIKE-EVAL Evaluate spike triggers (see spike-phase skill).
+               If any trigger fires, execute spike before implementing.
+               Log: spike-eval: <triggered|skipped> -- <reason>
+6. IMPLEMENT  bd ready → claim ALL ready tasks (not just one)
                For independent ready tasks: dispatch parallel agents
                (superpowers:dispatching-parallel-agents)
                For each sub-task:
@@ -119,14 +122,12 @@ Core flow:
                └─ bd close <sub-id>
                Scope health check every 3 closed sub-tasks.
                Repeat until bd ready shows no more sub-tasks.
-6. VERIFY     superpowers:verification-before-completion
-7. CLOSE      bd close <epic-id>
+7. VERIFY     superpowers:verification-before-completion
+8. CLOSE      bd close <epic-id>
 ```
 
 Use when needed:
 ```
-- SPIKE        Before IMPLEMENT, when architecture assumptions are unverified
-               (see spike-phase skill)
 - WORKTREE     Before IMPLEMENT, when isolating risk on a feature branch
                superpowers:using-git-worktrees
 - UPDATE-DOCS  After VERIFY, when public API or project docs changed
