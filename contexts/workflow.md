@@ -113,13 +113,33 @@ Before any new implementation:
 4. Search for adaptable open-source implementations
 5. Prefer proven approaches over net-new code
 
+## Verification Failure Protocol
+
+When tests or checks fail during VERIFY, classify before acting:
+
+| Type | Signal | Action |
+|---|---|---|
+| **A — Implementation bug** | The file to fix is one already in your confirmed scope | Fix within current task |
+| **B — Collateral breakage** | The file to fix is NOT in your confirmed scope, even if your change caused the failure | Side-quest: create bug, link, fix under its own task |
+| **C — Unrelated failure** | A test unrelated to your changes failed | Side-quest: create bug, park it, do NOT fix now |
+
+The test: **"Is the file I need to edit in my confirmed scope?"** If no → it is a side-quest regardless of whether your change caused the breakage.
+
+"My change caused it" is the most common rationalization for skipping the gate. Treat it as a red flag, not a justification.
+
 ## Side Quests
 
-Discover something unrelated mid-work:
+Discover a problem in a file outside your confirmed scope mid-work — regardless of whether your changes caused it:
 ```bash
 bd create --title="Found: <issue>" --type=bug
 bd dep add <new-id> <current-id> --type=discovered-from
 ```
 Finish current task first, then `bd ready`.
+
+### Collateral Breakage Rule
+
+When your changes cause failures in files OUTSIDE your confirmed scope (tests that hardcoded assumptions, downstream consumers, config files you didn't plan to touch): this is a side-quest, not part of the current task. The fact that your change caused the breakage does NOT make the fix in-scope.
+
+The fix may be trivial (2 lines), but the tracking is mandatory. Create a discovered-from bug, fix it under its own task, close it. Size of the fix does not reduce ceremony.
 
 Run `/help` for detailed step-by-step flows with full ceremony for each tier.

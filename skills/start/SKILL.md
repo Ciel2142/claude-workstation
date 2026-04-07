@@ -36,7 +36,7 @@ Extract from arguments:
 Before scoring, check if this is a side-quest. A side-quest is detected when ANY of:
 - Description starts with "Found:" or "Discovered:"
 - The `--side-quest` flag was passed
-- There is an active in-progress beads task (check `bd list --status=in_progress`) AND the new description is unrelated to it (targets a different domain, system component, or concern than the current task)
+- There is an active in-progress beads task (check `bd list --status=in_progress`) AND the new work would touch files outside the confirmed scope of the current task (different files, different directory, or different concern — even if causally related to the current task's changes)
 
 **If side-quest detected**, skip to the SIDE-QUEST FLOW below.
 

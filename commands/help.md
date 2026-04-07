@@ -178,9 +178,21 @@ Never skip tiers downward.
 
 ---
 
+## Verification Failure Protocol
+
+When tests fail during VERIFY, classify before acting:
+
+- **Type A (implementation bug):** File to fix is in your confirmed scope → fix in current task.
+- **Type B (collateral breakage):** File to fix is NOT in your confirmed scope, even if your change caused it → side-quest.
+- **Type C (unrelated failure):** Unrelated test failed → side-quest, park it.
+
+The test: "Is the file I need to edit in my confirmed scope?" If no → side-quest.
+
+---
+
 ## Side Quests
 
-Discover something unrelated mid-work:
+Discover a problem in a file outside your confirmed scope — regardless of whether your changes caused it:
 
 ```
 bd create --title="Found: <issue>" --type=bug
@@ -188,6 +200,8 @@ bd dep add <new-id> <current-id> --type=discovered-from
 ```
 
 Don't context-switch. Finish current task, then `bd ready`.
+
+"My change caused it" is a rationalization, not a justification. Size of the fix does not reduce ceremony.
 
 ---
 
