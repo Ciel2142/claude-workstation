@@ -767,6 +767,28 @@ else
     fail "10a. start skill does not reference review level"
 fi
 
+# ---------------------------------------------------------------------------
+# Section 11: help content includes review-level-gate
+# ---------------------------------------------------------------------------
+echo ""
+echo "11. help content review-level-gate reference"
+
+HELP_FILE="$PLUGIN_ROOT/skills/help/SKILL.md"
+if [[ -f "$HELP_FILE" ]]; then
+    if grep -qi 'review.level' "$HELP_FILE" 2>/dev/null; then
+        pass "11a. help skill references review-level-gate"
+    else
+        fail "11a. help skill does not reference review-level-gate"
+    fi
+else
+    # Help may be derived from workflow.md — check there
+    if grep -qi 'review.level.*gate' "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
+        pass "11a. help derived from workflow.md which includes review-level-gate"
+    else
+        fail "11a. neither help skill nor workflow.md references review-level-gate"
+    fi
+fi
+
 echo ""
 
 # ---------------------------------------------------------------------------
