@@ -519,6 +519,68 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 6: F15 — Previously untested hook paths
+# ---------------------------------------------------------------------------
+echo "6. untested hook paths (F15)"
+
+# 6a. pre-change-gate: no-bd guard — exits 0 silently when bd not in PATH
+TMPDIR_NOBD=$(mktemp -d)
+trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_GATE" "$TMPDIR_STOP" "$TMPDIR_NOBD"' EXIT
+# Empty PATH dir with only git (needed for rev-parse)
+cat > "$TMPDIR_NOBD/git" << GITNOBD
+#!/usr/bin/env bash
+echo "$PLUGIN_ROOT"
+GITNOBD
+chmod +x "$TMPDIR_NOBD/git"
+# No bd in PATH — pre-change-gate should exit 0 with no output
+NOBD_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_NOBD" \
+    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
+if [ -z "$NOBD_OUT" ]; then
+    pass "6a. pre-change-gate no-bd guard — exits silently"
+else
+    fail "6a. pre-change-gate no-bd guard — expected no output, got: $(printf '%q' "$NOBD_OUT")"
+fi
+
+# 6b. stop hook: no-bd warning — should warn when bd not found
+# Use restricted PATH with only essential system commands (no bd)
+STOP_NOBD_OUT=$(cd "$PLUGIN_ROOT" && PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
+    bash "$PLUGIN_ROOT/hooks/stop" 2>&1 || true)
+if echo "$STOP_NOBD_OUT" | grep -q "bd not found"; then
+    pass "6b. stop hook no-bd — warns about missing bd"
+else
+    fail "6b. stop hook no-bd — expected 'bd not found' warning, got: $(printf '%q' "$STOP_NOBD_OUT")"
+fi
+
+# 6c. bd-notes-append: bd show failure — exits 1 with error
+NOAPPEND_OUT=$(bash "$PLUGIN_ROOT/hooks/bd-notes-append" "nonexistent-task-xyz" "tier: small" 2>&1 || true)
+NOAPPEND_EXIT=$?
+if echo "$NOAPPEND_OUT" | grep -qi "error\|failed"; then
+    pass "6c. bd-notes-append bd-show failure — reports error"
+else
+    # May also exit non-zero without message if bd itself errors
+    if [ "$NOAPPEND_EXIT" -ne 0 ] 2>/dev/null; then
+        pass "6c. bd-notes-append bd-show failure — exits non-zero"
+    else
+        fail "6c. bd-notes-append bd-show failure — expected error, got: $(printf '%q' "$NOAPPEND_OUT")"
+    fi
+fi
+
+# 6d. pre-change-gate: cache hit — second call within 60s uses cache
+rm -f "$GATE_CACHE"
+FIRST_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
+    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
+# Second call should hit cache and return same result
+SECOND_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
+    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
+if [ "$FIRST_OUT" = "$SECOND_OUT" ]; then
+    pass "6d. pre-change-gate cache hit — consistent output on second call"
+else
+    fail "6d. pre-change-gate cache hit — first and second call differ"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="

@@ -13,6 +13,9 @@ TEST_DIR=$(mktemp -d "${TMPDIR:-/tmp}/workflow-test.XXXXXX")
 COORD_FILE="${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)"
 echo "$TEST_DIR" > "$COORD_FILE"
 chmod 600 "$COORD_FILE"
+
+# F17: Cleanup on abnormal exit (Ctrl-C, kill) so temp dir isn't leaked
+trap 'echo "Interrupted — cleaning up $TEST_DIR"; rm -rf "$TEST_DIR"; rm -f "$COORD_FILE"; exit 130' INT TERM
 mkdir -p "$TEST_DIR/src" "$TEST_DIR/tests"
 cd "$TEST_DIR"
 git init

@@ -2,7 +2,9 @@
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 echo "=== Side Quest: Discover issue mid-work ==="
-TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "/tmp/workflow-test")
+# F18: No stale fallback — require scaffold.sh to have run
+TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "")
+if [ -z "$TEST_DIR" ] || [ ! -d "$TEST_DIR" ]; then echo "SKIP: No test directory (run scaffold.sh first)"; exit 0; fi
 cd "$TEST_DIR"
 
 MAIN_ID=$(extract_id "$(bd create --title="Add subtract function" --type=task --priority=3 2>&1)")
