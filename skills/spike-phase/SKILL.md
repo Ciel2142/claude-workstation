@@ -54,9 +54,10 @@ documented. ~30-60 minutes.
    spike-risks: <risk1>, <risk2>
    ```
 
-5. Gate check: if any `spike-revised` entry is material (changes architecture,
-   drops/adds features, changes API shape), trigger the spec amendment protocol
-   before proceeding. Minor revisions (naming, paths) can be self-corrected.
+5. Gate check: if any `spike-revised` entry changes assumptions about external APIs,
+   libraries, system boundaries, or alters the set of deliverables, it is Material —
+   trigger the spec amendment protocol before proceeding. Only naming and path
+   corrections are Minor and can be self-corrected.
 
 6. Close the spike task:
    ```

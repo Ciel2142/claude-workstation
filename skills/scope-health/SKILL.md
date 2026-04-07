@@ -11,8 +11,9 @@ description: >
 
 ## When
 
-After every 3rd sub-task completion within a Medium+ epic. Count closed sub-tasks
-and trigger at 3, 6, 9, etc.
+After closing any sub-task within a Medium+ epic, query `bd list --status=closed`
+count for the epic. If `count % 3 == 0`, invoke this skill. Do not self-count —
+always query beads for the actual count.
 
 ## Baseline
 

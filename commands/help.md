@@ -127,14 +127,14 @@ Core flow:
 8. CLOSE      bd close <epic-id>
 ```
 
-Use when needed:
+Conditional steps (evaluate trigger, execute if it fires):
 ```
-- WORKTREE     Before IMPLEMENT, when isolating risk on a feature branch
-               superpowers:using-git-worktrees
-- UPDATE-DOCS  After VERIFY, when public API or project docs changed
-               /ecc:update-docs
-- FINISH       After VERIFY, when on a feature branch that needs merging
-               superpowers:finishing-a-development-branch
+- WORKTREE     Before IMPLEMENT. Trigger: work involves risk that should
+               be isolated on a feature branch. superpowers:using-git-worktrees
+- UPDATE-DOCS  After VERIFY. Trigger: public API, config schema, or
+               project docs changed. /ecc:update-docs
+- FINISH       After VERIFY. Trigger: you are on a feature branch that
+               needs merging. superpowers:finishing-a-development-branch
 ```
 
 ### Sub-task Dependencies
@@ -154,8 +154,8 @@ Each sub-task gets a micro-tier that determines ceremony level:
 
 | Micro-tier | Signal | Ceremony |
 |---|---|---|
-| **Micro-trivial** | Config, wiring, exports, type files, boilerplate. No logic. | Micro-TDD (one assertion) → commit. Batch review every 3 tasks. |
-| **Micro-small** | Single-concern logic, one function/method, straightforward. | Full TDD (red-green-refactor) → commit. Batch review every 3 tasks. |
+| **Micro-trivial** | Config, wiring, exports, type files, boilerplate. No logic: no conditional branches, no loops, no try/catch, no function calls that could fail, no computed values. | Micro-TDD (one assertion) → commit. Batch review every 3 tasks. |
+| **Micro-small** | Single-concern logic, one function/method. NOT any of: new algorithm, security-sensitive, public API, cross-cutting (those are micro-complex). | Full TDD (red-green-refactor) → commit. Batch review every 3 tasks. |
 | **Micro-complex** | New algorithm, security-sensitive, public API, cross-cutting. | Full TDD → individual code review → commit. |
 
 When claiming a sub-task, assess its micro-tier: `bd update <sub-id> --notes "micro-tier: <tier>"`

@@ -12,7 +12,7 @@ Before making ANY change to the codebase — editing files, deleting files, runn
 |---|---|---|
 | **Trivial** | ≤1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → spike eval → TDD → verify → `bd close` (+ worktree, update-docs, finish when applicable) |
+| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → spike eval → TDD → verify → `bd close` (+ worktree when isolating risk; update-docs when public API changed; finish when on feature branch) |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → `bd close` |
 
 Escalation only upward — never downgrade.
@@ -77,11 +77,11 @@ Within a Medium+ epic, each sub-task gets a micro-tier that determines ceremony 
 
 | Micro-tier | Signal | Ceremony |
 |---|---|---|
-| **Micro-trivial** | Config, wiring, exports, type files, boilerplate. No logic. | Micro-TDD (one assertion) → commit. Batch review every 3 tasks. |
-| **Micro-small** | Single-concern logic, one function/method, straightforward. | Full TDD (red-green-refactor) → commit. Batch review every 3 tasks. |
+| **Micro-trivial** | Config, wiring, exports, type files, boilerplate. No logic: no conditional branches, no loops, no try/catch, no function calls that could fail, no computed values. | Micro-TDD (one assertion) → commit. Batch review every 3 tasks. |
+| **Micro-small** | Single-concern logic, one function/method. NOT any of: new algorithm, security-sensitive, public API, cross-cutting (those are micro-complex). | Full TDD (red-green-refactor) → commit. Batch review every 3 tasks. |
 | **Micro-complex** | New algorithm, security-sensitive, public API, cross-cutting. | Full TDD → individual code review → commit. |
 
-When claiming a sub-task, assess its micro-tier. Log: `micro-tier: <micro-trivial|micro-small|micro-complex>`
+When claiming a sub-task, assess its micro-tier. If the sub-task creates or modifies any function/method body with conditional logic, loops, or error handling, it is NOT micro-trivial. Log: `micro-tier: <micro-trivial|micro-small|micro-complex>`
 
 **Micro-TDD:** One assertion proving the wiring works (import resolves, config parses, type compiles).
 
@@ -92,7 +92,7 @@ When claiming a sub-task, assess its micro-tier. Log: `micro-tier: <micro-trivia
 On-demand skills for specific workflow phases — invoke when reaching that step:
 - **Bug work** → `/claude-workstation:debugging-protocol` (root cause before fix, 3-strike rule)
 - **Spike eval** (Medium+, mandatory) → `/claude-workstation:spike-phase` (evaluate triggers → execute if any fire)
-- **Every 3rd sub-task** (Medium+) → `/claude-workstation:scope-health` (scope creep detection)
+- **Scope health** (Medium+) → `/claude-workstation:scope-health` — after closing any sub-task, query `bd list --status=closed` count for the epic. If `count % 3 == 0`, invoke scope-health.
 - **Milestone notes** → `/claude-workstation:beads-milestones` (standardized checkpoint format)
 - **Verification** → `/claude-workstation:verification-template` (output format with exit codes)
 

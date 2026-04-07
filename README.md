@@ -92,7 +92,7 @@ Installed by the setup skill:
 |---|---|---|
 | **Trivial** | ≤1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → spike eval → TDD → verify → `bd close` (+ worktree, update-docs, finish when applicable) |
+| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → spike eval → TDD → verify → `bd close` (+ worktree when isolating risk; update-docs when public API changed; finish when on feature branch) |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → `bd close` |
 
 ## Hooks
