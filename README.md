@@ -6,7 +6,7 @@ A Claude Code plugin that restores your full development environment from a sing
 
 - **Unified Workflow** — Size-based routing (trivial/small/medium+) connecting Beads, Superpowers, and ECC
 - **Auto-Injected Context** — SessionStart hook delivers workflow context (~8KB) without setup
-- **Auto-Tier Assessment** — `/start` scores task descriptions and routes to the right workflow automatically
+- **Auto-Tier Assessment** — `/start` evaluates task descriptions and routes to the right workflow automatically
 - **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
 - **Context Profiles** — `claude-dev`, `claude-research`, `claude-review` shell aliases
@@ -52,13 +52,13 @@ Installed by the setup skill:
 
 ```bash
 /claude-workstation:start "Fix the login validation bug"
-# → Scores description → Small → creates task → starts TDD
+# → Assesses tier → Small → creates task → starts TDD
 
 /claude-workstation:start "Design a new notification system"
-# → Scores description → Medium+ → creates epic → starts brainstorming
+# → Assesses tier → Medium+ → creates epic → starts brainstorming
 
 /claude-workstation:start "Fix typo in README"
-# → Scores description → Trivial → creates task → "Go fix it"
+# → Assesses tier → Trivial → creates task → "Go fix it"
 
 /claude-workstation:start --side-quest "Found: tokens aren't rotated"
 # → Detects side-quest → creates bug → links to current task → parks it
