@@ -681,11 +681,11 @@ else
     fail "8c. workflow.md missing Standard and/or Consensus"
 fi
 
-# 8d. Skill references section includes review-level-gate
-if grep -q 'review-level-gate' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "8d. skill references include review-level-gate"
+# 8d. Skill references section includes review-level-gate (specific bullet format)
+if grep -q 'Review level gate.*review-level-gate' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "8d. skill references include review-level-gate bullet"
 else
-    fail "8d. skill references missing review-level-gate"
+    fail "8d. skill references missing review-level-gate bullet"
 fi
 
 # ---------------------------------------------------------------------------
