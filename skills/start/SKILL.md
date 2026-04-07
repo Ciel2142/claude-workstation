@@ -40,44 +40,34 @@ Before scoring, check if this is a side-quest. A side-quest is detected when ANY
 
 **If side-quest detected**, skip to the SIDE-QUEST FLOW below.
 
-### Step 3: SCORE
+### Step 3: TIER
 
-Evaluate the description against six weighted dimensions. Score each 0.0-1.0, then compute the weighted sum.
+Walk four gates in order. The **first gate that fires** determines the tier.
 
-#### Scoring Matrix
+**Domains** (for counting): API, database, auth, frontend, backend, CI/CD, infrastructure, testing, security, config.
 
-| Dimension | Weight | How to Score |
-|---|---|---|
-| **task_type** | 0.20 | Match signal words to type. `fix/bug/broken/error/crash` = bug (0.3). `add/create/implement/new` = feature (0.5). `refactor/rename/move/clean` = refactor (0.4). `design/system/migrate/architecture` = architecture (0.9). `docs/readme/config/typo/comment/format` = docs (0.1). If multiple match, use the highest. If none match, use 0.4 (generic task). |
-| **scope_keywords** | 0.25 | Check for breadth signals. `all/every/across/entire/global` = 1.0. `most/many/several` = 0.7. No breadth words = 0.2. |
-| **domain_count** | 0.25 | Count distinct domains mentioned in the description: API, database, auth, frontend, backend, CI/CD, infrastructure, testing, security, config. 1 domain = 0.2. 2 domains = 0.5. 3+ domains = 1.0. |
-| **change_signal** | 0.15 | Check magnitude words. `typo/tweak/bump/rename` = 0.1. `update/improve/enhance` = 0.4. `new system/new component/rewrite/overhaul` = 1.0. No magnitude words = 0.3. |
-| **complexity_markers** | 0.05 | `step by step/multiple phases/depends on/coordination/integration` = 1.0. None = 0.0. |
-| **forced_escalation** | 0.10 | Binary. Any of: security, architecture, migration, "new system", "new component" mentioned = 1.0. Otherwise = 0.0. |
+#### Gate 1 — ESCALATION
+- Description contains **"new system"** or **"new component"** → **Medium+**
+- Primary intent is architecture (**design, architect, migrate**) → **Medium+**
+- Description mentions **security** or **migration** (not as primary intent) → set **floor = Small**, continue
 
-Compute: `total = sum(dimension_score * weight for each dimension)`
+#### Gate 2 — SCOPE
+- Breadth words present (**all, every, across, entire, global**) → **Medium+**
+- **3+ domains** touched → **Medium+**
+- **Rewrite** or **overhaul** mentioned → **Medium+**
 
-#### Forced Escalation Override
+#### Gate 3 — SIZE
+- **2+ domains** touched → **Small**
+- Feature intent (**add, create, implement, new**) → **Small**
 
-After computing the total:
-- If `forced_escalation` fired (1.0): minimum tier is **Small** regardless of total score.
-- If `forced_escalation` fired AND `domain_count` score was 1.0 (3+ domains): minimum tier is **Medium+**.
+#### Gate 4 — DEFAULT
+- → **Trivial** (or floor from Gate 1 if set)
 
 #### Claude Override
 
-You may override the numerical score **upward only** (never downward). If you know from project context that a seemingly small task actually spans many files, bump it up. Downward overrides require human approval. Log: `tier-override: <computed> -> <new> -- <reason>`
+You may override the gate result **upward only** (never downward). If you know from project context that a seemingly small task actually spans many files, bump it up. Downward overrides require human approval. Log: `tier-override: <computed> → <new> — <reason>`
 
-### Step 4: ASSESS
-
-Map the final score to a tier:
-
-| Score | Tier |
-|---|---|
-| < 0.25 | Trivial |
-| 0.25 - 0.39 | Small |
-| >= 0.40 | Medium+ |
-
-### Step 5: CREATE
+### Step 4: CREATE
 
 Create the beads task:
 
@@ -86,7 +76,6 @@ Create the beads task:
 - Medium+: `--type=epic`
 
 **Determine priority** (if no `-p` override):
-- Forced escalation fired (security, architecture): P1
 - Medium+: P1
 - Small: P2
 - Trivial: P3
@@ -110,13 +99,13 @@ Then persist the computed tier for use by `/resume`:
 bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "tier: <trivial|small|medium+>"
 ```
 
-### Step 6: ROUTE
+### Step 5: ROUTE
 
 **Print the analysis output:**
 ```
 📊 Analysis: "<description>"
-   Type: <task_type> | Scope: <domains> (<domain_count> domains)
-   Score: <total> → <tier>
+   Gate: <which gate fired> | Domains: <domain_count>
+   Tier: <tier>
 
    ✓ Created: <task-id> (<type>, P<priority>)
    → Starting: <next skill>
