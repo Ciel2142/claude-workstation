@@ -4,146 +4,103 @@ All work follows a size-based flow: Beads (tracking) + Superpowers (process) + E
 
 ## Beads-First Rule
 
-Before making ANY change to the codebase — editing files, deleting files, running destructive commands, or invoking Superpowers skills — create a beads task first. Sequence: `bd create` → then work. No work without a beads task. No exceptions.
+Before ANY change -- editing, deleting, destructive commands, or Superpowers skills -- `bd create` first. No exceptions.
 
 ## Task Sizing
 
 | Tier | Signal | Flow |
 |---|---|---|
-| **Trivial** | ≤1 file, no behavior change | `bd create` → fix → verify → `bd close` |
-| **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → spike eval → TDD → verify → `bd close` (+ worktree when isolating risk; update-docs when public API changed; finish when on feature branch) |
-| **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → `bd close` |
+| **Trivial** | <=1 file, no behavior change | `bd create` -> fix -> verify -> `bd close` |
+| **Small** | 1-3 files, single concern | `bd create` -> TDD -> review -> verify -> `bd close` |
+| **Medium+** | 4+ files, new system/component, or cross-cutting | `bd create -t epic` -> brainstorm -> plan -> sub-tasks -> spike -> TDD -> verify -> `bd close` |
+| **Bug** | Any tier, type=bug | `bd create -t bug` -> debug -> TDD (regression) -> review -> verify -> `bd close` |
 
-Escalation only upward — never downgrade.
+Escalation only upward -- never downgrade.
 
 ## Hard Rules
 
-- No Superpowers skill invocation without an active beads task
+- No Superpowers invocation without an active beads task
 - No production code without a failing test (Small/Medium+)
 - No completion claims without verification output
 - No trusting subagent reports without own verification
 
 ## Pre-Change Gate
 
-Before ANY file change (edit, delete, write, shell command), verify in order:
-1. **Task Boundary** — Is this a shift from discussion to action? If yes → `bd create` + tier assessment first.
-2. **Beads task exists?** — No task = no change. No exceptions.
-3. **Scope confirmed this turn?** — Restate specific files/changes, get explicit "yes." Prior intent ("yeah", "go ahead", "just do it") does NOT count as confirmation.
-
-If any box is unchecked, stop. Tell the user: "This is a new task — let me create a beads task and assess the tier before proceeding."
+Before ANY file change, verify: (1) **Task Boundary** -- shift from discussion to action? `bd create` + tier first. (2) **Task exists?** -- no task = no change. (3) **Scope confirmed this turn?** -- restate files/changes, get "yes." Prior intent does NOT count. Any unchecked -> stop: "This is a new task -- let me create a beads task and assess the tier."
 
 ## Scope Confirmation
 
-Before implementing changes, restate what you will change and confirm with the user. This applies when:
-- The user requests a change in conversational flow (not via `/start`)
-- The change involves deleting, renaming, or restructuring files
-- The request could refer to more than one file, directory, or component — if so, it is ambiguous by definition
-
-Does NOT apply when the specific files being changed are listed in the plan document or in the sub-task's beads description.
-
-Does NOT apply when invoked via `/claude-workstation:start` — the start skill handles its own scope assessment.
-
-Format: "I'll [verb] [specific file paths or named artifacts]. Confirm?" — then wait. Do not use category names ("the profiles") — list actual files.
-
-## Task Boundary
-
-When conversation shifts from research/discussion to implementation ("let's do it", "go ahead", "remove that", or similar intent to begin changes), treat it as a new task. Stop and run the workflow entry point:
-1. Create a beads task (`bd create`)
-2. Assess the tier
-3. Follow the tier's flow
-
-Words like "just", "quickly", "simply" do NOT reduce scope or create exceptions. When you feel the urge to act immediately, that urge is the signal to stop and follow the gate.
-
-Conversational momentum is not a reason to skip the workflow.
+Restate what you will change and confirm. Applies: conversational flow (not `/start`), delete/rename/restructure, ambiguous scope. Does NOT apply: files listed in plan/sub-task, or via `/start`. Format: "I'll [verb] [specific paths]. Confirm?" -- wait. When conversation shifts to implementation ("let's do it", "go ahead") -> new task: `bd create` -> tier -> flow. "Just"/"quickly"/"simply" do NOT reduce scope. Momentum is not a reason to skip.
 
 ## Spec Amendments
 
-When implementation reveals the spec is wrong, amend it — don't silently deviate.
+Spec wrong? Amend, don't silently deviate. **Minor (self-approve):** no change to deliverables/API/acceptance criteria. Update, commit, log `spec-amendment: minor -- <what>`. **Material (human):** algorithm, features, deps, API shape, architecture. Stop, present, wait. Log `spec-amendment: material -- <what>, approved`. Applies Small/Medium+ only.
 
-**Minor (agent self-approves):** Changes that do NOT alter the set of deliverables, API surface, or acceptance criteria. Examples: naming mismatches, missing edge case detail, clarifying ambiguous wording, parameter type corrections to match existing code. If any deliverable, endpoint, field, or acceptance criterion is added, removed, or functionally changed, it is Material.
-- Update the spec file, commit, log: `spec-amendment: minor -- <what changed>`
-- Continue without interruption.
+## Sub-task Micro-tiers and Review Level
 
-**Material (requires human approval):** Different algorithm, adding/dropping features, new dependencies, changed API shape, architectural changes.
-- Stop implementing and present the change, wait for approval.
-- Log: `spec-amendment: material -- <what changed>, approved by human`
-
-Applies to Small and Medium+ tiers. Trivial tasks have no spec.
-
-## Sub-task Micro-tiers
-
-Within a Medium+ epic, each sub-task gets a micro-tier that determines ceremony level.
+Each Medium+ sub-task gets micro-tier AND review level at claim-time.
 
 | Micro-tier | Signal | Ceremony |
 |---|---|---|
-| **Micro-trivial** | Config, wiring, exports, type files, boilerplate. No logic: no conditional branches, no loops, no try/catch, no function calls that could fail, no computed values. | Micro-TDD (one assertion) → commit. Batch review every 3 tasks. |
-| **Micro-small** | Single-concern logic, one function/method. NOT any of: new algorithm, security-sensitive, public API, cross-cutting (those are micro-complex). | Full TDD (red-green-refactor) → commit. Batch review every 3 tasks. |
-| **Micro-complex** | New algorithm, security-sensitive, public API, cross-cutting. | Full TDD → individual code review → commit. |
+| **Micro-trivial** | Config, wiring, exports, types. No branches/loops/try-catch. | Micro-TDD (1 assertion). Batch review every 3. |
+| **Micro-small** | Single-concern logic, one function. Not: algorithm/security/API/cross-cutting. | Full TDD. Batch review every 3. |
+| **Micro-complex** | Algorithm, security, public API, cross-cutting. | Full TDD + individual review. |
 
-When claiming a sub-task, assess its micro-tier AND review level. If the sub-task creates or modifies any function/method body with conditional logic, loops, or error handling, it is NOT micro-trivial. Then run the review level gate (`/claude-workstation:review-level-gate`) to determine Standard or Consensus review. Log: `micro-tier: <micro-trivial|micro-small|micro-complex>, review-level: <standard|consensus>`
+**Review signals** (against sub-task description, not code): security-sensitive (auth, crypto, validation, secrets), API surface change (public API, CLI, exports), cross-domain (2+ domains), supply-chain (deps added/removed/updated), infrastructure (Docker, CI/CD, env vars, migrations). Any signal -> Consensus (dual independent, santa-method). None -> Standard (single reviewer). No agent self-assessment. Standard can ESCALATE(reason) to Consensus (max 1, up only). Consensus resets batch counter. Log: `micro-tier: <tier>, review-level: <standard|consensus>`
 
-**Micro-TDD:** One assertion proving the wiring works (import resolves, config parses, type compiles).
+## Spike Phase
 
-**Batch review cadence:** After every 3rd non-complex task, dispatch one batch code review. Micro-complex tasks get individual reviews and reset the batch counter.
+After planning, before first implementation: validate file paths and interfaces match plan. If any task mentions API/integration/library/SDK/migrate/external, build minimal proof-of-concept for riskiest integration (discard after documenting). Log `spike:`, `spike-confirmed:`, `spike-revised:`, `spike-risks:`. Revised assumptions changing APIs/libraries/deliverables -> spec amendment.
 
-**Review level gate:** After micro-tier assessment, evaluate objective signals (security, API surface, cross-domain, supply-chain, infrastructure) against the sub-task description. Any signal → Consensus review (dual independent, santa-method). No signals → Standard review (single reviewer). Consensus tasks always get individual review and reset the batch counter.
+## Debugging
 
-## Skill References
+Invoke `superpowers:systematic-debugging` before any fix. 3 failed hypotheses -> STOP, present to user. Regression test before fix.
 
-On-demand skills for specific workflow phases — invoke when reaching that step:
-- **Bug work** → `/claude-workstation:debugging-protocol` (root cause before fix, 3-strike rule)
-- **Spike eval** (Medium+, mandatory) → `/claude-workstation:spike-phase` (evaluate triggers → execute if any fire)
-- **Scope health** (Medium+) → `/claude-workstation:scope-health` — after closing any sub-task, query `bd list --status=closed` count for the epic. If `count % 3 == 0`, invoke scope-health.
-- **Compaction** (Medium+) → After closing each sub-task in a long session, consider `/compact` — beads milestones ensure recovery. Log `stopped:` milestone before compacting.
-- **Milestone notes** → `/claude-workstation:beads-milestones` (standardized checkpoint format)
-- **Verification** → `/claude-workstation:verification-template` (output format with exit codes)
-- **Review level gate** (Medium+) → `/claude-workstation:review-level-gate` (Standard vs Consensus review intensity at claim-time)
+## Scope Health (Medium+)
+
+Every 3rd closed sub-task, check ratio = total created / planned-tasks. >=1.5x -> warning. >=2.0x -> gate (stop; re-plan, split, or continue; human decides).
+
+## Verification Format
+
+After `superpowers:verification-before-completion`, log to beads notes:
+```
+- Tests: <s> N passed, N failed (exit <code>)  - Build: <s> (exit <code>)
+- Lint:  <s> (exit <code>)  - Type: <s> (exit <code>)  - Manual: <s> <desc>
+```
+`s`: `✓` passed, `✗` failed (blocking), `⊘` skipped (reason). Exit code required. At least one must pass.
+
+## Milestone Notes
+
+Update beads notes via `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "key: value"`.
+
+| Key | When | Key | When |
+|---|---|---|---|
+| `tier:` | After `/start` | `completed:` | Sub-task closes |
+| `spec:` | After brainstorming | `current:` | Claiming sub-task |
+| `plan:` | After writing plan | `micro-tier:` | Claiming sub-task |
+| `planned-tasks:` | Sub-tasks created | `spec-amendment:` | Spec updated |
+| `spike:` | After spike | `scope-check:` | After scope health |
+| `spike-confirmed:` | Spike findings | `debug:` | Root cause found |
+| `spike-revised:` | Wrong assumption | `verification:` | After verification |
+| `spike-risks:` | Risks identified | `docs-updated:` | Docs updated |
+| `stopped:` | Session end / pre-compact | | |
 
 ## Plugin Routing
 
-- **Beads** → all persistent task/issue tracking (`bd` commands). No TodoWrite for persistent work.
-- **Superpowers** → all development process (brainstorming, planning, TDD, code review, verification, debugging, parallel agents, finishing branches).
-- **ECC** → all language-specific and domain-specific skills, agents, and patterns. Use within the Superpowers-driven process.
-
-When both apply: Superpowers drives the process, ECC provides expertise within it.
-
-## Research & Reuse
-
-Before any new implementation:
-1. GitHub code search first (`gh search repos`, `gh search code`)
-2. Library docs second (Context7 or vendor docs)
-3. Check package registries before writing utility code
-4. Search for adaptable open-source implementations
-5. Prefer proven approaches over net-new code
+**Beads** -> task tracking (`bd`), no TodoWrite. **Superpowers** -> process (brainstorming, planning, TDD, review, verification, debugging, agents, finishing). **ECC** -> language/domain skills within Superpowers process. Before new implementation: GitHub search first, library docs second (Context7), check registries. Proven > net-new.
 
 ## Verification Failure Protocol
 
-When tests or checks fail during VERIFY, classify before acting:
-
 | Type | Signal | Action |
 |---|---|---|
-| **A — Implementation bug** | The file to fix is one already in your confirmed scope | Fix within current task |
-| **B — Collateral breakage** | The file to fix is NOT in your confirmed scope, even if your change caused the failure | Side-quest: create bug, link, fix under its own task |
-| **C — Unrelated failure** | A test unrelated to your changes failed | Side-quest: create bug, park it, do NOT fix now |
+| **A -- Impl bug** | File in confirmed scope | Fix in current task |
+| **B -- Collateral** | File NOT in scope, even if your change caused it | Side-quest: bug, link, fix under own task |
+| **C -- Unrelated** | Test unrelated to your changes | Side-quest: bug, park, do NOT fix |
 
-The test: **"Is the file I need to edit in my confirmed scope?"** If no → it is a side-quest regardless of whether your change caused the breakage.
-
-"My change caused it" is the most common rationalization for skipping the gate. Treat it as a red flag, not a justification.
+"Is the file I need to edit in my confirmed scope?" No -> side-quest. "My change caused it" is rationalization, not justification.
 
 ## Side Quests
 
-Discover a problem in a file outside your confirmed scope mid-work — regardless of whether your changes caused it:
-```bash
-bd create --title="Found: <issue>" --type=bug
-bd dep add <new-id> <current-id> --type=discovered-from
-```
-Finish current task first, then `bd ready`.
+Problem outside scope: `bd create --title="Found: <issue>" --type=bug` + `bd dep add <new-id> <current-id> --type=discovered-from`. Finish current task first, then `bd ready`. Fix size does not reduce ceremony.
 
-### Collateral Breakage Rule
-
-When your changes cause failures in files OUTSIDE your confirmed scope (tests that hardcoded assumptions, downstream consumers, config files you didn't plan to touch): this is a side-quest, not part of the current task. The fact that your change caused the breakage does NOT make the fix in-scope.
-
-The fix may be trivial (2 lines), but the tracking is mandatory. Create a discovered-from bug, fix it under its own task, close it. Size of the fix does not reduce ceremony.
-
-Run `/help` for detailed step-by-step flows with full ceremony for each tier.
+Inlined from former skills: beads-milestones, review-level-gate, scope-health, spike-phase, debugging-protocol, verification-template. Run `/help` for full tier flows.

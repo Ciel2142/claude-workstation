@@ -130,8 +130,6 @@ bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "tier: <trivial|sma
 | Small | Invoke: `/superpowers:test-driven-development` |
 | Medium+ | Invoke: `/superpowers:brainstorming` |
 
-**Medium+ sub-task flow note:** When sub-tasks are claimed during execution, the orchestrator must assess both micro-tier AND review level (`/claude-workstation:review-level-gate`). The orchestrator is responsible for dispatching the appropriate number of reviewers based on the gate result — Standard (single reviewer) or Consensus (santa-method dual independent review).
-
 ---
 
 ## SIDE-QUEST FLOW

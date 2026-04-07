@@ -108,7 +108,7 @@ Core flow:
                bd dep add <sub-id> <epic-id>
                bd dep add <sub-id> <prev-sub-id>  (only if genuinely sequential)
                bd update <epic-id> --notes "planned-tasks: N"
-5. SPIKE-EVAL Evaluate spike triggers (see spike-phase skill).
+5. SPIKE-EVAL Evaluate spike triggers (see Spike Phase section in workflow.md).
                If any trigger fires, execute spike before implementing.
                Log: spike-eval: <triggered|skipped> -- <reason>
 6. IMPLEMENT  bd ready → claim ALL ready tasks (not just one)

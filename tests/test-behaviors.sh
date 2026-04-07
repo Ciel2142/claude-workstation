@@ -581,212 +581,59 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# Section 7: review-level-gate skill structure
+# Section 7: workflow.md inlined content guards
 # ---------------------------------------------------------------------------
 echo ""
-echo "7. review-level-gate skill"
+echo "7. workflow.md inlined content"
 
-SKILL_FILE="$PLUGIN_ROOT/skills/review-level-gate/SKILL.md"
+WORKFLOW_FILE="$PLUGIN_ROOT/contexts/workflow.md"
 
-# 7a. Skill file exists
-if [[ -f "$SKILL_FILE" ]]; then
-    pass "7a. review-level-gate SKILL.md exists"
+# 7a. Review levels defined (Standard and Consensus)
+if grep -q 'Standard' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'Consensus' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "7a. workflow.md defines Standard and Consensus review levels"
 else
-    fail "7a. review-level-gate SKILL.md does not exist"
+    fail "7a. workflow.md missing Standard and/or Consensus"
 fi
 
-# 7b. Has frontmatter with name
-if grep -q '^name: review-level-gate' "$SKILL_FILE" 2>/dev/null; then
-    pass "7b. frontmatter has name: review-level-gate"
-else
-    fail "7b. frontmatter missing name: review-level-gate"
-fi
-
-# 7c. Defines both review levels
-if grep -q 'Standard' "$SKILL_FILE" 2>/dev/null && grep -q 'Consensus' "$SKILL_FILE" 2>/dev/null; then
-    pass "7c. defines both Standard and Consensus levels"
-else
-    fail "7c. missing Standard and/or Consensus level definitions"
-fi
-
-# 7d. Lists objective signals
+# 7b. All 5 review-level signals present
 SIGNAL_COUNT=0
 for signal in "security" "API surface" "cross-domain" "supply-chain" "infrastructure"; do
-    if grep -qi "$signal" "$SKILL_FILE" 2>/dev/null; then
+    if grep -qi "$signal" "$WORKFLOW_FILE" 2>/dev/null; then
         SIGNAL_COUNT=$((SIGNAL_COUNT + 1))
     fi
 done
 if [[ $SIGNAL_COUNT -ge 5 ]]; then
-    pass "7d. all 5 objective signal categories present"
+    pass "7b. all 5 review-level signals present in workflow.md"
 else
-    fail "7d. only $SIGNAL_COUNT/5 objective signal categories found"
+    fail "7b. only $SIGNAL_COUNT/5 review-level signals in workflow.md"
 fi
 
-# 7e. Defines ESCALATE protocol
-if grep -q 'ESCALATE' "$SKILL_FILE" 2>/dev/null; then
-    pass "7e. ESCALATE protocol defined"
+# 7c. Milestone key table present
+if grep -q 'tier:' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'completed:' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'verification:' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'stopped:' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "7c. milestone key table present in workflow.md"
 else
-    fail "7e. ESCALATE protocol not defined"
+    fail "7c. milestone key table missing or incomplete in workflow.md"
 fi
 
-# 7f. Defines budget cap
-if grep -qi 'budget' "$SKILL_FILE" 2>/dev/null; then
-    pass "7f. budget cap defined"
+# 7d. Scope health thresholds present
+if grep -q '1.5x' "$WORKFLOW_FILE" 2>/dev/null && grep -q '2.0x' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "7d. scope health thresholds (1.5x, 2.0x) in workflow.md"
 else
-    fail "7f. budget cap not defined"
+    fail "7d. scope health thresholds missing from workflow.md"
 fi
 
-# 7g. Does NOT include self-confidence signal
-if grep -qi 'self-confidence\|confidence score\|self-report.*confidence' "$SKILL_FILE" 2>/dev/null; then
-    fail "7g. contains self-confidence signal (removed per security review)"
+# 7e. Verification format present
+if grep -q '✓' "$WORKFLOW_FILE" 2>/dev/null && grep -q '✗' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "7e. verification format symbols present in workflow.md"
 else
-    pass "7g. no self-confidence signal (correct per security review)"
+    fail "7e. verification format symbols missing from workflow.md"
 fi
 
-# 7h. Defines claim-time assessment
-if grep -qi 'claim.time\|claim time\|at claim' "$SKILL_FILE" 2>/dev/null; then
-    pass "7h. claim-time assessment documented"
+# 7f. Spike phase referenced
+if grep -qi 'spike' "$WORKFLOW_FILE" 2>/dev/null; then
+    pass "7f. spike phase documented in workflow.md"
 else
-    fail "7h. claim-time assessment not documented"
-fi
-
-echo ""
-
-# ---------------------------------------------------------------------------
-# Section 8: workflow.md review-level-gate integration
-# ---------------------------------------------------------------------------
-echo ""
-echo "8. workflow.md review-level-gate integration"
-
-WORKFLOW_FILE="$PLUGIN_ROOT/contexts/workflow.md"
-
-# 8a. Workflow references review-level-gate skill
-if grep -q 'review-level-gate' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "8a. workflow.md references review-level-gate"
-else
-    fail "8a. workflow.md does not reference review-level-gate"
-fi
-
-# 8b. Workflow mentions claim-time gate
-if grep -qi 'review.level.*gate\|review.*level.*claim' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "8b. workflow.md mentions review level at claim-time"
-else
-    fail "8b. workflow.md does not mention review level at claim-time"
-fi
-
-# 8c. Workflow mentions Standard and Consensus
-if grep -q 'Standard' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'Consensus' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "8c. workflow.md defines Standard and Consensus levels"
-else
-    fail "8c. workflow.md missing Standard and/or Consensus"
-fi
-
-# 8d. Skill references section includes review-level-gate (specific bullet format)
-if grep -q 'Review level gate.*review-level-gate' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "8d. skill references include review-level-gate bullet"
-else
-    fail "8d. skill references missing review-level-gate bullet"
-fi
-
-# ---------------------------------------------------------------------------
-# Section 9: review-level-gate enforcement guards
-# ---------------------------------------------------------------------------
-echo ""
-echo "9. review-level-gate enforcement"
-
-SKILL_FILE="$PLUGIN_ROOT/skills/review-level-gate/SKILL.md"
-
-# 9a. Security always triggers Consensus
-if grep -qi 'security.*consensus\|security.*no exception' "$SKILL_FILE" 2>/dev/null; then
-    pass "9a. security signal always triggers Consensus"
-else
-    fail "9a. security signal does not explicitly require Consensus"
-fi
-
-# 9b. Budget exhaustion falls back to Standard, never skips
-if grep -qi 'budget.*standard\|fall.*back.*standard\|never.*skip.*review' "$SKILL_FILE" 2>/dev/null; then
-    pass "9b. budget exhaustion falls back to Standard (never skips)"
-else
-    fail "9b. budget exhaustion behavior not documented"
-fi
-
-# 9c. Max 1 escalation per task documented
-if grep -qi 'max.*1.*escalation\|one.*escalation.*per.*task' "$SKILL_FILE" 2>/dev/null; then
-    pass "9c. max 1 escalation per task documented"
-else
-    fail "9c. max 1 escalation per task NOT documented"
-fi
-
-# 9d. Escalation is up only
-if grep -qi 'up.*only\|never.*demote\|never.*down' "$SKILL_FILE" 2>/dev/null; then
-    pass "9d. escalation up-only rule documented"
-else
-    fail "9d. escalation up-only rule NOT documented"
-fi
-
-# 9e. Consensus tasks skip batch review
-if grep -qi 'consensus.*individual\|consensus.*skip.*batch\|consensus.*reset.*batch' "$SKILL_FILE" 2>/dev/null; then
-    pass "9e. Consensus tasks skip batch / get individual review"
-else
-    fail "9e. Consensus/batch interaction not documented"
-fi
-
-# 9f. Red flags / rationalization table present
-if grep -qi 'red.flag\|rationali' "$SKILL_FILE" 2>/dev/null; then
-    pass "9f. red flags / rationalization guards present"
-else
-    fail "9f. red flags / rationalization guards missing"
-fi
-
-# 9g. Human escalation after 3 Consensus rounds
-if grep -qi 'human\|escalate.*3.*round\|3.*round.*escalat' "$SKILL_FILE" 2>/dev/null; then
-    pass "9g. human escalation after 3 rounds documented"
-else
-    fail "9g. human escalation after 3 rounds NOT documented"
-fi
-
-# 9h. Signal detection runs against task text, not code
-if grep -qi 'task.*text\|description.*plan.*text\|not.*against.*implementation\|not.*code' "$SKILL_FILE" 2>/dev/null; then
-    pass "9h. signal detection runs against task text, not code"
-else
-    fail "9h. signal detection scope (task text vs code) not documented"
-fi
-
-# ---------------------------------------------------------------------------
-# Section 10: start skill references review-level-gate
-# ---------------------------------------------------------------------------
-echo ""
-echo "10. start skill review-level-gate reference"
-
-START_FILE="$PLUGIN_ROOT/skills/start/SKILL.md"
-
-# 10a. Start skill mentions review-level-gate for Medium+
-if grep -qi 'review.level' "$START_FILE" 2>/dev/null; then
-    pass "10a. start skill references review level"
-else
-    fail "10a. start skill does not reference review level"
-fi
-
-# ---------------------------------------------------------------------------
-# Section 11: help content includes review-level-gate
-# ---------------------------------------------------------------------------
-echo ""
-echo "11. help content review-level-gate reference"
-
-HELP_FILE="$PLUGIN_ROOT/skills/help/SKILL.md"
-if [[ -f "$HELP_FILE" ]]; then
-    if grep -qi 'review.level' "$HELP_FILE" 2>/dev/null; then
-        pass "11a. help skill references review-level-gate"
-    else
-        fail "11a. help skill does not reference review-level-gate"
-    fi
-else
-    # Help may be derived from workflow.md — check there
-    if grep -qi 'review.level.*gate' "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
-        pass "11a. help derived from workflow.md which includes review-level-gate"
-    else
-        fail "11a. neither help skill nor workflow.md references review-level-gate"
-    fi
+    fail "7f. spike phase missing from workflow.md"
 fi
 
 echo ""

@@ -20,6 +20,13 @@ if ! command -v bd >/dev/null 2>&1; then
     exit 0
 fi
 
+# Timeout wrapper: GNU coreutils preferred, noop fallback for macOS
+if command -v timeout >/dev/null 2>&1; then
+    TO="timeout 5"
+else
+    TO=""
+fi
+
 # --- Cache ---
 # C1: Per-project cache avoids cross-project collisions in parallel sessions
 # F4: Guard against negative cache age from clock skew
@@ -48,14 +55,14 @@ fi
 
 # B2: Use --json for robust parsing, with text fallback
 OUTPUT=""
-LISTING_JSON=$(bd list --status=in_progress --json 2>/dev/null || echo "")
+LISTING_JSON=$($TO bd list --status=in_progress --json 2>/dev/null || echo "")
 if [ -n "$LISTING_JSON" ] && [ "$LISTING_JSON" != "[]" ] && [ "$LISTING_JSON" != "null" ]; then
     # Extract first task ID from JSON array
     TASK_ID=$(printf '%s' "$LISTING_JSON" | grep -o '"id": *"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null || echo "")
 fi
 # Fallback to text parsing if JSON extraction failed
 if [ -z "${TASK_ID:-}" ]; then
-    LISTING=$(bd list --status=in_progress 2>/dev/null || echo "")
+    LISTING=$($TO bd list --status=in_progress 2>/dev/null || echo "")
     TASK_ID=$(echo "$LISTING" | grep -v 'No issues' | awk 'NR>1 && NF>0{print $1; exit}' || true)
 fi
 
@@ -64,7 +71,7 @@ if [ -z "$TASK_ID" ]; then
         "WARNING: No active beads task. Create one before modifying files:" \
         "   bd create --title=\"...\" --type=task")
 else
-    NOTES=$(bd show "$TASK_ID" 2>/dev/null || echo "")
+    NOTES=$($TO bd show "$TASK_ID" 2>/dev/null || echo "")
     if ! echo "$NOTES" | grep -q 'tier:'; then
         OUTPUT="WARNING: Active task ($TASK_ID) has no tier assessment. Run /claude-workstation:start to assess."
     fi

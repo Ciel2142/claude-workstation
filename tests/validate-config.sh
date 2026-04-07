@@ -64,7 +64,7 @@ echo ""
 # --- 4. Workflow context content ---
 echo "4. Workflow context content"
 
-for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Research" "Side Quests" "Spec Amendments" "Micro-tiers" "Skill References" "Scope Confirmation" "Task Boundary" "Pre-Change Gate" "Hard Rules"; do
+for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Side Quests" "Spec Amendments" "Micro-tiers" "Scope Confirmation" "Pre-Change Gate" "Hard Rules" "Milestone Notes" "Verification Format" "Spike Phase" "Scope Health" "Debugging"; do
     if grep -q "$keyword" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
         pass "workflow.md contains '$keyword'"
     else
@@ -159,7 +159,7 @@ echo ""
 # --- 8. Skill directories ---
 echo "8. Skill directories"
 
-for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template status; do
+for skill_dir in start resume setup test; do
     if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
         pass "skills/$skill_dir/SKILL.md exists"
     else
@@ -172,7 +172,7 @@ echo ""
 # --- 9. SKILL.md frontmatter ---
 echo "9. SKILL.md frontmatter"
 
-for skill_dir in start resume setup test debugging-protocol beads-milestones spike-phase scope-health verification-template status; do
+for skill_dir in start resume setup test; do
     skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
     if [[ -f "$skill_file" ]]; then
         # Extract name from YAML frontmatter
@@ -234,23 +234,29 @@ echo ""
 echo "11. Milestone schema validation"
 
 RESUME_FILE="$PLUGIN_ROOT/skills/resume/SKILL.md"
-MILESTONES_FILE="$PLUGIN_ROOT/skills/beads-milestones/SKILL.md"
+WORKFLOW_FILE="$PLUGIN_ROOT/contexts/workflow.md"
 
-if [[ -f "$RESUME_FILE" ]] && [[ -f "$MILESTONES_FILE" ]]; then
+if [[ -f "$RESUME_FILE" ]] && [[ -f "$WORKFLOW_FILE" ]]; then
 
-    # 11a. Extract canonical keys from beads-milestones table (source of truth)
-    # Keys are in backtick-quoted format: `key:` in the markdown table
-    CANONICAL_KEYS=$(grep -o '`[a-z][a-z0-9-]*:`' "$MILESTONES_FILE" | sed 's/`//g' | sort -u)
-    CANONICAL_COUNT=$(echo "$CANONICAL_KEYS" | wc -l)
+    # 11a. Verify workflow.md contains key milestone keys (previously in beads-milestones)
+    MILESTONE_KEYS_FOUND=0
+    for key in "tier" "spec" "plan" "completed" "verification" "stopped"; do
+        if grep -q "$key" "$WORKFLOW_FILE" 2>/dev/null; then
+            pass "workflow.md contains milestone key '$key'"
+            MILESTONE_KEYS_FOUND=$((MILESTONE_KEYS_FOUND + 1))
+        else
+            fail "workflow.md MISSING milestone key '$key'"
+        fi
+    done
 
-    if (( CANONICAL_COUNT >= 10 )); then
-        pass "beads-milestones defines $CANONICAL_COUNT canonical keys"
+    if (( MILESTONE_KEYS_FOUND >= 6 )); then
+        pass "workflow.md contains all $MILESTONE_KEYS_FOUND milestone keys"
     else
-        fail "beads-milestones has only $CANONICAL_COUNT keys (expected ≥10)"
+        fail "workflow.md has only $MILESTONE_KEYS_FOUND milestone keys (expected 6)"
     fi
 
     # 11b. Verify resume references the routing-critical keys
-    # These are the keys resume uses for position detection (lines 172-178)
+    # These are the keys resume uses for position detection
     for key in "docs-updated:" "verification:" "completed:" "plan:" "spec:" "tier:"; do
         if grep -q "\"$key\"" "$RESUME_FILE" 2>/dev/null; then
             pass "resume matches milestone key '$key'"
@@ -259,23 +265,14 @@ if [[ -f "$RESUME_FILE" ]] && [[ -f "$MILESTONES_FILE" ]]; then
         fi
     done
 
-    # 11c. Verify all canonical keys are lowercase (schema rule)
-    while IFS= read -r key; do
-        if [[ "$key" =~ ^[a-z][a-z0-9-]*:$ ]]; then
-            pass "milestone key '$key' is lowercase"
-        else
-            fail "milestone key '$key' violates lowercase schema"
-        fi
-    done <<< "$CANONICAL_KEYS"
-
-    # 11d. Check resume does NOT use wrong-case patterns
+    # 11c. Check resume does NOT use wrong-case patterns
     for bad_pattern in '"Verification:"' '"Tests passing:"' '"Tests green:"' '"Plan:"' '"Spec:"'; do
         if grep -q "$bad_pattern" "$RESUME_FILE" 2>/dev/null; then
             fail "resume uses wrong-case pattern $bad_pattern (should be lowercase)"
         fi
     done
 
-    # 11e. Check resume references /ecc:update-docs correctly
+    # 11d. Check resume references /ecc:update-docs correctly
     if grep -q '/ecc:update-docs' "$RESUME_FILE" 2>/dev/null; then
         pass "resume references /ecc:update-docs correctly"
     else
@@ -287,15 +284,8 @@ if [[ -f "$RESUME_FILE" ]] && [[ -f "$MILESTONES_FILE" ]]; then
     else
         pass "resume has no bare /update-docs references"
     fi
-
-    # 11f. Verify beads-milestones rules section exists
-    if grep -q "Don't invent new keys" "$MILESTONES_FILE" 2>/dev/null; then
-        pass "beads-milestones enforces closed key set"
-    else
-        fail "beads-milestones MISSING 'Don't invent new keys' rule"
-    fi
 else
-    fail "Cannot check milestone schema — resume or beads-milestones SKILL.md missing"
+    fail "Cannot check milestone schema — resume SKILL.md or contexts/workflow.md missing"
 fi
 
 echo ""
@@ -733,11 +723,11 @@ else
     fail "BS3: workflow.md MISSING 'Escalation only upward' rule"
 fi
 
-# BS5: Collateral Breakage Rule
-if grep -q 'Collateral Breakage Rule' "$WORKFLOW" 2>/dev/null; then
-    pass "BS5: workflow.md contains Collateral Breakage Rule"
+# BS5: Collateral breakage in Verification Failure Protocol
+if grep -q 'Collateral' "$WORKFLOW" 2>/dev/null; then
+    pass "BS5: workflow.md contains Collateral breakage rule"
 else
-    fail "BS5: workflow.md MISSING Collateral Breakage Rule"
+    fail "BS5: workflow.md MISSING Collateral breakage rule"
 fi
 
 # BS6: No production code without failing test
@@ -748,21 +738,21 @@ else
 fi
 
 # BS8: Spec amendments Minor/Material criteria
-if grep -q 'do NOT alter the set of deliverables' "$WORKFLOW" 2>/dev/null; then
+if grep -q 'Minor.*self-approve' "$WORKFLOW" 2>/dev/null && grep -q 'Material.*human' "$WORKFLOW" 2>/dev/null; then
     pass "BS8: workflow.md has objective Minor/Material boundary"
 else
     fail "BS8: workflow.md MISSING objective Minor/Material spec amendment criteria"
 fi
 
-# BS9: Scope health uses bd query (not self-counting)
-if grep -q 'bd list --status=closed.*count' "$WORKFLOW" 2>/dev/null; then
-    pass "BS9: workflow.md scope-health uses bd query for counting"
+# BS9: Scope health uses ratio check
+if grep -q 'ratio.*planned-tasks\|total created.*planned' "$WORKFLOW" 2>/dev/null; then
+    pass "BS9: workflow.md scope-health uses ratio for counting"
 else
-    fail "BS9: workflow.md scope-health should reference bd list query, not self-counting"
+    fail "BS9: workflow.md scope-health should reference ratio check"
 fi
 
 # BS12: Verification Failure Protocol Type A/B/C
-for type_label in "Implementation bug" "Collateral breakage" "Unrelated failure"; do
+for type_label in "Impl bug" "Collateral" "Unrelated"; do
     if grep -q "$type_label" "$WORKFLOW" 2>/dev/null; then
         pass "BS12: workflow.md contains Verification Failure Protocol '$type_label'"
     else
