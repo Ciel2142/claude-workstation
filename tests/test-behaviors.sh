@@ -581,6 +581,78 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 7: review-level-gate skill structure
+# ---------------------------------------------------------------------------
+echo ""
+echo "7. review-level-gate skill"
+
+SKILL_FILE="$PLUGIN_ROOT/skills/review-level-gate/SKILL.md"
+
+# 7a. Skill file exists
+if [[ -f "$SKILL_FILE" ]]; then
+    pass "7a. review-level-gate SKILL.md exists"
+else
+    fail "7a. review-level-gate SKILL.md does not exist"
+fi
+
+# 7b. Has frontmatter with name
+if grep -q '^name: review-level-gate' "$SKILL_FILE" 2>/dev/null; then
+    pass "7b. frontmatter has name: review-level-gate"
+else
+    fail "7b. frontmatter missing name: review-level-gate"
+fi
+
+# 7c. Defines both review levels
+if grep -q 'Standard' "$SKILL_FILE" 2>/dev/null && grep -q 'Consensus' "$SKILL_FILE" 2>/dev/null; then
+    pass "7c. defines both Standard and Consensus levels"
+else
+    fail "7c. missing Standard and/or Consensus level definitions"
+fi
+
+# 7d. Lists objective signals
+SIGNAL_COUNT=0
+for signal in "security" "API surface" "cross-domain" "supply-chain" "infrastructure"; do
+    if grep -qi "$signal" "$SKILL_FILE" 2>/dev/null; then
+        SIGNAL_COUNT=$((SIGNAL_COUNT + 1))
+    fi
+done
+if [[ $SIGNAL_COUNT -ge 5 ]]; then
+    pass "7d. all 5 objective signal categories present"
+else
+    fail "7d. only $SIGNAL_COUNT/5 objective signal categories found"
+fi
+
+# 7e. Defines ESCALATE protocol
+if grep -q 'ESCALATE' "$SKILL_FILE" 2>/dev/null; then
+    pass "7e. ESCALATE protocol defined"
+else
+    fail "7e. ESCALATE protocol not defined"
+fi
+
+# 7f. Defines budget cap
+if grep -qi 'budget' "$SKILL_FILE" 2>/dev/null; then
+    pass "7f. budget cap defined"
+else
+    fail "7f. budget cap not defined"
+fi
+
+# 7g. Does NOT include self-confidence signal
+if grep -qi 'self-confidence\|confidence score\|self-report.*confidence' "$SKILL_FILE" 2>/dev/null; then
+    fail "7g. contains self-confidence signal (removed per security review)"
+else
+    pass "7g. no self-confidence signal (correct per security review)"
+fi
+
+# 7h. Defines claim-time assessment
+if grep -qi 'claim.time\|claim time\|at claim' "$SKILL_FILE" 2>/dev/null; then
+    pass "7h. claim-time assessment documented"
+else
+    fail "7h. claim-time assessment not documented"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
