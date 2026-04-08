@@ -1,6 +1,6 @@
 ---
 name: test
-version: 1.3.0
+version: 1.4.0
 description: >
   Validate the Claude Workstation configuration and run workflow dry-run scenarios.
   TRIGGER: After setup, or anytime to verify configuration integrity.

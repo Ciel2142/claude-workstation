@@ -1,6 +1,6 @@
 {
   "name": "claude-workstation",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Personal development environment — unified workflow (Beads + Superpowers + ECC), MCP servers, context profiles, and shell aliases. One install restores everything.",
   "author": {
     "name": "Ciel2142",

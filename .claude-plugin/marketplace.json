@@ -10,7 +10,7 @@
       "name": "claude-workstation",
       "source": "./",
       "description": "Unified development workflow with size-based routing, MCP server defaults, context profiles, and environment setup",
-      "version": "1.3.0"
+      "version": "1.4.0"
     }
   ]
 }
