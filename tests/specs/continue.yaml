@@ -35,6 +35,32 @@ steps:
       after_step: load_context
       before_step: route_to_skill
 
+  - id: project_tier_detection
+    description: "Detect tier: project from beads notes and switch to project-level loading"
+    required: false
+    condition: "tier: project found in notes"
+    detector:
+      description: "When notes contain 'tier: project', load project brief and enumerate child epic statuses"
+      after_step: load_context
+
+  - id: project_dashboard
+    description: "Display project-level progress dashboard before delegating to child epic"
+    required: false
+    condition: "tier: project found in notes"
+    detector:
+      description: "Show vision, child epic statuses (✓/◐/○), active skill, and which child to resume"
+      after_step: project_tier_detection
+      before_step: route_to_skill
+
+  - id: restore_active_skill
+    description: "Restore active-skill from notes when resuming"
+    required: false
+    condition: "active-skill: found in notes"
+    detector:
+      description: "Read active-skill: and skill-state: from notes, include in routing decision"
+      after_step: load_context
+      before_step: route_to_skill
+
   - id: route_to_skill
     description: "Map position and tier to next skill"
     required: true

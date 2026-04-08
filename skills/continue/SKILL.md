@@ -100,7 +100,8 @@ After selecting a task, load context at a depth determined by the original tier.
 
 **Determine tier:**
 
-1. Check beads notes for `"tier: <value>"` (set by `/start`)
+1. Check beads notes for `"tier: <value>"` (set by `/start` or promoted during brainstorming)
+   - If `"tier: project"` → use project-level loading (see below)
 2. If not found, infer:
    - Task is under an epic → medium+
    - Task type is epic → medium+
@@ -155,6 +156,20 @@ grep -rl "<epic-id>" ~/.claude/sessions/ 2>/dev/null
 ```
 Extract: spec contents, plan contents, sub-task progress, worktree path, session file contents.
 
+**Project (project):**
+Everything from Deep, plus:
+```bash
+# Read project brief (extract path from "brief: " in notes)
+# Parse child epic IDs from "epics: " in notes (comma-separated)
+# For each child epic ID:
+bd show <child-id>
+# Determine: which children are closed, in_progress, open
+# Read active-skill and skill-state from notes if present
+```
+Extract: project brief contents, child epic statuses, active skill/state.
+
+If a child epic is `in_progress`, also run Deep loading for that child (load its spec, plan, sub-tasks).
+
 **Assemble context object:**
 ```
 context = {
@@ -167,6 +182,10 @@ context = {
   subtasks:    list with statuses (deep, epics)
   worktree:    path if active (deep)
   session:     session file contents if found (deep)
+  brief:       project brief contents (project)
+  children:    list of child epics with statuses (project)
+  activeSkill: skill name from notes (if present)
+  skillState:  skill state from notes (if present)
   milestones:  extracted from beads notes (always, may be empty)
 }
 ```
@@ -174,6 +193,18 @@ context = {
 ### Step 4: DETECT POSITION
 
 Using the context object, determine where in the workflow the task left off.
+
+**Project-tier shortcut:**
+
+If tier is `project`, position detection works at TWO levels:
+
+1. **Project level:** Which child epic is current?
+   - A child epic is `in_progress` → resume that child
+   - All children `open` → start first child per dependency order
+   - Some `closed`, rest `open` → start next child per dependency order
+   - All `closed` → `project-complete` (verify + close parent)
+
+2. **Child level:** For the active child epic, detect its position using the standard milestone scan below (applied to the CHILD's notes, not the parent's).
 
 **Check milestones in beads notes (primary signal):**
 
@@ -227,6 +258,10 @@ If the notes have no recognizable milestone patterns (task created manually, or 
 | mid-implementation | medium+ | `/superpowers:test-driven-development` (next ready sub-task) |
 | post-verification | any | `/ecc:update-docs` |
 | post-update-docs | any | `/superpowers:finishing-a-development-branch` |
+| start | epic (project, no children yet) | `/superpowers:brainstorming` (scope assessment will fire) |
+| start | epic (project, children exist, none started) | `/superpowers:brainstorming` (for first child epic) |
+| mid-project | epic (project, child in_progress) | Delegate to child epic's position + skill |
+| project-complete | epic (project, all children closed) | `/superpowers:verification-before-completion` (whole project) |
 
 **Print the summary:**
 
@@ -247,6 +282,37 @@ If the notes have no recognizable milestone patterns (task created manually, or 
 ```
 
 Only show fields that have values. No "none" clutter for trivial tasks.
+
+**Project-tier summary format:**
+
+```
+📋 Resuming: <parent epic title> (project, N epics)
+
+   Vision: <first line of project brief>
+
+   Epic 1: <name>        ✓ closed
+   Epic 2: <name>        ◐ in_progress (<child position>, <progress>)
+   Epic 3: <name>        ○ open
+   Epic 4: <name>        ○ open
+
+   Active skill: <skill name from notes>
+   → Resuming Epic 2: <name>, <child next step>
+```
+
+Then delegate to the in_progress child epic's resume logic (load its spec/plan, detect its phase, route to its skill).
+
+**Active skill restoration (all tiers):**
+
+If beads notes contain `"active-skill: <name>"`, include in summary output:
+```
+   Active skill: <name>
+```
+And when routing, prefer the recorded active skill over the default for the position. Example: if position is `mid-implementation` and active-skill is `superpowers:subagent-driven-development`, route to subagent-driven-development rather than the default TDD.
+
+If notes contain `"skill-state: <state>"`, include:
+```
+   Skill state: <state>
+```
 
 **Then act based on mode:**
 
