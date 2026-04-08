@@ -104,7 +104,8 @@ After selecting a task, load context at a depth determined by the original tier.
 2. If not found, infer:
    - Task is under an epic → medium+
    - Task type is epic → medium+
-   - Task has notes referencing spec/plan files (contains `"spec:"` or `"plan:"`) → small
+   - Task has notes with `"plan:"` but no `"spec:"` → medium (plan without spec = no brainstorming)
+   - Task has notes referencing spec files (contains `"spec:"`) → small
    - Otherwise → **default to small** (ensures minimum TDD + review; can escalate if needed)
 
 **Load by depth:**
@@ -150,7 +151,7 @@ Extract: spec contents, plan contents, sub-task progress, worktree path, session
 ```
 context = {
   task:        bd show output (always)
-  tier:        trivial | small | medium+
+  tier:        trivial | small | medium | medium+
   commits:     related commits (medium, deep)
   files:       changed files from commits (medium, deep)
   spec:        spec file contents (deep)
@@ -175,10 +176,11 @@ Scan notes for milestone patterns. The latest (highest-priority) match wins:
 | 1 (highest) | `"docs-updated:"` | post-update-docs |
 | 2 | `"verification:"` | post-verification |
 | 3 | `"completed:"` | mid-implementation |
-| 4 | `"plan:"` | post-planning |
-| 5 | `"spec:"` | post-brainstorming |
-| 6 | `"debug:"` | mid-debugging |
-| 7 (lowest) | `"tier:"` only (no other milestones) | start |
+| 4 | `"planned-tasks:"` | post-decomposition |
+| 5 | `"plan:"` | post-planning |
+| 6 | `"spec:"` | post-brainstorming |
+| 7 | `"debug:"` | mid-debugging |
+| 8 (lowest) | `"tier:"` only (no other milestones) | start |
 
 **Artifact fallback (when no milestone patterns found):**
 
@@ -203,14 +205,18 @@ If the notes have no recognizable milestone patterns (task created manually, or 
 
 | Position | Task type | Next skill |
 |---|---|---|
-| start | epic | `/superpowers:brainstorming` |
+| start | epic (medium+) | `/superpowers:brainstorming` |
+| start | epic (medium) | `/superpowers:writing-plans` |
 | start | task (small) | `/superpowers:test-driven-development` |
 | start | task (trivial) | No skill — "Go fix it. Then verify and `bd close <id>`." |
 | start | bug (any tier) | `/superpowers:systematic-debugging` |
 | mid-debugging | bug | `/superpowers:systematic-debugging` (continue) |
 | post-brainstorming | any | `/superpowers:writing-plans` |
-| post-planning | any | `/superpowers:test-driven-development` (next ready sub-task) |
-| mid-implementation | any | `/superpowers:test-driven-development` (next ready sub-task) |
+| post-planning | any | Create sub-tasks from plan, then continue |
+| post-decomposition | medium | `/superpowers:subagent-driven-development` |
+| post-decomposition | medium+ | `/superpowers:test-driven-development` (next ready sub-task) |
+| mid-implementation | medium | `/superpowers:subagent-driven-development` (continue) |
+| mid-implementation | medium+ | `/superpowers:test-driven-development` (next ready sub-task) |
 | post-verification | any | `/ecc:update-docs` |
 | post-update-docs | any | `/superpowers:finishing-a-development-branch` |
 
