@@ -67,7 +67,22 @@ For any MISSING plugins, install using `/plugin install <key>`.
 For any UPDATE plugins, update using `/plugin update <key>`.
 A restart is required after updates take effect.
 
-## Step 3: Copy Context Profiles
+## Step 3: Initialize Beads
+
+Check if beads is initialized in the current project. If not, run `bd init`.
+
+```bash
+if [ -d ".beads" ]; then
+    echo "OK: beads already initialized"
+elif command -v bd &>/dev/null; then
+    bd init
+    echo "Initialized beads in current project"
+else
+    echo "WARNING: bd command not found — beads plugin may not be installed. Run Step 2 first."
+fi
+```
+
+## Step 4: Copy Context Profiles
 
 ```bash
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$(dirname "$0")")")}"
@@ -84,7 +99,7 @@ done
 
 Note: `workflow.md` is NOT copied — it is delivered automatically via the SessionStart hook.
 
-## Step 4: Clean Up Stale Aliases
+## Step 5: Clean Up Stale Aliases
 
 Remove the deprecated `claude-workflow` alias (now delivered via SessionStart hook).
 
@@ -103,7 +118,7 @@ for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
 done
 ```
 
-## Step 5: Append Shell Aliases
+## Step 6: Append Shell Aliases
 
 Detect shell and append aliases if not already present.
 
@@ -136,7 +151,7 @@ if [ "$FOUND_RC" -eq 0 ]; then
 fi
 ```
 
-## Step 6: Validate
+## Step 7: Validate
 
 Run the validation script:
 
