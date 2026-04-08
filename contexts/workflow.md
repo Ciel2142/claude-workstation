@@ -12,7 +12,8 @@ Before ANY change -- editing, deleting, destructive commands, or Superpowers ski
 |---|---|---|
 | **Trivial** | <=1 file, no behavior change | `bd create` -> fix -> verify -> `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` -> TDD -> review -> verify -> `bd close` |
-| **Medium+** | 4+ files, new system/component, or cross-cutting | `bd create -t epic` -> brainstorm -> plan -> sub-tasks -> spike -> TDD -> verify -> `bd close` |
+| **Medium** | 4-7 files OR 2 domains, no architecture/system signals | `bd create -t epic` -> plan -> sub-tasks -> TDD (subagent-driven) -> review -> verify -> `bd close` |
+| **Medium+** | New system/component, OR cross-cutting, OR 8+ files | `bd create -t epic` -> brainstorm -> plan -> sub-tasks -> spike -> TDD -> verify -> `bd close` |
 | **Bug** | Any tier, type=bug | `bd create -t bug` -> debug -> TDD (regression) -> review -> verify -> `bd close` |
 
 Escalation only upward -- never downgrade.
@@ -20,7 +21,7 @@ Escalation only upward -- never downgrade.
 ## Hard Rules
 
 - No Superpowers invocation without an active beads task
-- No production code without a failing test (Small/Medium+)
+- No production code without a failing test (Small/Medium/Medium+)
 - No completion claims without verification output
 - No trusting subagent reports without own verification
 
@@ -38,7 +39,7 @@ Spec wrong? Amend, don't silently deviate. **Minor (self-approve):** no change t
 
 ## Sub-task Micro-tiers and Review Level
 
-Each Medium+ sub-task gets micro-tier AND review level at claim-time.
+Each Medium/Medium+ sub-task gets micro-tier AND review level at claim-time.
 
 | Micro-tier | Signal | Ceremony |
 |---|---|---|
@@ -56,7 +57,7 @@ After planning, before first implementation: validate file paths and interfaces 
 
 Invoke `superpowers:systematic-debugging` before any fix. 3 failed hypotheses -> STOP, present to user. Regression test before fix.
 
-## Scope Health (Medium+)
+## Scope Health (Medium/Medium+)
 
 Every 3rd closed sub-task, check ratio = total created / planned-tasks. >=1.5x -> warning. >=2.0x -> gate (stop; re-plan, split, or continue; human decides).
 
