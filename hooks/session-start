@@ -56,6 +56,13 @@ else
     WORKFLOW_CONTENT=$(cat "$WORKFLOW_CONTEXT_FILE")
 fi
 
+# Step 2b: Resolve ${CLAUDE_PLUGIN_ROOT} in workflow content
+# Claude Code's hook runner expands this var in hooks.json commands, and the
+# plugin loader resolves it in skill files, but workflow.md is injected as raw
+# text — so Claude's bash environment (where the var is unset) would expand it
+# to empty, producing paths like "/hooks/bd-notes-append" that don't exist.
+WORKFLOW_CONTENT="${WORKFLOW_CONTENT//\$\{CLAUDE_PLUGIN_ROOT\}/$PLUGIN_ROOT}"
+
 # Step 3: Escape for JSON embedding
 escape_for_json() {
     local s="$1"
