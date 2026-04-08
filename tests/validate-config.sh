@@ -64,7 +64,7 @@ echo ""
 # --- 4. Workflow context content ---
 echo "4. Workflow context content"
 
-for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Side Quests" "Spec Amendments" "Micro-tiers" "Scope Confirmation" "Pre-Change Gate" "Hard Rules" "Milestone Notes" "Verification Format" "Spike Phase" "Spec Coverage Gate" "Scope Health" "Debugging" "Strategic Compaction"; do
+for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Side Quests" "Spec Amendments" "Micro-tiers" "Scope Confirmation" "Pre-Change Gate" "Hard Rules" "Milestone Notes" "Verification Format" "Spike Phase" "Spec Coverage Gate" "Scope Health" "Debugging" "Strategic Compaction" "Project Decomposition" "Scope Assessment"; do
     if grep -q "$keyword" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
         pass "workflow.md contains '$keyword'"
     else
@@ -240,7 +240,7 @@ if [[ -f "$CONTINUE_FILE" ]] && [[ -f "$WORKFLOW_FILE" ]]; then
 
     # 11a. Verify workflow.md contains key milestone keys (previously in beads-milestones)
     MILESTONE_KEYS_FOUND=0
-    for key in "tier" "spec" "plan" "completed" "verification" "stopped" "spec-coverage"; do
+    for key in "tier" "spec" "plan" "completed" "verification" "stopped" "spec-coverage" "active-skill"; do
         if grep -q "$key" "$WORKFLOW_FILE" 2>/dev/null; then
             pass "workflow.md contains milestone key '$key'"
             MILESTONE_KEYS_FOUND=$((MILESTONE_KEYS_FOUND + 1))
@@ -249,10 +249,10 @@ if [[ -f "$CONTINUE_FILE" ]] && [[ -f "$WORKFLOW_FILE" ]]; then
         fi
     done
 
-    if (( MILESTONE_KEYS_FOUND >= 7 )); then
+    if (( MILESTONE_KEYS_FOUND >= 8 )); then
         pass "workflow.md contains all $MILESTONE_KEYS_FOUND milestone keys"
     else
-        fail "workflow.md has only $MILESTONE_KEYS_FOUND milestone keys (expected 7)"
+        fail "workflow.md has only $MILESTONE_KEYS_FOUND milestone keys (expected 8)"
     fi
 
     # 11b. Verify continue references the routing-critical keys

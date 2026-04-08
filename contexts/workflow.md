@@ -14,6 +14,7 @@ Before ANY change -- editing, deleting, destructive commands, or Superpowers ski
 | **Small** | 1-3 files, single concern | `bd create` -> TDD -> review -> verify -> `bd close` |
 | **Medium** | 4-7 files OR 2 domains, no architecture/system signals | `bd create -t epic` -> plan -> sub-tasks -> TDD (subagent-driven) -> review -> verify -> `bd close` |
 | **Medium+** | New system/component, OR cross-cutting, OR 8+ files | `bd create -t epic` -> brainstorm -> plan -> sub-tasks -> spike -> TDD -> verify -> `bd close` |
+| **Project** | Promoted from Medium+ during brainstorming (3+ feature areas OR 10+ requirements) | Parent epic + brief -> child epics (each Small/Medium) -> full brainstorm->spec->plan->TDD per child |
 | **Bug** | Any tier, type=bug | `bd create -t bug` -> debug -> TDD (regression) -> review -> verify -> `bd close` |
 
 Escalation only upward -- never downgrade.
@@ -57,6 +58,42 @@ After planning, before first implementation: validate file paths and interfaces 
 
 After planning and sub-task decomposition, if a spec file exists: enumerate every numbered section, heading, or imperative requirement in the spec. If the spec has no numbered sections or headings, extract each imperative sentence ("must", "should", "implement", "add", "create") as a separate requirement. For each requirement, verify ≥1 sub-task explicitly covers it. List all requirements with their mapped sub-task (or "UNCOVERED"). Any UNCOVERED requirement MUST be resolved before proceeding -- either create the missing sub-task or log a spec amendment explaining why it's out of scope. This gate is BLOCKING: do not proceed to spike or implementation until all requirements are covered or explicitly amended. "Implicitly covered by task X" is not coverage -- the sub-task description must mention the requirement. Log `spec-coverage: N/N sections covered` to beads notes.
 
+## Project Decomposition
+
+During brainstorming for a Medium+ task, a **Scope Assessment** checkpoint is mandatory after clarifying questions but before proposing approaches or writing any spec. The agent explicitly assesses:
+
+**Signals (any ONE triggers decomposition):**
+- 3+ independent feature areas (areas that could be implemented and tested without the others existing yet)
+- 10+ estimated requirements
+
+**If triggered:** brainstorming switches from "write a spec" to "write a project brief" mode. The tier is promoted from Medium+ to Project (`tier: project`). The agent proposes an epic decomposition instead of detailed requirements.
+
+**Project brief format** (~1 page, saved to `docs/superpowers/specs/YYYY-MM-DD-<project>-brief.md`):
+1. Vision (2-3 sentences) -- what and why
+2. Epic decomposition table -- short name, 1-line description, key responsibility, estimated tier (Small/Medium only)
+3. Dependency order -- which epics must complete before others
+4. Cross-cutting decisions -- technical choices that apply to ALL child epics (not re-debated)
+5. Out of scope -- what this project does NOT cover
+
+**Child epic rules:**
+- Each must be Small or Medium tier (if Medium+, split further)
+- Each gets full brainstorm->spec->plan->TDD cycle independently
+- Linked to parent: `bd dep add <child-id> <parent-id> --type=subtask`
+- Inter-child deps: `bd dep add <later-child> <earlier-child> --type=blocked-by`
+- Cross-cutting decisions from brief are constraints, not open questions
+
+**Parent epic notes pattern:**
+
+```
+tier: project
+brief: <path>
+epics: <child-1-id>, <child-2-id>, ...
+current: <child-id>
+completed: <child-id> -- produced <key interfaces>
+active-skill: <skill name>
+skill-state: <internal state>
+```
+
 ## Debugging
 
 Invoke `superpowers:systematic-debugging` before any fix. 3 failed hypotheses -> STOP, present to user. Regression test before fix.
@@ -99,6 +136,7 @@ Update beads notes via `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> 
 | `spike-revised:` | Wrong assumption | `verification:` | After verification |
 | `spike-risks:` | Risks identified | `docs-updated:` | Docs updated |
 | `stopped:` | Session end / pre-compact | `spec-coverage:` | After coverage gate |
+| `active-skill:` | Skill invoked/transitioned | `skill-state:` | Before compaction |
 
 ## Plugin Routing
 
