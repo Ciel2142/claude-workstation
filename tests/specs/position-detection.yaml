@@ -1,0 +1,56 @@
+id: position-detection
+name: Position Detection Algorithm
+source_rule: skills/continue/SKILL.md
+version: "2.0"
+
+steps:
+  - id: scan_milestones
+    description: "Scan beads notes for milestone patterns in priority order"
+    required: true
+    detector:
+      description: "Check notes string for milestone keys in order: docs-updated, verification, completed, planned-tasks, plan, spec, debug, tier"
+
+  - id: detect_docs_updated
+    description: "Detect post-update-docs position from docs-updated: pattern"
+    required: true
+    detector:
+      description: "If notes contain docs-updated: return post-update-docs (priority 1)"
+      after_step: scan_milestones
+
+  - id: detect_verification
+    description: "Detect post-verification position from verification: pattern"
+    required: true
+    detector:
+      description: "If notes contain verification: return post-verification (priority 2)"
+      after_step: scan_milestones
+
+  - id: detect_completed
+    description: "Detect mid-implementation position from completed: pattern"
+    required: true
+    detector:
+      description: "If notes contain completed: return mid-implementation (priority 3)"
+      after_step: scan_milestones
+
+  - id: detect_planned_tasks
+    description: "Detect post-decomposition position from planned-tasks: pattern"
+    required: true
+    detector:
+      description: "If notes contain planned-tasks: return post-decomposition (priority 4)"
+      after_step: scan_milestones
+
+  - id: detect_plan
+    description: "Detect post-planning position from plan: pattern"
+    required: true
+    detector:
+      description: "If notes contain plan: return post-planning (priority 5)"
+      after_step: scan_milestones
+
+  - id: detect_tier_only
+    description: "Detect start position when only tier: is present"
+    required: true
+    detector:
+      description: "If notes contain only tier: with no other milestones, return start (priority 8)"
+      after_step: scan_milestones
+
+scoring:
+  threshold_promote_to_hook: 0.6
