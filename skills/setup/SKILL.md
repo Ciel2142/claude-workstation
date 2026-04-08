@@ -1,6 +1,6 @@
 ---
 name: setup
-version: 1.5.1
+version: 1.6.0
 description: >
   Install and configure the full Claude Code development environment.
   TRIGGER: First run on a new machine, or anytime to repair configuration.
