@@ -38,6 +38,7 @@ The beads task is the anchor. Everything else flows from it. No exceptions — d
 | **Small** | 1-3 files, single concern | Bug fix, small feature, focused refactor |
 | **Medium** | 4-7 files OR 2 domains, no architecture/system signals | Multi-file feature, cross-domain change |
 | **Medium+** | New system/component, OR cross-cutting, OR 8+ files | New system, API, architectural change |
+| **Project** | Promoted from Medium+ during brainstorming: 3+ feature areas OR 10+ requirements | Multi-epic project with project brief |
 | **Bug** | Any tier, type=bug | See Bug Path below |
 
 ---
@@ -166,6 +167,32 @@ Conditional steps (evaluate trigger, execute if it fires):
                needs merging. superpowers:finishing-a-development-branch
 ```
 
+---
+
+## Project Path
+
+Promoted from Medium+ when brainstorming's scope assessment gate fires (3+ feature areas OR 10+ requirements). Not assigned by `/start`.
+
+```
+1. EPIC       bd create --title="..." --type=epic  (created by /start as Medium+)
+2. BRAINSTORM superpowers:brainstorming
+               Scope assessment gate fires → tier promoted to Project
+               Output: project brief in docs/superpowers/specs/*-brief.md
+               Child epics created with dependencies
+3. PER-CHILD  For each child epic (in dependency order):
+               ├─ BRAINSTORM  superpowers:brainstorming (focused on child domain)
+               │              Output: child spec in docs/superpowers/specs/
+               ├─ PLAN        superpowers:writing-plans
+               │              Output: child plan in docs/superpowers/plans/
+               ├─ SUB-TASKS   Decompose child plan into sub-tasks
+               ├─ IMPLEMENT   TDD per sub-task (subagent-driven if Medium child)
+               ├─ REVIEW      Code review per micro-tier
+               └─ bd close <child-epic-id>
+               Update parent notes: completed: <child-id> -- produced <interfaces>
+4. VERIFY     superpowers:verification-before-completion (whole project)
+5. CLOSE      bd close <parent-epic-id>
+```
+
 ### Sub-task Dependencies
 
 When creating sub-tasks from the plan:
@@ -205,6 +232,7 @@ If work grows beyond current tier, stop and escalate:
 - **Trivial → Small:** Add TDD and review before continuing.
 - **Small → Medium:** Stop. Create an epic, plan, decompose into sub-tasks. Then continue from step 4 (IMPLEMENT).
 - **Medium → Medium+:** Stop. Add brainstorming and spike evaluation. Continue from step 2 (BRAINSTORM) in the Medium+ Path.
+- **Medium+ → Project:** Detected during brainstorming when scope assessment gate fires. Tier is promoted automatically — no manual escalation needed.
 
 Never skip tiers downward.
 

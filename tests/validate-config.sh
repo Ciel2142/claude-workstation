@@ -326,7 +326,7 @@ else
 fi
 
 # 12b. Consistency: workflow.md sections reflected in help.md
-for keyword in "Spec Amendments" "Micro-tier" "Sub-task Dependencies"; do
+for keyword in "Spec Amendments" "Micro-tier" "Sub-task Dependencies" "Project Path"; do
     if grep -q "$keyword" "$HELP_FILE" 2>/dev/null; then
         pass "help.md covers workflow.md section '$keyword'"
     else
@@ -335,7 +335,7 @@ for keyword in "Spec Amendments" "Micro-tier" "Sub-task Dependencies"; do
 done
 
 # 12c. Consistency: tier definitions match
-for tier_signal in "≤1 file" "1-3 files" "4-7 files" "8+ files"; do
+for tier_signal in "≤1 file" "1-3 files" "4-7 files" "8+ files" "3+ feature areas"; do
     WF_HAS=$(grep -c "$tier_signal" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null || true)
     HELP_HAS=$(grep -c "$tier_signal" "$HELP_FILE" 2>/dev/null || true)
     if (( WF_HAS > 0 && HELP_HAS > 0 )); then
