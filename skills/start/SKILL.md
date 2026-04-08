@@ -1,16 +1,17 @@
 ---
 name: start
-version: 1.2.1
+version: 1.2.2
 description: >
-  Auto-assess task tier and start the right workflow. Takes a description,
-  assesses tier, creates the beads task, and invokes the first skill.
+  Auto-assess task tier and recommend the right workflow. Takes a description,
+  assesses tier, creates the beads task, and presents workflow options with reasoning.
   TRIGGER: When starting any new work, or when the user describes a task.
 ---
 
 # Start: Auto-Tier Assessment & Workflow Routing
 
 Takes a task description, assesses its complexity tier, creates the appropriate
-beads task, and auto-invokes the first workflow skill for that tier.
+beads task, and recommends the first workflow skill with reasoning — letting
+the user choose before invoking.
 
 ## Invocation
 
@@ -101,23 +102,48 @@ bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "tier: <trivial|sma
 
 ### Step 5: ROUTE
 
-**Print the analysis output:**
+**Print the analysis output, then recommend a workflow and wait for user choice.**
+
+Do NOT auto-invoke any skill. Present the recommendation and let the user decide.
+
 ```
 📊 Analysis: "<description>"
    Gate: <which gate fired> | Domains: <domain_count>
    Tier: <tier>
 
    ✓ Created: <task-id> (<type>, P<priority>)
-   → Starting: <next skill>
+   → Recommended: <recommended skill>
 ```
 
-**Then auto-invoke the first skill for the tier:**
+**Then present a recommendation table with reasoning:**
 
-| Tier | Action |
-|---|---|
-| Trivial | Print: "Go fix it. Then verify and `bd close <task-id>`." Do NOT invoke any skill. |
-| Small | Invoke: `/superpowers:test-driven-development` |
-| Medium+ | Invoke: `/superpowers:brainstorming` |
+For each tier, there is a default recommendation and alternatives. Present ALL options
+with a brief explanation of why each fits or doesn't fit this specific task.
+
+| Tier | Default Recommendation | Reasoning to Show |
+|---|---|---|
+| Trivial | No skill needed — "Go fix it. Then verify and `bd close <task-id>`." | Explain: single-file, no behavior change, ceremony would slow you down. |
+| Small | `/superpowers:test-driven-development` | Explain: single-concern change benefits from RED-GREEN-REFACTOR to catch regressions. |
+| Medium+ | `/superpowers:brainstorming` | Explain: multi-file/cross-cutting work needs requirements exploration before code. |
+
+**Format the recommendation as a choice table:**
+
+| Option | Skill | Why it fits | Why it might not |
+|---|---|---|---|
+| **A (recommended)** | `<default for tier>` | `<specific reason for THIS task>` | `<honest caveat>` |
+| **B** | `<alternative 1>` | `<when this would be better>` | `<why it's not the default>` |
+| **C** | `<alternative 2 if applicable>` | `<when this would be better>` | `<why it's not the default>` |
+
+Alternatives to consider (pick 1-2 relevant ones):
+- `/superpowers:brainstorming` — when scope is ambiguous or requirements need exploration
+- `/superpowers:test-driven-development` — when behavior change needs regression safety
+- `/superpowers:systematic-debugging` — when the task is investigating a bug
+- Direct edit + manual verify — when the task is truly trivial and ceremony is overhead
+- `/superpowers:writing-plans` — when the task needs architectural planning before TDD
+
+End with: **"My recommendation: Option A — `<one-sentence reason>`. Which would you like?"**
+
+**Wait for user response. Do NOT invoke any skill until the user picks an option.**
 
 ---
 
