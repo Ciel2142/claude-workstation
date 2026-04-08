@@ -301,6 +301,8 @@ detect_position() {
         echo "post-verification"
     elif echo "$notes" | grep -q 'completed:'; then
         echo "mid-implementation"
+    elif echo "$notes" | grep -q 'planned-tasks:'; then
+        echo "post-decomposition"
     elif echo "$notes" | grep -q 'plan:'; then
         echo "post-planning"
     elif echo "$notes" | grep -q 'spec:'; then
@@ -335,6 +337,8 @@ _assert_position "3e. with verification"   "$(printf 'tier: small\nplan: docs/pl
 _assert_position "3f. with docs-updated"   "$(printf 'tier: small\nverification: tests 47/47\ndocs-updated: README refreshed')"          "post-update-docs"
 _assert_position "3g. with debug"          "$(printf 'tier: small\ndebug: root cause -- stale cache')"                  "mid-debugging"
 _assert_position "3h. empty string"        ""                                                           "unknown"
+_assert_position "3i. with planned-tasks"  "$(printf 'tier: medium\nplan: docs/plans/foo.md\nplanned-tasks: 5')"  "post-decomposition"
+_assert_position "3j. planned-tasks before completed" "$(printf 'tier: medium\nplanned-tasks: 3\ncompleted: 1')" "mid-implementation"
 
 echo ""
 
