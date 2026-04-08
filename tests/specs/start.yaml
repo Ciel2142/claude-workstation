@@ -1,0 +1,52 @@
+id: start-skill
+name: Start Skill Workflow
+source_rule: skills/start/SKILL.md
+version: "2.0"
+
+steps:
+  - id: parse_args
+    description: "Parse description, priority override, and side-quest flag from arguments"
+    required: true
+    detector:
+      description: "Extract quoted description, -p flag value, and --side-quest flag"
+      before_step: check_side_quest
+
+  - id: check_side_quest
+    description: "Check for side-quest indicators before tier assessment"
+    required: true
+    detector:
+      description: "Check for Found:/Discovered: prefix, --side-quest flag, or scope conflict with in-progress task"
+      after_step: parse_args
+      before_step: walk_gates
+
+  - id: walk_gates
+    description: "Walk gates 1-5 to determine tier"
+    required: true
+    detector:
+      description: "Evaluate Gate 1 (ESCALATION), Gate 2 (SCOPE), Gate 3 (MULTI), Gate 4 (FEATURE), Gate 5 (DEFAULT) in order"
+      after_step: check_side_quest
+      before_step: create_task
+
+  - id: create_task
+    description: "Create beads task with correct type and priority"
+    required: true
+    detector:
+      description: "Run bd create with --type=task|epic and -p based on tier (Trivial/Small=task, Medium/Medium+=epic)"
+      after_step: walk_gates
+
+  - id: persist_tier
+    description: "Log tier to beads notes via bd-notes-append"
+    required: true
+    detector:
+      description: "Run bd-notes-append with tier: trivial|small|medium|medium+"
+      after_step: create_task
+
+  - id: present_recommendation
+    description: "Present workflow options table and wait for user choice"
+    required: true
+    detector:
+      description: "Print analysis with gate, tier, task-id, and recommendation table. Do NOT auto-invoke any skill."
+      after_step: persist_tier
+
+scoring:
+  threshold_promote_to_hook: 0.6
