@@ -36,7 +36,8 @@ The beads task is the anchor. Everything else flows from it. No exceptions — d
 |---|---|---|
 | **Trivial** | ≤1 file, no behavior change | Typo, config tweak, formatting, comment |
 | **Small** | 1-3 files, single concern | Bug fix, small feature, focused refactor |
-| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | New feature, API, architectural change |
+| **Medium** | 4-7 files OR 2 domains, no architecture/system signals | Multi-file feature, cross-domain change |
+| **Medium+** | New system/component, OR cross-cutting, OR 8+ files | New system, API, architectural change |
 | **Bug** | Any tier, type=bug | See Bug Path below |
 
 ---
@@ -68,6 +69,34 @@ No brainstorming, no TDD, no code review. Just track it and do it.
 5. COMMIT   Conventional commit
 6. CLOSE    bd close <id>
 ```
+
+---
+
+## Medium Path
+
+```
+1. EPIC       bd create --title="..." --type=epic
+2. PLAN       superpowers:writing-plans
+               Output: plan in docs/superpowers/plans/
+               bd update <epic-id> --notes "plan: <path>"
+3. SUB-TASKS  For each plan step:
+               bd create --title="Step N: ..." --type=task
+               bd dep add <sub-id> <epic-id>
+               bd update <epic-id> --notes "planned-tasks: N"
+4. IMPLEMENT  superpowers:subagent-driven-development
+               For each sub-task:
+               ├─ Assess micro-tier
+               ├─ TDD per micro-tier
+               ├─ Commit after each green
+               ├─ Code review per micro-tier
+               └─ bd close <sub-id>
+               Scope health check every 3 closed sub-tasks.
+5. VERIFY     superpowers:verification-before-completion
+6. CLOSE      bd close <epic-id>
+```
+
+What Medium skips vs Medium+: No brainstorming (requirements are clear). No spike
+evaluation (no risky integrations expected). Goes straight to planning.
 
 ---
 
@@ -174,7 +203,8 @@ When implementation reveals the spec is wrong, amend it — don't silently devia
 If work grows beyond current tier, stop and escalate:
 
 - **Trivial → Small:** Add TDD and review before continuing.
-- **Small → Medium+:** Stop. Create an epic, brainstorm, plan, decompose into sub-tasks. Then continue from step 6 (IMPLEMENT).
+- **Small → Medium:** Stop. Create an epic, plan, decompose into sub-tasks. Then continue from step 4 (IMPLEMENT).
+- **Medium → Medium+:** Stop. Add brainstorming and spike evaluation. Continue from step 2 (BRAINSTORM) in the Medium+ Path.
 
 Never skip tiers downward.
 
@@ -212,7 +242,7 @@ Don't context-switch. Finish current task, then `bd ready`.
 | Plugin | Role | Tiers |
 |---|---|---|
 | **Beads** | Task lifecycle: create, claim, dep, close | All |
-| **Superpowers** | Process: brainstorm, plan, TDD, review, verify, debug, finish | Small, Medium+, Bug |
+| **Superpowers** | Process: brainstorm, plan, TDD, review, verify, debug, finish | Small, Medium, Medium+, Bug |
 | **ECC** | Language/domain expertise within Superpowers process | All (as needed) |
 
 Superpowers drives the process. ECC provides expertise within it.
