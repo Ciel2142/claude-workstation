@@ -643,6 +643,40 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 8: YAML spec structure validation
+# ---------------------------------------------------------------------------
+echo ""
+echo "8. YAML spec structure"
+
+SPECS_DIR="$PLUGIN_ROOT/tests/specs"
+if [ -d "$SPECS_DIR" ]; then
+    for spec_file in "$SPECS_DIR"/*.yaml; do
+        [ -f "$spec_file" ] || continue
+        spec_name=$(basename "$spec_file" .yaml)
+        # Check required top-level keys exist
+        HAS_ID=0; HAS_STEPS=0; HAS_SCORING=0
+        grep -q '^id:' "$spec_file" 2>/dev/null && HAS_ID=1
+        grep -q '^steps:' "$spec_file" 2>/dev/null && HAS_STEPS=1
+        grep -q '^scoring:' "$spec_file" 2>/dev/null && HAS_SCORING=1
+        if [ "$HAS_ID" -eq 1 ] && [ "$HAS_STEPS" -eq 1 ] && [ "$HAS_SCORING" -eq 1 ]; then
+            pass "8. $spec_name.yaml has required keys (id, steps, scoring)"
+        else
+            fail "8. $spec_name.yaml missing keys: id=$HAS_ID steps=$HAS_STEPS scoring=$HAS_SCORING"
+        fi
+        # Check version is 2.0
+        if grep -q 'version: "2.0"' "$spec_file" 2>/dev/null; then
+            pass "8. $spec_name.yaml version is 2.0"
+        else
+            fail "8. $spec_name.yaml version is not 2.0"
+        fi
+    done
+else
+    pass "8. specs directory not yet created (skipped)"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="

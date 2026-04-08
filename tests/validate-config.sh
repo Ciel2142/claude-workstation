@@ -777,6 +777,25 @@ done
 
 echo ""
 
+# --- 24. Behavioral spec files ---
+echo "24. Behavioral spec files"
+
+SPECS_DIR="$PLUGIN_ROOT/tests/specs"
+if [ -d "$SPECS_DIR" ]; then
+    pass "tests/specs/ directory exists"
+    for spec_name in pre-change-gate bd-notes-append position-detection scope-health start continue; do
+        if [ -f "$SPECS_DIR/${spec_name}.yaml" ]; then
+            pass "specs/${spec_name}.yaml exists"
+        else
+            fail "specs/${spec_name}.yaml MISSING"
+        fi
+    done
+else
+    fail "tests/specs/ directory MISSING"
+fi
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"
