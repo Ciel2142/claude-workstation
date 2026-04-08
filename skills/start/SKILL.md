@@ -50,18 +50,21 @@ Walk four gates in order. The **first gate that fires** determines the tier.
 #### Gate 1 — ESCALATION
 - Description contains **"new system"** or **"new component"** → **Medium+**
 - Primary intent is architecture (**design, architect, migrate**) → **Medium+**
-- Description mentions **security** or **migration** (not as primary intent) → set **floor = Small**, continue
+- Description mentions **security** or **migration** (not as primary intent) → set **floor = Medium**, continue
 
 #### Gate 2 — SCOPE
 - Breadth words present (**all, every, across, entire, global**) → **Medium+**
 - **3+ domains** touched → **Medium+**
 - **Rewrite** or **overhaul** mentioned → **Medium+**
 
-#### Gate 3 — SIZE
-- **2+ domains** touched → **Small**
-- Feature intent (**add, create, implement, new**) → **Small**
+#### Gate 3 — MULTI
+- **2+ domains** touched → **Medium**
+- Estimated **4+ files** changed → **Medium**
 
-#### Gate 4 — DEFAULT
+#### Gate 4 — FEATURE
+- Feature intent (**add, create, implement, new**), single domain → **Small**
+
+#### Gate 5 — DEFAULT
 - → **Trivial** (or floor from Gate 1 if set)
 
 #### Claude Override
@@ -74,10 +77,11 @@ Create the beads task:
 
 **Determine task type:**
 - Trivial or Small: `--type=task`
-- Medium+: `--type=epic`
+- Medium or Medium+: `--type=epic`
 
 **Determine priority** (if no `-p` override):
 - Medium+: P1
+- Medium: P2
 - Small: P2
 - Trivial: P3
 
@@ -97,7 +101,7 @@ bd update <task-id> -s in_progress
 
 Then persist the computed tier for use by `/resume`:
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "tier: <trivial|small|medium+>"
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "tier: <trivial|small|medium|medium+>"
 ```
 
 ### Step 5: ROUTE
@@ -124,7 +128,8 @@ with a brief explanation of why each fits or doesn't fit this specific task.
 |---|---|---|
 | Trivial | No skill needed — "Go fix it. Then verify and `bd close <task-id>`." | Explain: single-file, no behavior change, ceremony would slow you down. |
 | Small | `/superpowers:test-driven-development` | Explain: single-concern change benefits from RED-GREEN-REFACTOR to catch regressions. |
-| Medium+ | `/superpowers:brainstorming` | Explain: multi-file/cross-cutting work needs requirements exploration before code. |
+| Medium | `/superpowers:writing-plans` | Explain: multi-file work benefits from planning the order of changes before TDD. Implementation via subagent-driven-development. |
+| Medium+ | `/superpowers:brainstorming` | Explain: new system/cross-cutting work needs requirements exploration before code. |
 
 **Format the recommendation as a choice table:**
 
