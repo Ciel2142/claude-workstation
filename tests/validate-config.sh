@@ -335,7 +335,7 @@ for keyword in "Spec Amendments" "Micro-tier" "Sub-task Dependencies"; do
 done
 
 # 12c. Consistency: tier definitions match
-for tier_signal in "≤1 file" "1-3 files" "4+ files"; do
+for tier_signal in "≤1 file" "1-3 files" "4-7 files" "8+ files"; do
     WF_HAS=$(grep -c "$tier_signal" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null || true)
     HELP_HAS=$(grep -c "$tier_signal" "$HELP_FILE" 2>/dev/null || true)
     if (( WF_HAS > 0 && HELP_HAS > 0 )); then
