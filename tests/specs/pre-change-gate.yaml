@@ -1,0 +1,52 @@
+id: pre-change-gate
+name: Pre-Change Gate Hook
+source_rule: hooks/pre-change-gate
+version: "2.0"
+
+steps:
+  - id: check_beads_dir
+    description: "Check for .beads directory; exit silently if not found"
+    required: true
+    detector:
+      description: "Script checks for .beads directory existence and exits 0 if missing"
+      before_step: check_bd_available
+
+  - id: check_bd_available
+    description: "Check if bd command is available; exit silently if not"
+    required: true
+    detector:
+      description: "command -v bd check, exits 0 if bd not in PATH"
+      after_step: check_beads_dir
+      before_step: check_cache
+
+  - id: check_cache
+    description: "Check per-project cache; return cached result if fresh (<60s)"
+    required: true
+    detector:
+      description: "Read cache file, compare mtime, return cached output if age < 60s"
+      after_step: check_bd_available
+      before_step: query_in_progress
+
+  - id: query_in_progress
+    description: "Query bd for in-progress tasks"
+    required: true
+    detector:
+      description: "Run bd list --status=in_progress (JSON first, text fallback)"
+      after_step: check_cache
+
+  - id: warn_no_task
+    description: "Warn if no active beads task found"
+    required: true
+    detector:
+      description: "Output WARNING about no active beads task when bd list returns empty"
+      after_step: query_in_progress
+
+  - id: warn_no_tier
+    description: "Warn if active task has no tier assessment"
+    required: true
+    detector:
+      description: "Run bd show on task, check notes for tier: pattern, warn if missing"
+      after_step: query_in_progress
+
+scoring:
+  threshold_promote_to_hook: 0.8
