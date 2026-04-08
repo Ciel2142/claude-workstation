@@ -646,7 +646,7 @@ if grep -q 'Strategic Compaction' "$WORKFLOW_FILE" 2>/dev/null && \
    grep -q 'spec:' "$WORKFLOW_FILE" 2>/dev/null && \
    grep -q 'plan:' "$WORKFLOW_FILE" 2>/dev/null && \
    grep -q 'debug:' "$WORKFLOW_FILE" 2>/dev/null && \
-   grep -q 'scope-health' "$WORKFLOW_FILE" 2>/dev/null; then
+   grep -q 'Every 3rd closed task' "$WORKFLOW_FILE" 2>/dev/null; then
     pass "7g. strategic compaction section with trigger points in workflow.md"
 else
     fail "7g. strategic compaction section missing or incomplete in workflow.md"

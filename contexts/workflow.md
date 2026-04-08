@@ -110,7 +110,7 @@ At these phase boundaries, invoke `ecc:strategic-compact` to assess context cons
 - After `spec:` milestone (brainstorming complete)
 - After `plan:` milestone (planning complete)
 - After `debug:` milestone (root cause found)
-- During scope-health check (every 3rd closed sub-task)
+- Every 3rd closed task (any tier, including sub-tasks)
 
 If strategic-compact recommends compaction: (0) if medium/medium+ with a spec -- verify the Spec Coverage Gate has passed (all spec sections mapped to sub-tasks or amended). If not, run it NOW before compacting. Uncovered spec sections that survive compaction will never be caught. (1) write any unrecorded decisions, context, or insights to beads notes via `bd-notes-append` -- anything that lives only in conversation and wouldn't survive compaction, (2) log `stopped: pre-compact -- <phase>`, (3) proceed with compaction.
 
