@@ -1,6 +1,6 @@
 ---
 name: continue
-version: 1.5.0
+version: 1.5.1
 description: >
   Continue open work. Lists tasks grouped by epic, loads context at tier-appropriate
   depth, detects workflow position, and routes to the correct next skill.
@@ -131,6 +131,14 @@ Extract: commit list, changed file paths, test file paths.
 Everything from Medium, plus:
 ```bash
 # Read spec file if referenced in notes (extract path after "spec: ")
+# MANDATORY FALLBACK: If no "spec:" in notes, you MUST search by convention:
+#   grep -rl "<epic-id>\|<task-id>" docs/superpowers/specs/ 2>/dev/null
+#   ls docs/superpowers/specs/ 2>/dev/null
+# If multiple spec files match, read all of them — coverage gaps hide in any.
+# If any spec file is found, read it. Then persist the path for future sessions:
+#   bd-notes-append <id> "spec: <found-path>"
+# If the directory does not exist, skip silently (no spec to recover).
+# Skipping this search means spec content is lost after compaction — permanently.
 # Read plan file if referenced in notes (extract path after "plan: ")
 
 # Get sub-task statuses for the parent epic

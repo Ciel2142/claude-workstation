@@ -53,6 +53,10 @@ Each Medium/Medium+ sub-task gets micro-tier AND review level at claim-time.
 
 After planning, before first implementation: validate file paths and interfaces match plan. If any task mentions API/integration/library/SDK/migrate/external, build minimal proof-of-concept for riskiest integration (discard after documenting). Log `spike:`, `spike-confirmed:`, `spike-revised:`, `spike-risks:`. Revised assumptions changing APIs/libraries/deliverables -> spec amendment.
 
+## Spec Coverage Gate (Medium/Medium+)
+
+After planning and sub-task decomposition, if a spec file exists: enumerate every numbered section, heading, or imperative requirement in the spec. If the spec has no numbered sections or headings, extract each imperative sentence ("must", "should", "implement", "add", "create") as a separate requirement. For each requirement, verify ≥1 sub-task explicitly covers it. List all requirements with their mapped sub-task (or "UNCOVERED"). Any UNCOVERED requirement MUST be resolved before proceeding -- either create the missing sub-task or log a spec amendment explaining why it's out of scope. This gate is BLOCKING: do not proceed to spike or implementation until all requirements are covered or explicitly amended. "Implicitly covered by task X" is not coverage -- the sub-task description must mention the requirement. Log `spec-coverage: N/N sections covered` to beads notes.
+
 ## Debugging
 
 Invoke `superpowers:systematic-debugging` before any fix. 3 failed hypotheses -> STOP, present to user. Regression test before fix.
@@ -69,7 +73,7 @@ At these phase boundaries, invoke `ecc:strategic-compact` to assess context cons
 - After `debug:` milestone (root cause found)
 - During scope-health check (every 3rd closed sub-task)
 
-If strategic-compact recommends compaction: (1) write any unrecorded decisions, context, or insights to beads notes via `bd-notes-append` -- anything that lives only in conversation and wouldn't survive compaction, (2) log `stopped: pre-compact -- <phase>`, (3) proceed with compaction.
+If strategic-compact recommends compaction: (0) if medium/medium+ with a spec -- verify the Spec Coverage Gate has passed (all spec sections mapped to sub-tasks or amended). If not, run it NOW before compacting. Uncovered spec sections that survive compaction will never be caught. (1) write any unrecorded decisions, context, or insights to beads notes via `bd-notes-append` -- anything that lives only in conversation and wouldn't survive compaction, (2) log `stopped: pre-compact -- <phase>`, (3) proceed with compaction.
 
 ## Verification Format
 
@@ -94,7 +98,7 @@ Update beads notes via `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> 
 | `spike-confirmed:` | Spike findings | `debug:` | Root cause found |
 | `spike-revised:` | Wrong assumption | `verification:` | After verification |
 | `spike-risks:` | Risks identified | `docs-updated:` | Docs updated |
-| `stopped:` | Session end / pre-compact | | |
+| `stopped:` | Session end / pre-compact | `spec-coverage:` | After coverage gate |
 
 ## Plugin Routing
 
