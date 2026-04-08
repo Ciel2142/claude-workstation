@@ -1,6 +1,6 @@
 ---
 name: resume
-version: 1.2.1
+version: 1.2.2
 description: >
   Resume open work. Lists tasks grouped by epic, loads context at tier-appropriate
   depth, detects workflow position, and routes to the correct next skill.
