@@ -1,0 +1,35 @@
+id: scope-health
+name: Scope Health Check
+source_rule: contexts/workflow.md
+version: "2.0"
+
+steps:
+  - id: trigger_check
+    description: "Trigger scope health check every 3rd closed sub-task"
+    required: true
+    detector:
+      description: "After closing a sub-task, count total closed. If divisible by 3, run scope health."
+
+  - id: compute_ratio
+    description: "Compute ratio of total created tasks to planned tasks"
+    required: true
+    detector:
+      description: "Calculate ratio = total_created / planned_tasks from beads notes"
+      after_step: trigger_check
+
+  - id: warn_at_threshold
+    description: "Warn when ratio reaches 1.5x"
+    required: true
+    detector:
+      description: "If ratio >= 1.5, output warning about scope growth"
+      after_step: compute_ratio
+
+  - id: gate_at_threshold
+    description: "Gate (stop and ask human) when ratio reaches 2.0x"
+    required: true
+    detector:
+      description: "If ratio >= 2.0, stop execution and present re-plan/split/continue options to human"
+      after_step: compute_ratio
+
+scoring:
+  threshold_promote_to_hook: 0.6
