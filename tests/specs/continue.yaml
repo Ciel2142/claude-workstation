@@ -1,0 +1,53 @@
+id: continue-skill
+name: Continue Skill Workflow
+source_rule: skills/continue/SKILL.md
+version: "2.0"
+
+steps:
+  - id: gather_open_work
+    description: "Query beads for in-progress and open tasks"
+    required: true
+    detector:
+      description: "Run bd list --status=in_progress and bd list --status=open"
+      before_step: select_task
+
+  - id: select_task
+    description: "Auto-select if 1 in-progress, show list if multiple or none"
+    required: true
+    detector:
+      description: "Apply auto-selection logic: 1 in_progress=auto, multiple=show list, 0=show list"
+      after_step: gather_open_work
+      before_step: load_context
+
+  - id: load_context
+    description: "Load context at tier-appropriate depth"
+    required: true
+    detector:
+      description: "Determine tier from notes or inference. Load shallow (trivial), medium (small), or deep (medium/medium+)."
+      after_step: select_task
+      before_step: detect_position
+
+  - id: detect_position
+    description: "Detect workflow position from milestone notes"
+    required: true
+    detector:
+      description: "Scan notes for milestone patterns in priority order (docs-updated > verification > completed > planned-tasks > plan > spec > debug > tier)"
+      after_step: load_context
+      before_step: route_to_skill
+
+  - id: route_to_skill
+    description: "Map position and tier to next skill"
+    required: true
+    detector:
+      description: "Use routing table to determine next skill based on position + task type/tier. Medium at post-decomposition routes to subagent-driven-development."
+      after_step: detect_position
+
+  - id: print_summary
+    description: "Print continue summary with status, tier, and next skill"
+    required: true
+    detector:
+      description: "Output formatted summary showing task title, position, tier, and next skill name"
+      after_step: route_to_skill
+
+scoring:
+  threshold_promote_to_hook: 0.6
