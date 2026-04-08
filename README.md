@@ -4,7 +4,7 @@ A Claude Code plugin that restores your full development environment from a sing
 
 ## What's Included
 
-- **Unified Workflow** — Size-based routing (trivial/small/medium+) connecting Beads, Superpowers, and ECC
+- **Unified Workflow** — Size-based routing (trivial/small/medium/medium+) connecting Beads, Superpowers, and ECC
 - **Auto-Injected Context** — SessionStart hook delivers workflow context (~8KB) without setup
 - **Auto-Tier Assessment** — `/start` evaluates task descriptions and routes to the right workflow automatically
 - **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
@@ -86,7 +86,8 @@ Installed by the setup skill:
 |---|---|---|
 | **Trivial** | ≤1 file, no behavior change | `bd create` → fix → verify → `bd close` |
 | **Small** | 1-3 files, single concern | `bd create` → TDD → review → verify → `bd close` |
-| **Medium+** | 4+ files, OR new system/component, OR cross-cutting | `bd create -t epic` → brainstorm → plan → sub-tasks → spike eval → TDD → verify → `bd close` (+ worktree when isolating risk; update-docs when public API changed; finish when on feature branch) |
+| **Medium** | 4-7 files OR 2 domains, no architecture/system signals | `bd create -t epic` → plan → sub-tasks → TDD (subagent-driven) → review → verify → `bd close` |
+| **Medium+** | New system/component, OR cross-cutting, OR 8+ files | `bd create -t epic` → brainstorm → plan → sub-tasks → spike eval → TDD → verify → `bd close` (+ worktree when isolating risk; update-docs when public API changed; finish when on feature branch) |
 | **Bug** | Any tier, type=bug | `bd create -t bug` → debug → TDD (regression test) → review → verify → `bd close` |
 
 ## Hooks
