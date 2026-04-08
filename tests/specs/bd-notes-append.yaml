@@ -1,0 +1,38 @@
+id: bd-notes-append
+name: Beads Notes Append Hook
+source_rule: hooks/bd-notes-append
+version: "2.0"
+
+steps:
+  - id: validate_args
+    description: "Validate task-id and new-line arguments are provided"
+    required: true
+    detector:
+      description: "Check that both positional args are non-empty, exit 1 with usage if missing"
+      before_step: check_bd
+
+  - id: check_bd
+    description: "Verify bd command is available"
+    required: true
+    detector:
+      description: "command -v bd check, exit 1 with error if bd not in PATH"
+      after_step: validate_args
+      before_step: fetch_existing
+
+  - id: fetch_existing
+    description: "Fetch current notes from bd show"
+    required: true
+    detector:
+      description: "Run bd show <task-id>, extract NOTES section between headers"
+      after_step: check_bd
+      before_step: append_note
+
+  - id: append_note
+    description: "Append new line to existing notes and update"
+    required: true
+    detector:
+      description: "Run bd update --notes with existing content plus new line appended"
+      after_step: fetch_existing
+
+scoring:
+  threshold_promote_to_hook: 0.8
