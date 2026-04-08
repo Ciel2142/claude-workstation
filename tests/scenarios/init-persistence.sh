@@ -36,7 +36,7 @@ bd close "$SMALL_ID" --reason="Tier persistence test"
 
 # Simulate /init for a medium+ epic with milestone progression
 # Note: bd update --notes replaces (not appends), so each milestone overwrites
-# the previous. Resume handles this by checking latest milestone first, and
+# the previous. Continue handles this by checking latest milestone first, and
 # falling back to task type inference for tier when tier: note is overwritten.
 EPIC_ID=$(extract_id "$(bd create --title="Add string operations" --type=epic --priority=2 2>&1)")
 bd update "$EPIC_ID" --notes "tier: medium+"

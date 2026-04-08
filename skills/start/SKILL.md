@@ -1,6 +1,6 @@
 ---
 name: start
-version: 1.2.2
+version: 1.3.0
 description: >
   Auto-assess task tier and recommend the right workflow. Takes a description,
   assesses tier, creates the beads task, and presents workflow options with reasoning.
@@ -99,7 +99,7 @@ Then set it to in-progress:
 bd update <task-id> -s in_progress
 ```
 
-Then persist the computed tier for use by `/resume`:
+Then persist the computed tier for use by `/continue`:
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "tier: <trivial|small|medium|medium+>"
 ```

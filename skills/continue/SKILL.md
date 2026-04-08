@@ -1,14 +1,14 @@
 ---
-name: resume
-version: 1.2.2
+name: continue
+version: 1.3.0
 description: >
-  Resume open work. Lists tasks grouped by epic, loads context at tier-appropriate
+  Continue open work. Lists tasks grouped by epic, loads context at tier-appropriate
   depth, detects workflow position, and routes to the correct next skill.
   TRIGGER: When starting a session with existing open work, or when the user
   wants to continue previous work.
 ---
 
-# Resume: Continue Open Work
+# Continue Open Work
 
 Lists open tasks and epics, lets the user pick one to continue, deep-loads all
 related context, detects where the workflow left off, and routes to the correct
@@ -16,10 +16,10 @@ next skill.
 
 ## Invocation
 
-- `/claude-workstation:resume` — auto-resume (picks most recent in_progress, or shows list)
-- `/claude-workstation:resume --interactive` — always show list, suggest but don't auto-invoke
-- `/claude-workstation:resume --dry` — show summary without invoking anything
-- `/claude-workstation:resume <task-id>` — resume a specific task by ID (skip selection)
+- `/claude-workstation:continue` — auto-resume (picks most recent in_progress, or shows list)
+- `/claude-workstation:continue --interactive` — always show list, suggest but don't auto-invoke
+- `/claude-workstation:continue --dry` — show summary without invoking anything
+- `/claude-workstation:continue <task-id>` — resume a specific task by ID (skip selection)
 
 ## Flow
 
@@ -51,7 +51,7 @@ bd list --status=open
 1. Exactly 1 `in_progress` task → auto-select it, skip to Step 3
 2. Multiple `in_progress` tasks → show list, user picks
 3. 0 `in_progress` but open tasks exist → show list, user picks
-4. Nothing open → print: "Nothing to resume. Use `/claude-workstation:start` to start new work." and STOP
+4. Nothing open → print: "Nothing to continue. Use `/claude-workstation:start` to start new work." and STOP
 
 **Display format** (when showing the list):
 

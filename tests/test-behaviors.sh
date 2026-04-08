@@ -292,7 +292,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "3. Position detection"
 
-# Mirror the resume/SKILL.md position detection logic
+# Mirror the continue/SKILL.md position detection logic
 detect_position() {
     local notes="$1"
     if echo "$notes" | grep -q 'docs-updated:'; then

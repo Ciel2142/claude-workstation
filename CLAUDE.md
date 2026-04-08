@@ -7,7 +7,7 @@ Sequence: `bd create` → then work. No work without a beads task. No exceptions
 ## Quick Start
 
 - **New work:** `/claude-workstation:start "description"` — assess tier, create task, start workflow
-- **Resume work:** `/claude-workstation:resume` — pick up open tasks, load context, continue workflow
+- **Continue work:** `/claude-workstation:continue` — pick up open tasks, load context, continue workflow
 
 ## Workflow
 

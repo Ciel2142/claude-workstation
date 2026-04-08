@@ -159,7 +159,7 @@ echo ""
 # --- 8. Skill directories ---
 echo "8. Skill directories"
 
-for skill_dir in start resume setup test; do
+for skill_dir in start continue setup test; do
     if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
         pass "skills/$skill_dir/SKILL.md exists"
     else
@@ -172,7 +172,7 @@ echo ""
 # --- 9. SKILL.md frontmatter ---
 echo "9. SKILL.md frontmatter"
 
-for skill_dir in start resume setup test; do
+for skill_dir in start continue setup test; do
     skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
     if [[ -f "$skill_file" ]]; then
         # Extract name from YAML frontmatter
@@ -233,10 +233,10 @@ echo ""
 # --- 11. Milestone schema validation ---
 echo "11. Milestone schema validation"
 
-RESUME_FILE="$PLUGIN_ROOT/skills/resume/SKILL.md"
+CONTINUE_FILE="$PLUGIN_ROOT/skills/continue/SKILL.md"
 WORKFLOW_FILE="$PLUGIN_ROOT/contexts/workflow.md"
 
-if [[ -f "$RESUME_FILE" ]] && [[ -f "$WORKFLOW_FILE" ]]; then
+if [[ -f "$CONTINUE_FILE" ]] && [[ -f "$WORKFLOW_FILE" ]]; then
 
     # 11a. Verify workflow.md contains key milestone keys (previously in beads-milestones)
     MILESTONE_KEYS_FOUND=0
@@ -255,37 +255,37 @@ if [[ -f "$RESUME_FILE" ]] && [[ -f "$WORKFLOW_FILE" ]]; then
         fail "workflow.md has only $MILESTONE_KEYS_FOUND milestone keys (expected 6)"
     fi
 
-    # 11b. Verify resume references the routing-critical keys
-    # These are the keys resume uses for position detection
+    # 11b. Verify continue references the routing-critical keys
+    # These are the keys continue uses for position detection
     for key in "docs-updated:" "verification:" "completed:" "plan:" "spec:" "tier:"; do
-        if grep -q "\"$key\"" "$RESUME_FILE" 2>/dev/null; then
-            pass "resume matches milestone key '$key'"
+        if grep -q "\"$key\"" "$CONTINUE_FILE" 2>/dev/null; then
+            pass "continue matches milestone key '$key'"
         else
-            fail "resume MISSING routing key '$key'"
+            fail "continue MISSING routing key '$key'"
         fi
     done
 
-    # 11c. Check resume does NOT use wrong-case patterns
+    # 11c. Check continue does NOT use wrong-case patterns
     for bad_pattern in '"Verification:"' '"Tests passing:"' '"Tests green:"' '"Plan:"' '"Spec:"'; do
-        if grep -q "$bad_pattern" "$RESUME_FILE" 2>/dev/null; then
-            fail "resume uses wrong-case pattern $bad_pattern (should be lowercase)"
+        if grep -q "$bad_pattern" "$CONTINUE_FILE" 2>/dev/null; then
+            fail "continue uses wrong-case pattern $bad_pattern (should be lowercase)"
         fi
     done
 
-    # 11d. Check resume references /ecc:update-docs correctly
-    if grep -q '/ecc:update-docs' "$RESUME_FILE" 2>/dev/null; then
-        pass "resume references /ecc:update-docs correctly"
+    # 11d. Check continue references /ecc:update-docs correctly
+    if grep -q '/ecc:update-docs' "$CONTINUE_FILE" 2>/dev/null; then
+        pass "continue references /ecc:update-docs correctly"
     else
-        fail "resume MISSING /ecc:update-docs reference"
+        fail "continue MISSING /ecc:update-docs reference"
     fi
 
-    if grep '/update-docs' "$RESUME_FILE" 2>/dev/null | grep -qv '/ecc:update-docs'; then
-        fail "resume references bare /update-docs without ecc: prefix"
+    if grep '/update-docs' "$CONTINUE_FILE" 2>/dev/null | grep -qv '/ecc:update-docs'; then
+        fail "continue references bare /update-docs without ecc: prefix"
     else
-        pass "resume has no bare /update-docs references"
+        pass "continue has no bare /update-docs references"
     fi
 else
-    fail "Cannot check milestone schema — resume SKILL.md or contexts/workflow.md missing"
+    fail "Cannot check milestone schema — continue SKILL.md or contexts/workflow.md missing"
 fi
 
 echo ""

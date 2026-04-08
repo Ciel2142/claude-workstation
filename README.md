@@ -7,7 +7,7 @@ A Claude Code plugin that restores your full development environment from a sing
 - **Unified Workflow** — Size-based routing (trivial/small/medium/medium+) connecting Beads, Superpowers, and ECC
 - **Auto-Injected Context** — SessionStart hook delivers workflow context (~8KB) without setup
 - **Auto-Tier Assessment** — `/start` evaluates task descriptions and routes to the right workflow automatically
-- **Resume Work** — `/resume` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
+- **Continue Work** — `/continue` lists open tasks, loads context at tier-appropriate depth, and continues the workflow
 - **Bug Path** — systematic debugging rule ensures root cause analysis before fixes
 - **Context Profiles** — `claude-dev`, `claude-research`, `claude-review` shell aliases
 - **Inline Protocols** — Phase-specific protocols for debugging, spike, scope health, milestones, verification (documented in workflow.md)
@@ -43,7 +43,7 @@ Installed by the setup skill:
 | Command | What it does |
 |---|---|
 | `/claude-workstation:start` | Auto-assess task tier, create beads task, start the right workflow |
-| `/claude-workstation:resume` | Resume open work — load context, detect position, continue workflow |
+| `/claude-workstation:continue` | Continue open work — load context, detect position, continue workflow |
 | `/help` | Show the full development playbook |
 | `/claude-workstation:setup` | Install dependencies and configure environment |
 | `/claude-workstation:test` | Validate configuration and run scenarios |
@@ -64,19 +64,19 @@ Installed by the setup skill:
 # → Detects side-quest → creates bug → links to current task → parks it
 ```
 
-### `/resume` — Continue Open Work
+### `/continue` — Continue Open Work
 
 ```bash
-/claude-workstation:resume
+/claude-workstation:continue
 # → Shows grouped task list → pick one → loads context → continues workflow
 
-/claude-workstation:resume --interactive
+/claude-workstation:continue --interactive
 # → Always shows list, suggests next skill but waits for confirmation
 
-/claude-workstation:resume claude-workstation-pyc
-# → Resumes specific task directly, skipping selection
+/claude-workstation:continue claude-workstation-pyc
+# → Continues specific task directly, skipping selection
 
-/claude-workstation:resume --dry
+/claude-workstation:continue --dry
 # → Shows what would happen without invoking anything
 ```
 
@@ -118,7 +118,7 @@ claude-workstation/
 │   └── help.md               # /help command — full playbook
 ├── skills/
 │   ├── start/SKILL.md         # /start — auto-tier assessment & workflow start
-│   ├── resume/SKILL.md        # /resume — continue open work
+│   ├── continue/SKILL.md      # /continue — continue open work
 │   ├── setup/SKILL.md         # /setup — environment installer
 │   └── test/SKILL.md          # /test — config validation
 ├── contexts/
