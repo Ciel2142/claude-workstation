@@ -61,6 +61,16 @@ Invoke `superpowers:systematic-debugging` before any fix. 3 failed hypotheses ->
 
 Every 3rd closed sub-task, check ratio = total created / planned-tasks. >=1.5x -> warning. >=2.0x -> gate (stop; re-plan, split, or continue; human decides).
 
+## Strategic Compaction
+
+At these phase boundaries, invoke `ecc:strategic-compact` to assess context consumption:
+- After `spec:` milestone (brainstorming complete)
+- After `plan:` milestone (planning complete)
+- After `debug:` milestone (root cause found)
+- During scope-health check (every 3rd closed sub-task)
+
+If strategic-compact recommends compaction: (1) write any unrecorded decisions, context, or insights to beads notes via `bd-notes-append` -- anything that lives only in conversation and wouldn't survive compaction, (2) log `stopped: pre-compact -- <phase>`, (3) proceed with compaction.
+
 ## Verification Format
 
 After `superpowers:verification-before-completion`, log to beads notes:
