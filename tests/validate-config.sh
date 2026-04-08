@@ -624,17 +624,23 @@ echo "19. help.md escalation step reference"
 
 HELP_FILE="$PLUGIN_ROOT/commands/help.md"
 if [[ -f "$HELP_FILE" ]]; then
-    # B1: Escalation "Small → Medium+" must reference step 6 (IMPLEMENT) — step 5 is SPIKE-EVAL, step 7 is VERIFY
-    if grep -q 'step 6 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
-        pass "escalation references 'step 6 (IMPLEMENT)' correctly"
+    # B1: Escalation "Small → Medium" must reference step 4 (IMPLEMENT) — Medium path step 4
+    if grep -q 'step 4 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
+        pass "escalation references 'step 4 (IMPLEMENT)' for Small → Medium"
     else
-        fail "escalation does NOT reference 'step 6 (IMPLEMENT)' — may point to wrong step"
+        fail "escalation does NOT reference 'step 4 (IMPLEMENT)' for Small → Medium"
     fi
-    # Negative: ensure old wrong reference is gone
-    if grep -q 'step 5 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
-        fail "escalation still references 'step 5 (IMPLEMENT)' (step 5 is now SPIKE-EVAL, not IMPLEMENT)"
+    # B2: Escalation "Medium → Medium+" must reference step 2 (BRAINSTORM)
+    if grep -q 'step 2 (BRAINSTORM)' "$HELP_FILE" 2>/dev/null; then
+        pass "escalation references 'step 2 (BRAINSTORM)' for Medium → Medium+"
     else
-        pass "no stale 'step 5 (IMPLEMENT)' reference"
+        fail "escalation does NOT reference 'step 2 (BRAINSTORM)' for Medium → Medium+"
+    fi
+    # Negative: ensure old escalation reference is gone
+    if grep -q 'step 6 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
+        fail "escalation still references 'step 6 (IMPLEMENT)' (old Small → Medium+ path)"
+    else
+        pass "no stale 'step 6 (IMPLEMENT)' reference"
     fi
 else
     fail "commands/help.md MISSING"
