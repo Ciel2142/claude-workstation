@@ -6,29 +6,37 @@ The current workflow spans 506 lines across two files:
 - `contexts/workflow.md` (206 lines, auto-injected every session)
 - `commands/help.md` (300 lines, on-demand)
 
+Additional bloat:
+- `skills/setup/SKILL.md` (164 lines) duplicates what each plugin's own README covers
+- `skills/continue/SKILL.md` (327 lines) for session recovery that a one-liner handles
+
 Issues:
 1. **Context budget waste** — 206 lines auto-injected when ~30 would suffice
 2. **Redundancy** — 14 concepts duplicated across both files
 3. **Verbosity** — 2-6x more words than needed for shared concepts (compared to template-bridge reference)
 4. **19 standalone protocols** — most either redundant with skills that own them, or compressible to one-liners
+5. **Setup skill** — each plugin (Beads, Superpowers, ECC) has its own install docs; no need for a wrapper
 
 ## Solution
 
-Adopt the template-bridge architecture: lean always-on cheatsheet + full workflow as on-demand skill.
+Adopt the template-bridge architecture: lean always-on cheatsheet (auto-injected via SessionStart hook) + full workflow as on-demand skill. Drop setup and continue skills.
 
 ### Architecture
 
 | Layer | File | Size | Delivery |
 |---|---|---|---|
-| Always-on | Plugin `CLAUDE.md` | ~30 lines | Auto-loaded by Claude Code |
+| Always-on | SessionStart hook injects cheatsheet | ~30 lines | Auto-injected every session (guaranteed) |
+| Backup | Plugin `CLAUDE.md` | ~30 lines (same content) | Auto-loaded by Claude Code (if supported) |
 | On-demand | `skills/workflow/SKILL.md` | ~120 lines | Loaded when invoked or when `/start` routes |
+
+Note: Plugin CLAUDE.md auto-loading is not guaranteed across all environments. The SessionStart hook is the primary delivery mechanism (following template-bridge's approach of hook-based injection). CLAUDE.md serves as backup for environments that do load it.
 
 ### Context budget
 
 | Before | After | Reduction |
 |---|---|---|
-| ~230 lines always-on (CLAUDE.md + workflow.md) | ~30 lines always-on (CLAUDE.md only) | 87% |
-| ~530 lines total (+ help.md) | ~150 lines total | 72% |
+| ~230 lines always-on (CLAUDE.md + workflow.md) | ~30 lines always-on (hook-injected) | 87% |
+| ~1020 lines total (workflow + help + setup + continue) | ~150 lines total (CLAUDE.md + workflow skill) | 85% |
 
 ## File Changes
 
@@ -68,11 +76,23 @@ For the full workflow reference, invoke `/claude-workstation:workflow`.
 ### Session
 
 - **Resume:** `bd list --status=in_progress` -> `bd show <id>` -> read notes for spec/plan paths
-- **Setup:** `/claude-workstation:setup`
 - **Validate:** `/claude-workstation:test`
+
+### Prerequisites
+
+Install each plugin following its own documentation:
+- [Beads](https://github.com/steveyegge/beads) -- task tracking
+- [Superpowers](https://github.com/obra/superpowers) -- development methodology
+- [ECC](https://github.com/affaan-m/everything-claude-code) -- domain expertise
 ```
 
-### 2. `skills/workflow/SKILL.md` — CREATE (~120 lines)
+### 2. `hooks/session-start` — SIMPLIFY
+
+Keep beads auto-init (Step 0) and server configuration (Step 1). Replace workflow.md injection (Step 2) with injection of the lean cheatsheet content from CLAUDE.md (~30 lines).
+
+The hook reads `CLAUDE.md` instead of `contexts/workflow.md` and injects it as `additionalContext`. Same mechanism, smaller payload.
+
+### 3. `skills/workflow/SKILL.md` — CREATE (~120 lines)
 
 Full workflow reference, loaded on-demand. Contains:
 
@@ -166,30 +186,32 @@ Section 11: PLUGIN ROUTING (3 lines)
   Before new implementation: search existing tools first, library docs second (Context7), build last.
 ```
 
-### 3. `contexts/workflow.md` — DELETE
+### 4. `contexts/workflow.md` — DELETE
 
 Content merged into `skills/workflow/SKILL.md`.
 
-### 4. `commands/help.md` — DELETE
+### 5. `commands/help.md` — DELETE
 
 Content merged into `skills/workflow/SKILL.md` and `CLAUDE.md`. The detailed per-tier paths (Trivial Path, Small Path, Medium Path, etc.) are dropped -- `/start` handles tier routing at invocation time.
 
-### 5. `skills/continue/SKILL.md` — DELETE
+### 6. `skills/continue/SKILL.md` — DELETE
 
-Replaced by two-line session recovery in CLAUDE.md:
+Replaced by one-liner session recovery in CLAUDE.md:
 ```
 Resume: bd list --status=in_progress -> bd show <id> -> read notes for spec/plan paths
 ```
 
-### 6. `hooks/session-start` — SIMPLIFY
+### 7. `skills/setup/SKILL.md` — DELETE
 
-Remove Step 2 (workflow.md injection). Keep:
-- Step 0: beads auto-init
-- Step 1: beads server configuration
+Each plugin has its own installation docs:
+- Beads: https://github.com/steveyegge/beads
+- Superpowers: https://github.com/obra/superpowers
+- ECC: https://github.com/affaan-m/everything-claude-code
 
-The hook still runs but no longer injects workflow context. CLAUDE.md (auto-loaded by Claude Code) provides the always-on context.
+CLAUDE.md lists prerequisites with links. Beads auto-init is handled by SessionStart hook.
+The setup skill was wrapping `/plugin install` commands that each plugin's README already documents.
 
-### 7. `/start` skill — NO CHANGE (this task)
+### 8. `/start` skill — NO CHANGE (this task)
 
 `/start` continues to own tier assessment and skill routing. The tier system is an internal implementation detail of `/start`, no longer explained in workflow context. Future optimization of `/start` is a separate task.
 
@@ -250,9 +272,21 @@ The hook still runs but no longer injects workflow context. CLAUDE.md (auto-load
 
 3. **Session recovery is weaker.** `/continue` had deep context loading (spec files, plan files, sub-task statuses, worktree detection). The one-liner replacement relies on agent judgment. Mitigation: milestone notes preserve enough breadcrumbs for manual recovery.
 
+4. **Setup discoverability.** New users won't have a guided setup experience. Mitigation: CLAUDE.md lists prerequisites with GitHub links; each plugin's docs are comprehensive.
+
 ## Out of Scope
 
 - Optimizing `/start` skill (tier gates, side-quest detection) -- separate task
 - Modifying Superpowers skills to absorb dropped protocols -- separate task (Risk 1)
 - Changing hook infrastructure (pre-change-gate, stop hooks) -- unchanged
 - AGENTS.md changes -- unchanged
+
+## Summary of Deletions
+
+| File | Lines removed | Replacement |
+|---|---|---|
+| `contexts/workflow.md` | 206 | `skills/workflow/SKILL.md` (~120 lines) |
+| `commands/help.md` | ~300 | Merged into workflow skill + CLAUDE.md |
+| `skills/continue/SKILL.md` | 327 | One-liner in CLAUDE.md |
+| `skills/setup/SKILL.md` | 164 | Prerequisites section in CLAUDE.md + plugin READMEs |
+| **Total removed** | **~997 lines** | **~150 lines** |
