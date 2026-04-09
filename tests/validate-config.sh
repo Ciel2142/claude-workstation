@@ -47,9 +47,9 @@ echo ""
 # --- 3. Plugin source files ---
 echo "3. Plugin source files"
 
-[[ -f "$PLUGIN_ROOT/contexts/workflow.md" ]] \
-    && pass "contexts/workflow.md exists" \
-    || fail "contexts/workflow.md MISSING"
+[[ -f "$PLUGIN_ROOT/skills/workflow/SKILL.md" ]] \
+    && pass "skills/workflow/SKILL.md exists" \
+    || fail "skills/workflow/SKILL.md MISSING"
 
 [[ -f "$PLUGIN_ROOT/hooks/session-start" ]] \
     && pass "hooks/session-start exists" \
@@ -61,14 +61,14 @@ echo "3. Plugin source files"
 
 echo ""
 
-# --- 4. Workflow context content ---
-echo "4. Workflow context content"
+# --- 4. Workflow skill content ---
+echo "4. Workflow skill content"
 
-for keyword in "Beads-First" "Task Sizing" "Plugin Routing" "Side Quests" "Spec Amendments" "Micro-tiers" "Scope Confirmation" "Pre-Change Gate" "Hard Rules" "Milestone Notes" "Verification Format" "Spike Phase" "Spec Coverage Gate" "Scope Health" "Debugging" "Strategic Compaction" "Project Decomposition" "Scope Assessment"; do
-    if grep -q "$keyword" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null; then
-        pass "workflow.md contains '$keyword'"
+for keyword in "Pre-Change Gate" "Hard Rules" "Milestone Notes" "Side Quests" "Anti-Patterns" "Plugin Routing" "Skill Invocation Priority" "Task Decomposition" "Ready Fronts" "Key Skills Reference"; do
+    if grep -q "$keyword" "$PLUGIN_ROOT/skills/workflow/SKILL.md" 2>/dev/null; then
+        pass "workflow skill contains '$keyword'"
     else
-        fail "workflow.md MISSING '$keyword'"
+        fail "workflow skill MISSING '$keyword'"
     fi
 done
 
@@ -97,8 +97,8 @@ if echo "$HOOK_OUTPUT" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 ctx = d['hookSpecificOutput']['additionalContext']
-assert 'Pre-Change Gate' in ctx, 'Pre-Change Gate missing from escaped content'
-assert 'Scope Confirmation' in ctx, 'Scope Confirmation missing from escaped content'
+assert 'Quick Reference' in ctx, 'Quick Reference missing from escaped content'
+assert 'Hard Rules' in ctx, 'Hard Rules missing from escaped content'
 assert '\"yes\"' not in ctx or 'yes' in ctx, 'quote escaping corrupted content'
 " 2>/dev/null; then
     pass "session-start hook JSON escaping preserves content correctly"
@@ -159,7 +159,7 @@ echo ""
 # --- 8. Skill directories ---
 echo "8. Skill directories"
 
-for skill_dir in start continue setup test; do
+for skill_dir in start workflow test; do
     if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
         pass "skills/$skill_dir/SKILL.md exists"
     else
@@ -172,7 +172,7 @@ echo ""
 # --- 9. SKILL.md frontmatter ---
 echo "9. SKILL.md frontmatter"
 
-for skill_dir in start continue setup test; do
+for skill_dir in start workflow test; do
     skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
     if [[ -f "$skill_file" ]]; then
         # Extract name from YAML frontmatter
@@ -233,59 +233,28 @@ echo ""
 # --- 11. Milestone schema validation ---
 echo "11. Milestone schema validation"
 
-CONTINUE_FILE="$PLUGIN_ROOT/skills/continue/SKILL.md"
-WORKFLOW_FILE="$PLUGIN_ROOT/contexts/workflow.md"
+WORKFLOW_SKILL_FILE="$PLUGIN_ROOT/skills/workflow/SKILL.md"
 
-if [[ -f "$CONTINUE_FILE" ]] && [[ -f "$WORKFLOW_FILE" ]]; then
+if [[ -f "$WORKFLOW_SKILL_FILE" ]]; then
 
-    # 11a. Verify workflow.md contains key milestone keys (previously in beads-milestones)
+    # 11a. Verify workflow skill contains key milestone keys
     MILESTONE_KEYS_FOUND=0
-    for key in "tier" "spec" "plan" "completed" "verification" "stopped" "spec-coverage" "active-skill"; do
-        if grep -q "$key" "$WORKFLOW_FILE" 2>/dev/null; then
-            pass "workflow.md contains milestone key '$key'"
+    for key in "tier" "spec" "plan" "completed" "verification" "stopped" "active-skill"; do
+        if grep -q "$key" "$WORKFLOW_SKILL_FILE" 2>/dev/null; then
+            pass "workflow skill contains milestone key '$key'"
             MILESTONE_KEYS_FOUND=$((MILESTONE_KEYS_FOUND + 1))
         else
-            fail "workflow.md MISSING milestone key '$key'"
+            fail "workflow skill MISSING milestone key '$key'"
         fi
     done
 
-    if (( MILESTONE_KEYS_FOUND >= 8 )); then
-        pass "workflow.md contains all $MILESTONE_KEYS_FOUND milestone keys"
+    if (( MILESTONE_KEYS_FOUND >= 7 )); then
+        pass "workflow skill contains all $MILESTONE_KEYS_FOUND milestone keys"
     else
-        fail "workflow.md has only $MILESTONE_KEYS_FOUND milestone keys (expected 8)"
-    fi
-
-    # 11b. Verify continue references the routing-critical keys
-    # These are the keys continue uses for position detection
-    for key in "docs-updated:" "verification:" "completed:" "plan:" "spec:" "tier:"; do
-        if grep -q "\"$key\"" "$CONTINUE_FILE" 2>/dev/null; then
-            pass "continue matches milestone key '$key'"
-        else
-            fail "continue MISSING routing key '$key'"
-        fi
-    done
-
-    # 11c. Check continue does NOT use wrong-case patterns
-    for bad_pattern in '"Verification:"' '"Tests passing:"' '"Tests green:"' '"Plan:"' '"Spec:"'; do
-        if grep -q "$bad_pattern" "$CONTINUE_FILE" 2>/dev/null; then
-            fail "continue uses wrong-case pattern $bad_pattern (should be lowercase)"
-        fi
-    done
-
-    # 11d. Check continue references /ecc:update-docs correctly
-    if grep -q '/ecc:update-docs' "$CONTINUE_FILE" 2>/dev/null; then
-        pass "continue references /ecc:update-docs correctly"
-    else
-        fail "continue MISSING /ecc:update-docs reference"
-    fi
-
-    if grep '/update-docs' "$CONTINUE_FILE" 2>/dev/null | grep -qv '/ecc:update-docs'; then
-        fail "continue references bare /update-docs without ecc: prefix"
-    else
-        pass "continue has no bare /update-docs references"
+        fail "workflow skill has only $MILESTONE_KEYS_FOUND milestone keys (expected 7)"
     fi
 else
-    fail "Cannot check milestone schema — continue SKILL.md or contexts/workflow.md missing"
+    fail "Cannot check milestone schema — skills/workflow/SKILL.md missing"
 fi
 
 echo ""
@@ -293,57 +262,15 @@ echo ""
 # --- 11g. Context budget accuracy ---
 echo "11g. Context budget accuracy"
 
-WORKFLOW_SIZE=$(wc -c < "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null || echo 0)
 CLAUDE_MD="$PLUGIN_ROOT/CLAUDE.md"
-if [[ -f "$CLAUDE_MD" ]] && grep -q '~[0-9]' "$CLAUDE_MD" 2>/dev/null; then
-    STATED_KB=$(grep -o '~[0-9][0-9]*' "$CLAUDE_MD" | sed 's/~//' | head -1)
-    ACTUAL_KB=$(( (WORKFLOW_SIZE + 512) / 1024 ))
-    if (( ACTUAL_KB <= STATED_KB + 1 )); then
-        pass "CLAUDE.md context budget (~${STATED_KB}KB) matches actual (${ACTUAL_KB}KB)"
-    else
-        fail "CLAUDE.md says ~${STATED_KB}KB but workflow.md is ${ACTUAL_KB}KB"
-    fi
+CLAUDE_SIZE=$(wc -c < "$CLAUDE_MD" 2>/dev/null || echo 0)
+if (( CLAUDE_SIZE > 0 && CLAUDE_SIZE < 2048 )); then
+    pass "CLAUDE.md is lean (${CLAUDE_SIZE} bytes)"
 else
-    pass "No context budget claim found in CLAUDE.md (skipped)"
+    fail "CLAUDE.md is ${CLAUDE_SIZE} bytes (expected < 2048 for lean cheatsheet)"
 fi
 
 echo ""
-
-# --- 12. help.md gate rules ---
-echo "12. help.md gate rules"
-
-HELP_FILE="$PLUGIN_ROOT/commands/help.md"
-if [[ -f "$HELP_FILE" ]]; then
-    for keyword in "Pre-Change Gate" "Scope confirmed" "Task Boundary"; do
-        if grep -q "$keyword" "$HELP_FILE" 2>/dev/null; then
-            pass "help.md references '$keyword'"
-        else
-            fail "help.md MISSING '$keyword'"
-        fi
-    done
-else
-    fail "commands/help.md MISSING"
-fi
-
-# 12b. Consistency: workflow.md sections reflected in help.md
-for keyword in "Spec Amendments" "Micro-tier" "Sub-task Dependencies" "Project Path"; do
-    if grep -q "$keyword" "$HELP_FILE" 2>/dev/null; then
-        pass "help.md covers workflow.md section '$keyword'"
-    else
-        fail "help.md MISSING workflow.md section '$keyword'"
-    fi
-done
-
-# 12c. Consistency: tier definitions match
-for tier_signal in "≤1 file" "1-3 files" "4-7 files" "8+ files" "3+ feature areas"; do
-    WF_HAS=$(grep -c "$tier_signal" "$PLUGIN_ROOT/contexts/workflow.md" 2>/dev/null || true)
-    HELP_HAS=$(grep -c "$tier_signal" "$HELP_FILE" 2>/dev/null || true)
-    if (( WF_HAS > 0 && HELP_HAS > 0 )); then
-        pass "tier signal '$tier_signal' consistent across workflow.md and help.md"
-    elif (( WF_HAS > 0 && HELP_HAS == 0 )); then
-        fail "tier signal '$tier_signal' in workflow.md but MISSING from help.md"
-    fi
-done
 
 echo ""
 
@@ -469,10 +396,10 @@ if echo "$SESSION_OUT" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/d
 else
     fail "session-start hook output is NOT valid JSON (functional)"
 fi
-if echo "$SESSION_OUT" | grep -q "Beads-First"; then
-    pass "session-start injects workflow content (functional)"
+if echo "$SESSION_OUT" | grep -q "Quick Reference"; then
+    pass "session-start injects CLAUDE.md content (functional)"
 else
-    fail "session-start does NOT inject workflow content (functional)"
+    fail "session-start does NOT inject CLAUDE.md content (functional)"
 fi
 
 # 15f. Functional: pre-change-gate warns when no task is in_progress
@@ -489,57 +416,24 @@ if command -v bd >/dev/null 2>&1; then
     fi
 fi
 
-# 15g. Functional: session-start with missing workflow.md outputs warning JSON
-REAL_WORKFLOW="$PLUGIN_ROOT/contexts/workflow.md"
-if [ -f "$REAL_WORKFLOW" ]; then
+# 15g. Functional: session-start with missing CLAUDE.md outputs warning JSON
+REAL_CLAUDE="$PLUGIN_ROOT/CLAUDE.md"
+if [ -f "$REAL_CLAUDE" ]; then
     TMPDIR_HOOK=$(mktemp -d)
-    # Create a minimal plugin structure with no workflow.md
-    mkdir -p "$TMPDIR_HOOK/contexts" "$TMPDIR_HOOK/hooks"
+    # Create a minimal plugin structure with no CLAUDE.md
+    mkdir -p "$TMPDIR_HOOK/hooks"
     cp "$PLUGIN_ROOT/hooks/session-start" "$TMPDIR_HOOK/hooks/"
-    # Run from the temp dir (workflow.md doesn't exist)
+    # Run from the temp dir (CLAUDE.md doesn't exist)
     MISSING_OUT=$(bash "$TMPDIR_HOOK/hooks/session-start" 2>/dev/null || echo "")
     if echo "$MISSING_OUT" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
-        pass "session-start outputs valid JSON even when workflow.md missing (functional)"
+        pass "session-start outputs valid JSON even when CLAUDE.md missing (functional)"
     else
-        fail "session-start outputs INVALID JSON when workflow.md missing (functional)"
+        fail "session-start outputs INVALID JSON when CLAUDE.md missing (functional)"
     fi
     rm -rf "$TMPDIR_HOOK"
 fi
 
 echo ""
-
-# --- 16. Setup skill plugin list ---
-echo "16. Setup skill — no optional plugins"
-
-SETUP_SKILL="$PLUGIN_ROOT/skills/setup/SKILL.md"
-if [[ -f "$SETUP_SKILL" ]]; then
-    # Required plugins that MUST be present
-    for required in "ecc@everything-claude-code" "superpowers@superpowers-marketplace" "beads@beads-marketplace"; do
-        if grep -q "$required" "$SETUP_SKILL" 2>/dev/null; then
-            pass "setup lists required plugin $required"
-        else
-            fail "setup MISSING required plugin $required"
-        fi
-    done
-
-    # Optional plugins that must NOT be present (overshadowed by ECC)
-    for optional in "hookify@claude-plugins-official" "playwright@claude-plugins-official" "code-simplifier@claude-plugins-official" "code-review@claude-plugins-official" "security-guidance@claude-plugins-official" "commit-commands@claude-plugins-official" "frontend-design@claude-plugins-official"; do
-        if grep -q "$optional" "$SETUP_SKILL" 2>/dev/null; then
-            fail "setup still references optional plugin $optional (should be removed)"
-        else
-            pass "setup does not reference optional $optional"
-        fi
-    done
-
-    # Step 2b (mgrep optional section) should not exist
-    if grep -q "Step 2b" "$SETUP_SKILL" 2>/dev/null; then
-        fail "setup still has Step 2b (mgrep optional section — should be removed)"
-    else
-        pass "setup does not have Step 2b"
-    fi
-else
-    fail "setup skill MISSING at $SETUP_SKILL"
-fi
 
 echo ""
 
@@ -619,51 +513,14 @@ fi
 
 echo ""
 
-# --- 19. help.md escalation step reference ---
-echo "19. help.md escalation step reference"
-
-HELP_FILE="$PLUGIN_ROOT/commands/help.md"
-if [[ -f "$HELP_FILE" ]]; then
-    # B1: Escalation "Small → Medium" must reference step 4 (IMPLEMENT) — Medium path step 4
-    if grep -q 'step 4 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
-        pass "escalation references 'step 4 (IMPLEMENT)' for Small → Medium"
-    else
-        fail "escalation does NOT reference 'step 4 (IMPLEMENT)' for Small → Medium"
-    fi
-    # B2: Escalation "Medium → Medium+" must reference step 2 (BRAINSTORM)
-    if grep -q 'step 2 (BRAINSTORM)' "$HELP_FILE" 2>/dev/null; then
-        pass "escalation references 'step 2 (BRAINSTORM)' for Medium → Medium+"
-    else
-        fail "escalation does NOT reference 'step 2 (BRAINSTORM)' for Medium → Medium+"
-    fi
-    # Negative: ensure old escalation reference is gone
-    if grep -q 'step 6 (IMPLEMENT)' "$HELP_FILE" 2>/dev/null; then
-        fail "escalation still references 'step 6 (IMPLEMENT)' (old Small → Medium+ path)"
-    else
-        pass "no stale 'step 6 (IMPLEMENT)' reference"
-    fi
-else
-    fail "commands/help.md MISSING"
-fi
-
 echo ""
 
 # --- 20. Alias consistency ---
 echo "20. Alias consistency"
 
 ALIASES_FILE="$PLUGIN_ROOT/profiles/aliases.sh"
-SETUP_SKILL="$PLUGIN_ROOT/skills/setup/SKILL.md"
 
-if [[ -f "$ALIASES_FILE" ]] && [[ -f "$SETUP_SKILL" ]]; then
-    # F1: Setup skill must reference profiles/aliases.sh as single source of truth
-    # (not hardcode alias definitions inline)
-    if grep -q 'profiles/aliases.sh' "$SETUP_SKILL" 2>/dev/null; then
-        pass "setup skill references profiles/aliases.sh (single source of truth)"
-    else
-        fail "setup skill does NOT reference profiles/aliases.sh — aliases may drift"
-    fi
-
-    # Verify aliases.sh contains all expected alias names
+if [[ -f "$ALIASES_FILE" ]]; then
     for alias_name in claude-dev claude-research claude-review; do
         if grep -q "alias $alias_name=" "$ALIASES_FILE" 2>/dev/null; then
             pass "profiles/aliases.sh defines $alias_name"
@@ -672,7 +529,7 @@ if [[ -f "$ALIASES_FILE" ]] && [[ -f "$SETUP_SKILL" ]]; then
         fi
     done
 else
-    fail "Cannot check alias consistency — aliases.sh or setup/SKILL.md missing"
+    fail "profiles/aliases.sh MISSING"
 fi
 
 echo ""
@@ -713,67 +570,37 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# Section 23: BS coverage — enforcement documentation guards
-# Verifies that blind-spot rules remain documented in source-of-truth files.
+# Section 23: Enforcement documentation guards
+# Verifies that hard rules remain documented in source-of-truth files.
 # These rules have no mechanical enforcement; tests ensure text survives edits.
 # ---------------------------------------------------------------------------
-echo "23. Enforcement documentation (BS coverage)"
+echo "23. Enforcement documentation"
 
-WORKFLOW="$PLUGIN_ROOT/contexts/workflow.md"
-HELP="$PLUGIN_ROOT/commands/help.md"
+WORKFLOW_SKILL="$PLUGIN_ROOT/skills/workflow/SKILL.md"
+CLAUDE_MD="$PLUGIN_ROOT/CLAUDE.md"
 
-# BS3: No skipping tiers downward
-if grep -q 'Escalation only upward' "$WORKFLOW" 2>/dev/null; then
-    pass "BS3: workflow.md contains 'Escalation only upward' rule"
-else
-    fail "BS3: workflow.md MISSING 'Escalation only upward' rule"
-fi
-
-# BS5: Collateral breakage in Verification Failure Protocol
-if grep -q 'Collateral' "$WORKFLOW" 2>/dev/null; then
-    pass "BS5: workflow.md contains Collateral breakage rule"
-else
-    fail "BS5: workflow.md MISSING Collateral breakage rule"
-fi
-
-# BS6: No production code without failing test
-if grep -q 'No production code without a failing test' "$WORKFLOW" 2>/dev/null; then
-    pass "BS6: workflow.md contains TDD-first rule"
-else
-    fail "BS6: workflow.md MISSING 'No production code without a failing test'"
-fi
-
-# BS8: Spec amendments Minor/Material criteria
-if grep -q 'Minor.*self-approve' "$WORKFLOW" 2>/dev/null && grep -q 'Material.*human' "$WORKFLOW" 2>/dev/null; then
-    pass "BS8: workflow.md has objective Minor/Material boundary"
-else
-    fail "BS8: workflow.md MISSING objective Minor/Material spec amendment criteria"
-fi
-
-# BS9: Scope health uses ratio check
-if grep -q 'ratio.*planned-tasks\|total created.*planned' "$WORKFLOW" 2>/dev/null; then
-    pass "BS9: workflow.md scope-health uses ratio for counting"
-else
-    fail "BS9: workflow.md scope-health should reference ratio check"
-fi
-
-# BS12: Verification Failure Protocol Type A/B/C
-for type_label in "Impl bug" "Collateral" "Unrelated"; do
-    if grep -q "$type_label" "$WORKFLOW" 2>/dev/null; then
-        pass "BS12: workflow.md contains Verification Failure Protocol '$type_label'"
+# Hard rules in CLAUDE.md (always-on)
+for rule in "No code without a beads task" "No production code without a failing test" "No completion claims without verification output" "strategic-compact"; do
+    if grep -q "$rule" "$CLAUDE_MD" 2>/dev/null; then
+        pass "CLAUDE.md contains hard rule: '$rule'"
     else
-        fail "BS12: workflow.md MISSING Verification Failure Protocol '$type_label'"
+        fail "CLAUDE.md MISSING hard rule: '$rule'"
     fi
 done
 
-# BS12 mirror: help.md should also have Type A/B/C
-for type_label in "Type A" "Type B" "Type C"; do
-    if grep -q "$type_label" "$HELP" 2>/dev/null; then
-        pass "BS12: help.md contains Verification Failure Protocol '$type_label'"
-    else
-        fail "BS12: help.md MISSING Verification Failure Protocol '$type_label'"
-    fi
-done
+# Pre-Change Gate in workflow skill
+if grep -q "Pre-Change Gate" "$WORKFLOW_SKILL" 2>/dev/null; then
+    pass "workflow skill contains Pre-Change Gate"
+else
+    fail "workflow skill MISSING Pre-Change Gate"
+fi
+
+# Side quests in workflow skill
+if grep -q "Side Quests" "$WORKFLOW_SKILL" 2>/dev/null; then
+    pass "workflow skill contains Side Quests"
+else
+    fail "workflow skill MISSING Side Quests"
+fi
 
 echo ""
 
@@ -783,7 +610,7 @@ echo "24. Behavioral spec files"
 SPECS_DIR="$PLUGIN_ROOT/tests/specs"
 if [ -d "$SPECS_DIR" ]; then
     pass "tests/specs/ directory exists"
-    for spec_name in pre-change-gate bd-notes-append position-detection scope-health start continue; do
+    for spec_name in pre-change-gate bd-notes-append position-detection scope-health start; do
         if [ -f "$SPECS_DIR/${spec_name}.yaml" ]; then
             pass "specs/${spec_name}.yaml exists"
         else
