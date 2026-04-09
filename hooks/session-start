@@ -47,21 +47,14 @@ if [ -n "$BEADS_CONFIGURE" ] && [ -x "$BEADS_CONFIGURE" ]; then
     fi
 fi
 
-# Step 2: Read workflow context
-# B1: Output warning JSON instead of silent exit when workflow.md is missing
-WORKFLOW_CONTEXT_FILE="${PLUGIN_ROOT}/contexts/workflow.md"
-if [ ! -f "$WORKFLOW_CONTEXT_FILE" ]; then
-    WORKFLOW_CONTENT="warning: workflow.md not found at ${WORKFLOW_CONTEXT_FILE} — workflow context not injected"
+# Step 2: Read cheatsheet context from CLAUDE.md
+# B1: Output warning JSON instead of silent exit when CLAUDE.md is missing
+CHEATSHEET_FILE="${PLUGIN_ROOT}/CLAUDE.md"
+if [ ! -f "$CHEATSHEET_FILE" ]; then
+    WORKFLOW_CONTENT="warning: CLAUDE.md not found at ${CHEATSHEET_FILE} — workflow context not injected"
 else
-    WORKFLOW_CONTENT=$(cat "$WORKFLOW_CONTEXT_FILE")
+    WORKFLOW_CONTENT=$(cat "$CHEATSHEET_FILE")
 fi
-
-# Step 2b: Resolve ${CLAUDE_PLUGIN_ROOT} in workflow content
-# Claude Code's hook runner expands this var in hooks.json commands, and the
-# plugin loader resolves it in skill files, but workflow.md is injected as raw
-# text — so Claude's bash environment (where the var is unset) would expand it
-# to empty, producing paths like "/hooks/bd-notes-append" that don't exist.
-WORKFLOW_CONTENT="${WORKFLOW_CONTENT//\$\{CLAUDE_PLUGIN_ROOT\}/$PLUGIN_ROOT}"
 
 # Step 3: Escape for JSON embedding
 escape_for_json() {
