@@ -7,26 +7,8 @@ A Claude Code plugin that restores your full development environment from a sing
 - **Unified Workflow** -- On-demand skill connecting Beads, Superpowers, and ECC (`/claude-workstation:workflow`)
 - **Lean Auto-Injection** -- SessionStart hook delivers ~30-line cheatsheet (down from ~200 lines)
 - **Auto-Tier Assessment** -- `/start` evaluates task descriptions and routes to the right workflow
-- **Context Profiles** -- `claude-dev`, `claude-research`, `claude-review` shell aliases
 - **Session Hooks** -- SessionStart, PreToolUse, and Stop hooks for beads enforcement
 - **Test Suite** -- Config validation + dry-run scenarios
-
-## Install
-
-Install prerequisites following their own documentation:
-- [Beads](https://github.com/steveyegge/beads) -- `/plugin install beads@beads-marketplace`
-- [Superpowers](https://github.com/obra/superpowers-marketplace) -- `/plugin install superpowers@superpowers-marketplace`
-- [ECC](https://github.com/affaan-m/everything-claude-code) -- `/plugin install ecc@everything-claude-code`
-
-Then install Claude Workstation:
-
-```bash
-/plugin marketplace add https://github.com/Ciel2142/claude-workstation
-/plugin install claude-workstation@claude-workstation
-
-# Validate:
-/claude-workstation:test
-```
 
 ## Dependencies
 
@@ -74,18 +56,6 @@ See `/claude-workstation:workflow` for the full reference, or the cheatsheet in 
 | **PreToolUse** | Before Edit/Write | Warns if no active beads task exists (pre-change-gate) |
 | **Stop** | Session ends | Warns about untracked commits, lists in-progress tasks |
 
-## Context Profiles
-
-After setup, use these shell aliases:
-
-```bash
-claude-dev       # Code-first development mode
-claude-research  # Exploration and investigation mode
-claude-review    # Code review and quality analysis mode
-```
-
-Note: Workflow context is auto-injected via the SessionStart hook — no alias needed.
-
 ## Project Structure
 
 ```
@@ -94,18 +64,12 @@ claude-workstation/
 │   ├── start/SKILL.md         # /start -- auto-tier assessment & workflow start
 │   ├── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
 │   └── test/SKILL.md          # /test -- config validation
-├── contexts/
-│   ├── dev.md
-│   ├── research.md
-│   └── review.md
 ├── hooks/
 │   ├── hooks.json             # SessionStart + PreToolUse + Stop hooks
 │   ├── bd-notes-append        # Safe notes append wrapper
 │   ├── session-start          # Cheatsheet injection script
 │   ├── pre-change-gate        # Beads task enforcement before file edits
 │   └── stop                   # Session-end reminder script
-├── profiles/
-│   └── aliases.sh             # Shell aliases for context profiles
 ├── tests/
 │   ├── validate-config.sh     # Config validation
 │   ├── test-behaviors.sh      # Behavioral tests for hooks

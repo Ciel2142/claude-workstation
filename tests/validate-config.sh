@@ -15,21 +15,18 @@ echo ""
 # --- 1. File existence ---
 echo "1. File existence"
 
-[[ -f "$HOME/.claude/contexts/dev.md" ]] \
-    && pass "dev.md context exists" \
-    || fail "dev.md context MISSING"
-
-[[ -f "$HOME/.claude/contexts/research.md" ]] \
-    && pass "research.md context exists" \
-    || fail "research.md context MISSING"
-
-[[ -f "$HOME/.claude/contexts/review.md" ]] \
-    && pass "review.md context exists" \
-    || fail "review.md context MISSING"
-
 [[ -f "$HOME/.claude/settings.json" ]] \
     && pass "settings.json exists" \
     || fail "settings.json MISSING"
+
+# contexts/ and profiles/ were removed in v2.1 — verify they're gone
+[[ ! -d "$PLUGIN_ROOT/contexts" ]] \
+    && pass "contexts/ directory removed" \
+    || fail "contexts/ directory still exists (should be removed)"
+
+[[ ! -d "$PLUGIN_ROOT/profiles" ]] \
+    && pass "profiles/ directory removed" \
+    || fail "profiles/ directory still exists (should be removed)"
 
 echo ""
 
@@ -132,27 +129,6 @@ while IFS= read -r line; do
 done <<< "$PLUGIN_CHECK"
 
 echo ""
-
-# --- 7. Shell aliases ---
-echo "7. Shell aliases"
-
-RC_FILES=()
-[[ -f "$HOME/.bashrc" ]] && RC_FILES+=("$HOME/.bashrc")
-[[ -f "$HOME/.zshrc" ]] && RC_FILES+=("$HOME/.zshrc")
-
-if [ ${#RC_FILES[@]} -gt 0 ]; then
-    for rc_file in "${RC_FILES[@]}"; do
-        for alias_name in claude-dev claude-research claude-review; do
-            if grep -q "alias $alias_name=" "$rc_file" 2>/dev/null; then
-                pass "$alias_name alias in $rc_file"
-            else
-                fail "$alias_name alias MISSING from $rc_file"
-            fi
-        done
-    done
-else
-    fail "No .bashrc or .zshrc found"
-fi
 
 echo ""
 
@@ -515,23 +491,6 @@ echo ""
 
 echo ""
 
-# --- 20. Alias consistency ---
-echo "20. Alias consistency"
-
-ALIASES_FILE="$PLUGIN_ROOT/profiles/aliases.sh"
-
-if [[ -f "$ALIASES_FILE" ]]; then
-    for alias_name in claude-dev claude-research claude-review; do
-        if grep -q "alias $alias_name=" "$ALIASES_FILE" 2>/dev/null; then
-            pass "profiles/aliases.sh defines $alias_name"
-        else
-            fail "profiles/aliases.sh MISSING $alias_name definition"
-        fi
-    done
-else
-    fail "profiles/aliases.sh MISSING"
-fi
-
 echo ""
 
 # --- 21. README test file references ---
@@ -552,19 +511,59 @@ fi
 
 echo ""
 
-# --- 22. Context file tool references ---
-echo "22. Context file tool references"
+# --- 22. Removed content guards ---
+echo "22. Removed content guards"
 
-RESEARCH_FILE="$PLUGIN_ROOT/contexts/research.md"
-if [[ -f "$RESEARCH_FILE" ]]; then
-    # I1: Should reference "Agent" tool, not stale "Task" tool name
-    if grep -q 'Task with' "$RESEARCH_FILE" 2>/dev/null; then
-        fail "research.md uses stale 'Task with' tool reference (should be 'Agent')"
+if [[ -f "$PLUGIN_ROOT/README.md" ]]; then
+    # 22a. README should NOT have an "## Install" section (install instructions removed in v2.1)
+    if grep -q '^## Install' "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+        fail "README still has '## Install' section (should be removed)"
     else
-        pass "research.md does not use stale 'Task' tool name"
+        pass "README does not have '## Install' section"
     fi
+
+    # 22b. README should NOT reference "Context Profiles" (removed in v2.1)
+    if grep -q 'Context Profiles' "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+        fail "README still references 'Context Profiles' (should be removed)"
+    else
+        pass "README does not reference 'Context Profiles'"
+    fi
+
+    # 22c. README project structure should NOT list contexts/ or profiles/
+    if grep -q 'contexts/' "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+        fail "README project structure still lists contexts/"
+    else
+        pass "README does not list contexts/ in structure"
+    fi
+
+    if grep -q 'profiles/' "$PLUGIN_ROOT/README.md" 2>/dev/null; then
+        fail "README project structure still lists profiles/"
+    else
+        pass "README does not list profiles/ in structure"
+    fi
+fi
+
+# 22e. plugin.json should NOT have "setup" keyword
+if python3 -c "
+import json
+d = json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))
+kw = d.get('keywords', [])
+assert 'setup' not in kw, 'setup keyword still present'
+" 2>/dev/null; then
+    pass "plugin.json does not have 'setup' keyword"
 else
-    fail "contexts/research.md MISSING"
+    fail "plugin.json still has 'setup' keyword"
+fi
+
+# 22f. plugin.json description should not reference 'context profiles'
+if python3 -c "
+import json
+d = json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))
+assert 'context profiles' not in d.get('description', '').lower(), 'description still mentions context profiles'
+" 2>/dev/null; then
+    pass "plugin.json description does not mention context profiles"
+else
+    fail "plugin.json description still mentions 'context profiles'"
 fi
 
 echo ""
@@ -633,6 +632,6 @@ if [[ $FAIL -eq 0 ]]; then
     echo "✅ All checks passed"
     exit 0
 else
-    echo "❌ $FAIL check(s) failed — run /claude-workstation:setup to fix"
+    echo "❌ $FAIL check(s) failed"
     exit 1
 fi
