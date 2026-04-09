@@ -1,6 +1,6 @@
 ---
 name: start
-version: 2.0.0
+version: 2.1.0
 description: >
   Auto-assess task tier and recommend the right workflow. Takes a description,
   assesses tier, creates the beads task, and presents workflow options with reasoning.
