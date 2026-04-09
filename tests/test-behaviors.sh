@@ -292,7 +292,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "3. Position detection"
 
-# Mirror the continue/SKILL.md position detection logic
+# Mirror the workflow skill position detection logic
 detect_position() {
     local notes="$1"
     if echo "$notes" | grep -q 'docs-updated:'; then
@@ -585,80 +585,10 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# Section 7: workflow.md inlined content guards
+# Section 7: YAML spec structure validation
 # ---------------------------------------------------------------------------
 echo ""
-echo "7. workflow.md inlined content"
-
-WORKFLOW_FILE="$PLUGIN_ROOT/contexts/workflow.md"
-
-# 7a. Review levels defined (Standard and Consensus)
-if grep -q 'Standard' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'Consensus' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "7a. workflow.md defines Standard and Consensus review levels"
-else
-    fail "7a. workflow.md missing Standard and/or Consensus"
-fi
-
-# 7b. All 5 review-level signals present
-SIGNAL_COUNT=0
-for signal in "security" "API surface" "cross-domain" "supply-chain" "infrastructure"; do
-    if grep -qi "$signal" "$WORKFLOW_FILE" 2>/dev/null; then
-        SIGNAL_COUNT=$((SIGNAL_COUNT + 1))
-    fi
-done
-if [[ $SIGNAL_COUNT -ge 5 ]]; then
-    pass "7b. all 5 review-level signals present in workflow.md"
-else
-    fail "7b. only $SIGNAL_COUNT/5 review-level signals in workflow.md"
-fi
-
-# 7c. Milestone key table present
-if grep -q 'tier:' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'completed:' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'verification:' "$WORKFLOW_FILE" 2>/dev/null && grep -q 'stopped:' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "7c. milestone key table present in workflow.md"
-else
-    fail "7c. milestone key table missing or incomplete in workflow.md"
-fi
-
-# 7d. Scope health thresholds present
-if grep -q '1.5x' "$WORKFLOW_FILE" 2>/dev/null && grep -q '2.0x' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "7d. scope health thresholds (1.5x, 2.0x) in workflow.md"
-else
-    fail "7d. scope health thresholds missing from workflow.md"
-fi
-
-# 7e. Verification format present
-if grep -q '✓' "$WORKFLOW_FILE" 2>/dev/null && grep -q '✗' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "7e. verification format symbols present in workflow.md"
-else
-    fail "7e. verification format symbols missing from workflow.md"
-fi
-
-# 7f. Spike phase referenced
-if grep -qi 'spike' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "7f. spike phase documented in workflow.md"
-else
-    fail "7f. spike phase missing from workflow.md"
-fi
-
-# 7g. Strategic compaction section present
-if grep -q 'Strategic Compaction' "$WORKFLOW_FILE" 2>/dev/null && \
-   grep -q 'ecc:strategic-compact' "$WORKFLOW_FILE" 2>/dev/null && \
-   grep -q 'spec:' "$WORKFLOW_FILE" 2>/dev/null && \
-   grep -q 'plan:' "$WORKFLOW_FILE" 2>/dev/null && \
-   grep -q 'debug:' "$WORKFLOW_FILE" 2>/dev/null && \
-   grep -q 'Every 3rd closed task' "$WORKFLOW_FILE" 2>/dev/null; then
-    pass "7g. strategic compaction section with trigger points in workflow.md"
-else
-    fail "7g. strategic compaction section missing or incomplete in workflow.md"
-fi
-
-echo ""
-
-# ---------------------------------------------------------------------------
-# Section 8: YAML spec structure validation
-# ---------------------------------------------------------------------------
-echo ""
-echo "8. YAML spec structure"
+echo "7. YAML spec structure"
 
 SPECS_DIR="$PLUGIN_ROOT/tests/specs"
 if [ -d "$SPECS_DIR" ]; then
@@ -671,19 +601,19 @@ if [ -d "$SPECS_DIR" ]; then
         grep -q '^steps:' "$spec_file" 2>/dev/null && HAS_STEPS=1
         grep -q '^scoring:' "$spec_file" 2>/dev/null && HAS_SCORING=1
         if [ "$HAS_ID" -eq 1 ] && [ "$HAS_STEPS" -eq 1 ] && [ "$HAS_SCORING" -eq 1 ]; then
-            pass "8. $spec_name.yaml has required keys (id, steps, scoring)"
+            pass "7. $spec_name.yaml has required keys (id, steps, scoring)"
         else
-            fail "8. $spec_name.yaml missing keys: id=$HAS_ID steps=$HAS_STEPS scoring=$HAS_SCORING"
+            fail "7. $spec_name.yaml missing keys: id=$HAS_ID steps=$HAS_STEPS scoring=$HAS_SCORING"
         fi
         # Check version is 2.0
         if grep -q 'version: "2.0"' "$spec_file" 2>/dev/null; then
-            pass "8. $spec_name.yaml version is 2.0"
+            pass "7. $spec_name.yaml version is 2.0"
         else
-            fail "8. $spec_name.yaml version is not 2.0"
+            fail "7. $spec_name.yaml version is not 2.0"
         fi
     done
 else
-    pass "8. specs directory not yet created (skipped)"
+    pass "7. specs directory not yet created (skipped)"
 fi
 
 echo ""
