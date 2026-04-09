@@ -104,15 +104,59 @@ Invoke `superpowers:systematic-debugging` before any fix. 3 failed hypotheses ->
 
 Every 3rd closed sub-task, check ratio = total created / planned-tasks. >=1.5x -> warning. >=2.0x -> gate (stop; re-plan, split, or continue; human decides).
 
-## Strategic Compaction
+## Plan Phases (Medium/Medium+)
 
-At these phase boundaries, invoke `ecc:strategic-compact` to assess context consumption:
-- After `spec:` milestone (brainstorming complete)
-- After `plan:` milestone (planning complete)
-- After `debug:` milestone (root cause found)
+Plans with 5+ tasks MUST group tasks into named phases. A phase is a logical cluster of tasks that share a domain or concern. Phase headers use `## Phase N: <name>` above the tasks they contain.
+
+Example:
+```
+## Phase 1: Infrastructure & Data Layer
+### Task 1: Maven deps + Liquibase schema
+### Task 2: DB entities + repositories
+
+## Phase 2: External Clients
+### Task 3: OAuth2 token manager
+### Task 4: DocRegistry client
+
+## Phase 3: Domain Services
+### Task 5: ZipPackager
+...
+```
+
+Guidelines: 2-5 tasks per phase. Name reflects the domain/concern, not the task list. A phase boundary means the agent shifts focus to a different part of the system -- context from the previous phase becomes dead weight.
+
+Plans with <5 tasks: phases are optional. The plan author decides. If omitted, the entire plan is one implicit phase.
+
+## Strategic Compaction (Hard Gate)
+
+**BLOCKING.** At every phase boundary, you MUST invoke `/ecc:strategic-compact`. Do NOT proceed to the next phase until this gate passes. "I'll do it later" or "context is still fine" are not valid reasons to skip.
+
+**Phase boundaries (MUST invoke):**
+
+Workflow-stage boundaries:
+- After `spec:` milestone (brainstorming complete, before planning)
+- After `plan:` milestone (planning complete, before implementation)
+- After `debug:` milestone (root cause found, before fix)
+- After `verification:` milestone (verification complete, before docs/finishing)
+
+Plan-phase boundaries (Medium/Medium+ with phased plans):
+- When the last task in a `## Phase N` group is closed, before starting any task from `## Phase N+1`
+- Log `phase-complete: Phase N -- <phase name>` to beads notes before invoking strategic-compact
+
+Fallback (plans without explicit phases, or Small tier):
 - Every 3rd closed task (any tier, including sub-tasks)
 
-If strategic-compact recommends compaction: (0) if medium/medium+ with a spec -- verify the Spec Coverage Gate has passed (all spec sections mapped to sub-tasks or amended). If not, run it NOW before compacting. Uncovered spec sections that survive compaction will never be caught. (1) write any unrecorded decisions, context, or insights to beads notes via `bd-notes-append` -- anything that lives only in conversation and wouldn't survive compaction, (2) log `stopped: pre-compact -- <phase>`, (3) proceed with compaction.
+**When strategic-compact recommends compaction:**
+
+0. **Spec Coverage Gate** -- if medium/medium+ with a spec, verify the gate has passed (all spec sections mapped to sub-tasks or amended). If not, run it NOW. Uncovered spec sections that survive compaction will never be caught.
+1. **Persist context for next phase** -- write ALL of the following to beads notes via `bd-notes-append`:
+   - Decisions made during this phase that aren't in spec/plan files
+   - Interface contracts or signatures the next phase depends on (class names, method signatures, config keys)
+   - Known risks, gotchas, or non-obvious behavior discovered during this phase
+   - Current phase number and next phase name: `next-phase: Phase N+1 -- <name>`
+   - Anything that lives only in conversation and wouldn't survive compaction
+2. **Log stop marker** -- `stopped: pre-compact -- <phase name>`
+3. **Compact** with a summary directing the next phase: `/compact Continuing with Phase N+1: <name>. Read plan file and beads notes for context.`
 
 ## Verification Format
 
@@ -139,6 +183,7 @@ Update beads notes via `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> 
 | `spike-risks:` | Risks identified | `docs-updated:` | Docs updated |
 | `stopped:` | Session end / pre-compact | `spec-coverage:` | After coverage gate |
 | `active-skill:` | Skill invoked/transitioned | `skill-state:` | Before compaction |
+| `phase-complete:` | Last task in plan phase closed | `next-phase:` | Before compaction |
 
 ## Plugin Routing
 
