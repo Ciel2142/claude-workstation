@@ -650,6 +650,46 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 9: F11 regression — JSON control character stripping
+# ---------------------------------------------------------------------------
+echo "9. F11 — JSON control character stripping"
+
+# Create a temp plugin dir with a CLAUDE.md containing control chars
+TMPDIR_F11=$(mktemp -d)
+
+mkdir -p "$TMPDIR_F11/hooks"
+cp "$PLUGIN_ROOT/hooks/session-start" "$TMPDIR_F11/hooks/"
+
+# Write a CLAUDE.md with form-feed (0x0c) and backspace (0x08) chars
+printf '## Workflow\n\x0cThis has a form-feed\x08and backspace\n' > "$TMPDIR_F11/CLAUDE.md"
+
+F11_OUT=$(CLAUDE_PLUGIN_ROOT="$TMPDIR_F11" \
+    bash "$TMPDIR_F11/hooks/session-start" 2>/dev/null || echo "")
+
+if echo "$F11_OUT" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
+    pass "9a. CLAUDE.md with control chars produces valid JSON"
+else
+    fail "9a. CLAUDE.md with control chars produces INVALID JSON"
+fi
+
+# Verify the content is present (stripped of control chars, not empty)
+if echo "$F11_OUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+ctx = d.get('hookSpecificOutput', d).get('additionalContext', d.get('additional_context', ''))
+assert 'Workflow' in ctx, 'content lost after stripping'
+assert 'form-feed' in ctx, 'content truncated at control char'
+" 2>/dev/null; then
+    pass "9b. content preserved after control char stripping"
+else
+    fail "9b. content lost or truncated after control char stripping"
+fi
+
+rm -rf "$TMPDIR_F11"
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
