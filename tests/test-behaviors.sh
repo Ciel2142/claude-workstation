@@ -690,6 +690,57 @@ rm -rf "$TMPDIR_F11"
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 10: F12 regression — printf format string safety
+# ---------------------------------------------------------------------------
+echo "10. F12 — printf format string safety"
+
+TMPDIR_F12=$(mktemp -d)
+
+mkdir -p "$TMPDIR_F12/hooks"
+cp "$PLUGIN_ROOT/hooks/session-start" "$TMPDIR_F12/hooks/"
+
+# Write CLAUDE.md with % characters that would break printf if used in format string
+# Using heredoc with single-quoted delimiter to prevent any interpretation
+cat > "$TMPDIR_F12/CLAUDE.md" << 'CLAUDE_EOF'
+## Workflow
+Coverage: 100%% achieved
+Progress: %%d items %%s done
+CLAUDE_EOF
+
+# Verify the file actually contains % characters
+if grep -q '%' "$TMPDIR_F12/CLAUDE.md"; then
+    :  # File contains % as expected, continue
+else
+    fail "10-setup. test CLAUDE.md does not contain %% characters"
+    rm -rf "$TMPDIR_F12"
+fi
+
+F12_OUT=$(CLAUDE_PLUGIN_ROOT="$TMPDIR_F12" \
+    bash "$TMPDIR_F12/hooks/session-start" 2>/dev/null || echo "")
+
+if echo "$F12_OUT" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
+    pass "10a. CLAUDE.md with %% format chars produces valid JSON"
+else
+    fail "10a. CLAUDE.md with %% format chars produces INVALID JSON"
+fi
+
+# Verify the % chars survive in the output
+if echo "$F12_OUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+ctx = d.get('hookSpecificOutput', d).get('additionalContext', d.get('additional_context', ''))
+assert '100%' in ctx, 'percent sign lost'
+" 2>/dev/null; then
+    pass "10b. percent characters preserved in output"
+else
+    fail "10b. percent characters lost or corrupted"
+fi
+
+rm -rf "$TMPDIR_F12"
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
