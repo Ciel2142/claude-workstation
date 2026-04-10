@@ -1,6 +1,6 @@
 {
   "name": "claude-workstation",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Personal development environment — unified workflow (Beads + Superpowers + ECC) with auto-tier assessment and session hooks. One install restores everything.",
   "author": {
     "name": "Ciel2142",
@@ -17,6 +17,5 @@
     "ecc",
     "mcp"
   ],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": ["./skills/"]
 }
