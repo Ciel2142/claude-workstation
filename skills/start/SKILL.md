@@ -1,6 +1,6 @@
 ---
 name: start
-version: 2.4.1
+version: 2.4.2
 description: >
   Create a beads task and choose your workflow entry point.
   TRIGGER: When starting any new work, or when the user describes a task.
@@ -60,13 +60,13 @@ Print confirmation and ask one question:
 
 ```
 ✓ Created: <task-id> (P<priority>)
-→ Brainstorm first, or straight to planning?
+→ 1) Brainstorm  2) Plan
 ```
 
 Wait for user response.
 
-- If the user chooses brainstorm: invoke `/superpowers:brainstorming`
-- If the user chooses planning: invoke `/superpowers:writing-plans`
+- If the user chooses 1 (brainstorm): invoke `/superpowers:brainstorming`
+- If the user chooses 2 (plan): invoke `/superpowers:writing-plans`
 
 ---
 
