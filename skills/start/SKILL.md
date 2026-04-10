@@ -1,21 +1,17 @@
 ---
 name: start
-version: 2.2.2
+version: 2.3.0
 description: >
-  Auto-assess task tier and recommend the right workflow. Takes a description,
-  assesses tier, creates the beads task, and presents workflow options with reasoning.
+  Create a beads task and choose your workflow entry point.
   TRIGGER: When starting any new work, or when the user describes a task.
 ---
 
-# Start: Auto-Tier Assessment & Workflow Routing
+# Start: Task Creation & Workflow Entry
 
-Takes a task description, assesses its complexity tier, creates the appropriate
-beads task, and recommends the first workflow skill with reasoning — letting
-the user choose before invoking.
+Creates a beads task and lets the user choose between brainstorming
+(clarify what to build) or planning (decompose into sub-tasks).
 
 ## Invocation
-
-The user provides a description and optional flags:
 
 - `/claude-workstation:start "Add rate limiting to all API endpoints"`
 - `/claude-workstation:start -p 0 "Critical production outage"`
@@ -34,60 +30,19 @@ Extract from arguments:
 
 ### Step 2: CHECK FOR SIDE-QUEST
 
-Before scoring, check if this is a side-quest. A side-quest is detected when ANY of:
+Before creating, check if this is a side-quest. A side-quest is detected when ANY of:
 - Description starts with "Found:" or "Discovered:"
 - The `--side-quest` flag was passed
 - There is an active in-progress beads task (check `bd list --status=in_progress`) AND the new work would touch files not listed in the current task's beads description or plan (different files or different directory — even if causally related to the current task's changes)
 
 **If side-quest detected**, skip to the SIDE-QUEST FLOW below.
 
-### Step 3: TIER
-
-Walk four gates in order. The **first gate that fires** determines the tier.
-
-**Domains** (for counting): API, database, auth, frontend, backend, CI/CD, infrastructure, testing, security, config.
-
-#### Gate 1 — ESCALATION
-- Description contains **"new system"** or **"new component"** → **Medium+**
-- Primary intent is architecture (**design, architect, migrate**) → **Medium+**
-- Description mentions **security** or **migration** (not as primary intent) → set **floor = Medium**, continue
-
-#### Gate 2 — SCOPE
-- Breadth words present (**all, every, across, entire, global**) → **Medium+**
-- **3+ domains** touched → **Medium+**
-- **Rewrite** or **overhaul** mentioned → **Medium+**
-
-#### Gate 3 — MULTI
-- **2+ domains** touched → **Medium**
-- Estimated **4+ files** changed → **Medium**
-
-#### Gate 4 — FEATURE
-- Feature intent (**add, create, implement, new**), single domain → **Small**
-
-#### Gate 5 — DEFAULT
-- → **Trivial** (or floor from Gate 1 if set)
-
-#### Claude Override
-
-You may override the gate result **upward only** (never downward). If you know from project context that a seemingly small task actually spans many files, bump it up. Downward overrides require human approval. Log: `tier-override: <computed> → <new> — <reason>`
-
-### Step 4: CREATE
+### Step 3: CREATE
 
 Create the beads task:
 
-**Determine task type:**
-- Trivial or Small: `--type=task`
-- Medium or Medium+: `--type=epic`
-
-**Determine priority** (if no `-p` override):
-- Medium+: P1
-- Medium: P2
-- Small: P2
-- Trivial: P3
-
-**Run:**
 ```bash
-bd create --title="<description>" --type=<task|epic> -p <priority>
+bd create --title="<description>" --type=task -p <priority-override-or-2>
 ```
 
 If `bd create` fails (beads not initialized, offline, or command error), stop and tell
@@ -99,63 +54,19 @@ Then set it to in-progress:
 bd update <task-id> -s in_progress
 ```
 
-Then persist the computed tier for use by `/continue`:
-```bash
-bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "tier: <trivial|small|medium|medium+>"
-```
+### Step 4: ROUTE
 
-### Step 5: ROUTE
-
-**Print the analysis output, then recommend a workflow and wait for user choice.**
-
-Do NOT auto-invoke any skill. Present the recommendation and let the user decide.
+Print confirmation and ask one question:
 
 ```
-📊 Analysis: "<description>"
-   Gate: <which gate fired> | Domains: <domain_count>
-   Tier: <tier>
-
-   ✓ Created: <task-id> (<type>, P<priority>)
-   → Recommended: <recommended skill>
+✓ Created: <task-id> (P<priority>)
+→ Brainstorm first, or straight to planning?
 ```
 
-**Then present a recommendation table with reasoning:**
+Wait for user response.
 
-For each tier, there is a default recommendation and alternatives. Present ALL options
-with a brief explanation of why each fits or doesn't fit this specific task.
-
-| Tier | Default Recommendation | Reasoning to Show |
-|---|---|---|
-| Trivial | No skill needed — "Go fix it. Then verify and `bd close <task-id>`." | Explain: single-file, no behavior change, ceremony would slow you down. |
-| Small | `/superpowers:test-driven-development` | Explain: single-concern change benefits from RED-GREEN-REFACTOR to catch regressions. |
-| Medium | `/superpowers:writing-plans` | Explain: multi-file work benefits from planning the order of changes before TDD. Implementation via subagent-driven-development. |
-| Medium+ | `/superpowers:brainstorming` | Explain: new system/cross-cutting work needs requirements exploration before code. |
-
-**Format the recommendation as a choice table.**
-
-ALWAYS include ALL of the following options in the table. Do not omit any.
-Mark exactly ONE option as `(recommended)` — whichever genuinely fits best
-for THIS specific task. The recommended option can be any letter, not just A.
-
-When the task involves a bug, `/superpowers:systematic-debugging`,
-`/superpowers:brainstorming`, and `/superpowers:writing-plans` should all
-be presented as viable alternatives with honest reasoning.
-
-| Option | Skill | Why it fits | Why it might not |
-|---|---|---|---|
-| **A** | `/superpowers:brainstorming` | `<specific reason for THIS task>` | `<honest caveat>` |
-| **B** | `/superpowers:writing-plans` | `<specific reason for THIS task>` | `<honest caveat>` |
-| **C** | `/superpowers:test-driven-development` | `<specific reason for THIS task>` | `<honest caveat>` |
-| **D** | `/superpowers:systematic-debugging` | `<specific reason for THIS task>` | `<honest caveat>` |
-
-Append `(recommended)` to the letter of the option you actually recommend.
-For example: `| **C (recommended)** |` if TDD is the best fit.
-
-End with: **"My recommendation: Option `<letter>` — `<one-sentence reason>`. Which would you like?"**
-
-The letter in the closing line MUST match the letter marked `(recommended)` in the table.
-
-**Wait for user response. Do NOT invoke any skill until the user picks an option.**
+- If the user chooses brainstorm: invoke `/superpowers:brainstorming`
+- If the user chooses planning: invoke `/superpowers:writing-plans`
 
 ---
 
@@ -181,12 +92,9 @@ When a side-quest is detected:
 
 4. **Print output:**
    ```
-   📊 Analysis: "<description>"
-      Detected: Side-quest (current task: <current-task-id>)
-
-      ✓ Created: <new-task-id> (bug, P<priority>)
-      ✓ Linked: <new-task-id> discovered-from <current-task-id>
-      → Parked. Finish current task first, then bd ready.
+   ✓ Created: <new-task-id> (bug, P<priority>)
+     Linked: <new-task-id> discovered-from <current-task-id>
+   → Parked. Finish current task first, then bd ready.
    ```
 
 5. **Do NOT invoke any skill.** Return control to the user to continue current work.
