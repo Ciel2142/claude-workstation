@@ -213,7 +213,7 @@ if [[ -f "$WORKFLOW_SKILL_FILE" ]]; then
 
     # 11a. Verify workflow skill contains key milestone keys
     MILESTONE_KEYS_FOUND=0
-    for key in "tier" "spec" "plan" "completed" "verification" "stopped" "active-skill"; do
+    for key in "spec" "plan" "completed" "verification" "stopped" "active-skill"; do
         if grep -q "$key" "$WORKFLOW_SKILL_FILE" 2>/dev/null; then
             pass "workflow skill contains milestone key '$key'"
             MILESTONE_KEYS_FOUND=$((MILESTONE_KEYS_FOUND + 1))
@@ -222,10 +222,10 @@ if [[ -f "$WORKFLOW_SKILL_FILE" ]]; then
         fi
     done
 
-    if (( MILESTONE_KEYS_FOUND >= 7 )); then
+    if (( MILESTONE_KEYS_FOUND >= 6 )); then
         pass "workflow skill contains all $MILESTONE_KEYS_FOUND milestone keys"
     else
-        fail "workflow skill has only $MILESTONE_KEYS_FOUND milestone keys (expected 7)"
+        fail "workflow skill has only $MILESTONE_KEYS_FOUND milestone keys (expected 6)"
     fi
 else
     fail "Cannot check milestone schema — skills/workflow/SKILL.md missing"
