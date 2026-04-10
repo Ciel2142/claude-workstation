@@ -15,9 +15,15 @@ echo ""
 # --- 1. File existence ---
 echo "1. File existence"
 
-[[ -f "$HOME/.claude/settings.json" ]] \
-    && pass "settings.json exists" \
-    || fail "settings.json MISSING"
+SETTINGS_JSON="$HOME/.claude/settings.json"
+HAS_SETTINGS=false
+
+if [[ -f "$SETTINGS_JSON" ]]; then
+    HAS_SETTINGS=true
+    pass "settings.json exists"
+else
+    echo "  ⏭️  settings.json not found (CI environment) — skipping user-env checks"
+fi
 
 # contexts/ and profiles/ were removed in v2.1 — verify they're gone
 [[ ! -d "$PLUGIN_ROOT/contexts" ]] \
@@ -33,10 +39,14 @@ echo ""
 # --- 2. JSON validity ---
 echo "2. Settings JSON validity"
 
-if python3 -c "import json; json.load(open('$HOME/.claude/settings.json'))" 2>/dev/null; then
-    pass "settings.json is valid JSON"
+if $HAS_SETTINGS; then
+    if python3 -c "import json; json.load(open('$SETTINGS_JSON'))" 2>/dev/null; then
+        pass "settings.json is valid JSON"
+    else
+        fail "settings.json is INVALID JSON"
+    fi
 else
-    fail "settings.json is INVALID JSON"
+    echo "  ⏭️  skipped (no settings.json)"
 fi
 
 echo ""
@@ -108,9 +118,10 @@ echo ""
 # --- 6. Plugin presence ---
 echo "6. Plugin presence"
 
-PLUGIN_CHECK=$(python3 -c "
+if $HAS_SETTINGS; then
+    PLUGIN_CHECK=$(python3 -c "
 import json
-d = json.load(open('$HOME/.claude/settings.json'))
+d = json.load(open('$SETTINGS_JSON'))
 plugins = d.get('enabledPlugins', {})
 needed = ['beads@beads-marketplace', 'superpowers@superpowers-marketplace', 'ecc@everything-claude-code']
 for p in needed:
@@ -120,13 +131,16 @@ for p in needed:
         print(f'MISSING:{p}')
 " 2>/dev/null)
 
-while IFS= read -r line; do
-    if [[ "$line" == FOUND:* ]]; then
-        pass "Plugin ${line#FOUND:} enabled"
-    elif [[ "$line" == MISSING:* ]]; then
-        fail "Plugin ${line#MISSING:} NOT enabled"
-    fi
-done <<< "$PLUGIN_CHECK"
+    while IFS= read -r line; do
+        if [[ "$line" == FOUND:* ]]; then
+            pass "Plugin ${line#FOUND:} enabled"
+        elif [[ "$line" == MISSING:* ]]; then
+            fail "Plugin ${line#MISSING:} NOT enabled"
+        fi
+    done <<< "$PLUGIN_CHECK"
+else
+    echo "  ⏭️  skipped (no settings.json)"
+fi
 
 echo ""
 
