@@ -598,6 +598,58 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 8: Command injection prevention in session-start (SECURITY)
+# ---------------------------------------------------------------------------
+echo "8. session-start command injection prevention"
+
+TMPDIR_INJECT=$(mktemp -d)
+CANARY_FILE=$(mktemp -u "${TMPDIR_INJECT}/canary.XXXXXX")
+trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_GATE" "$TMPDIR_STOP" "$TMPDIR_NOBD" "$TMPDIR_INJECT"' EXIT
+
+# Mock bd: record arguments, do nothing dangerous
+cat > "$TMPDIR_INJECT/bd" << 'MOCK_BD'
+#!/usr/bin/env bash
+exit 0
+MOCK_BD
+chmod +x "$TMPDIR_INJECT/bd"
+
+# Mock git: return the temp dir as git root (no .beads, so auto-init triggers)
+FAKE_GIT_ROOT=$(mktemp -d "${TMPDIR_INJECT}/gitroot.XXXXXX")
+cat > "$TMPDIR_INJECT/git" << MOCK_GIT
+#!/usr/bin/env bash
+case "\$1" in
+    rev-parse) echo "$FAKE_GIT_ROOT" ;;
+    *) exec /usr/bin/git "\$@" ;;
+esac
+MOCK_GIT
+chmod +x "$TMPDIR_INJECT/git"
+
+# 8a. Hostile BEADS_SERVER_HOST must NOT execute injected command
+INJECT_OUT=$(
+    BEADS_SERVER_HOST='evil$(touch '"$CANARY_FILE"')' \
+    BEADS_SERVER_PORT='3307' \
+    BEADS_SERVER_USER='root' \
+    CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" \
+    PATH="$TMPDIR_INJECT:$PATH" \
+    bash "$PLUGIN_ROOT/hooks/session-start" 2>/dev/null || true
+)
+if [ -f "$CANARY_FILE" ]; then
+    fail "8a. command injection — canary file was created (injection succeeded!)"
+    rm -f "$CANARY_FILE"
+else
+    pass "8a. command injection — canary file NOT created (injection blocked)"
+fi
+
+# 8b. Hook should still produce valid JSON despite hostile input
+if echo "$INJECT_OUT" | python3 -c "import sys, json; json.load(sys.stdin)" 2>/dev/null; then
+    pass "8b. hostile env — hook still produces valid JSON"
+else
+    fail "8b. hostile env — hook did not produce valid JSON, got: $(printf '%q' "$INJECT_OUT")"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
