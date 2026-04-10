@@ -70,11 +70,6 @@ if [ -z "$TASK_ID" ]; then
     OUTPUT=$(printf '%s\n%s' \
         "WARNING: No active beads task. Create one before modifying files:" \
         "   bd create --title=\"...\" --type=task")
-else
-    NOTES=$($TO bd show "$TASK_ID" 2>/dev/null || echo "")
-    if ! echo "$NOTES" | grep -q 'tier:'; then
-        OUTPUT="WARNING: Active task ($TASK_ID) has no tier assessment. Run /claude-workstation:start to assess."
-    fi
 fi
 
 # --- Cache and output ---
