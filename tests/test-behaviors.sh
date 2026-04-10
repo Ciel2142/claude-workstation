@@ -741,6 +741,66 @@ rm -rf "$TMPDIR_F12"
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 11: Timeout resilience — hooks handle hanging bd
+# ---------------------------------------------------------------------------
+echo "11. Timeout resilience"
+
+# Skip if 'timeout' command not available (macOS without coreutils)
+if ! command -v timeout >/dev/null 2>&1; then
+    pass "11a. (skipped — timeout command not available)"
+    pass "11b. (skipped — timeout command not available)"
+else
+    TMPDIR_HANG=$(mktemp -d)
+
+    cat > "$TMPDIR_HANG/bd" << 'MOCK'
+#!/usr/bin/env bash
+# Simulate a hanging bd command
+sleep 60
+MOCK
+    chmod +x "$TMPDIR_HANG/bd"
+
+    cat > "$TMPDIR_HANG/git" << GITMOCK
+#!/usr/bin/env bash
+case "\$1" in
+    rev-parse) echo "$PLUGIN_ROOT" ;;
+    log) true ;;
+    *) /usr/bin/git "\$@" ;;
+esac
+GITMOCK
+    chmod +x "$TMPDIR_HANG/git"
+
+    # 11a. pre-change-gate with hanging bd — should exit within 12s (2 x 5s timeouts + margin)
+    rm -f "$GATE_CACHE"
+    if timeout 12 bash -c "cd '$PLUGIN_ROOT' && PATH='$TMPDIR_HANG:$PATH' bash '$PLUGIN_ROOT/hooks/pre-change-gate'" 2>/dev/null; then
+        pass "11a. pre-change-gate completes when bd hangs (timeout works)"
+    else
+        EXIT_CODE=$?
+        if [ "$EXIT_CODE" -eq 124 ]; then
+            fail "11a. pre-change-gate timed out at 12s (internal timeout 5s did not fire)"
+        else
+            pass "11a. pre-change-gate exited with code $EXIT_CODE when bd hangs"
+        fi
+    fi
+
+    # 11b. stop hook with hanging bd — should exit within 15s (multiple bd calls x 5s timeouts + margin)
+    rm -f "$GATE_CACHE"
+    if timeout 15 bash -c "cd '$PLUGIN_ROOT' && PATH='$TMPDIR_HANG:$PATH' bash '$PLUGIN_ROOT/hooks/stop'" 2>/dev/null; then
+        pass "11b. stop hook completes when bd hangs (timeout works)"
+    else
+        EXIT_CODE=$?
+        if [ "$EXIT_CODE" -eq 124 ]; then
+            fail "11b. stop hook timed out at 15s (internal timeout 5s did not fire)"
+        else
+            pass "11b. stop hook exited with code $EXIT_CODE when bd hangs"
+        fi
+    fi
+
+    rm -rf "$TMPDIR_HANG"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
