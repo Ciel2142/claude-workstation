@@ -535,7 +535,7 @@ else
 fi
 
 # 6c. bd-notes-append: bd show failure — exits 1 with error
-NOAPPEND_OUT=$(bash "$PLUGIN_ROOT/hooks/bd-notes-append" "nonexistent-task-xyz" "tier: small" 2>&1 || true)
+NOAPPEND_OUT=$(bash "$PLUGIN_ROOT/hooks/bd-notes-append" "nonexistent-task-xyz" "spec: docs/spec.md" 2>&1 || true)
 NOAPPEND_EXIT=$?
 if echo "$NOAPPEND_OUT" | grep -qi "error\|failed"; then
     pass "6c. bd-notes-append bd-show failure — reports error"

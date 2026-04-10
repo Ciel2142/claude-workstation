@@ -368,7 +368,7 @@ fi
 # Run in a temp dir with beads initialized but no in_progress tasks
 if command -v bd >/dev/null 2>&1; then
     GATE_OUT=$(cd "$PLUGIN_ROOT" && bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || echo "")
-    # If there are no in_progress tasks, it should warn; if there are, it should be empty or about tier
+    # If there are no in_progress tasks, it should warn; if there are, it should be empty
     # Either way, it should exit 0 and not crash
     GATE_EXIT=$?
     if [ "${GATE_EXIT:-0}" -eq 0 ] 2>/dev/null; then
