@@ -411,6 +411,42 @@ fi
 
 echo ""
 
+# --- 16. PreCompact hook ---
+echo "16. PreCompact hook"
+
+# 16a. hooks.json has PreCompact entry
+if python3 -c "
+import json
+d = json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))
+hooks = d['hooks']
+assert 'PreCompact' in hooks, 'PreCompact not found'
+entries = hooks['PreCompact']
+assert isinstance(entries, list), 'PreCompact must be a list'
+assert len(entries) > 0, 'PreCompact has no entries'
+for group in entries:
+    assert 'hooks' in group, 'PreCompact group missing hooks array'
+    for h in group['hooks']:
+        assert 'type' in h, 'hook entry missing type'
+        assert 'command' in h, 'hook entry missing command'
+" 2>/dev/null; then
+    pass "hooks.json has PreCompact entry with correct structure"
+else
+    fail "hooks.json MISSING PreCompact entry"
+fi
+
+# 16b. PreCompact hook runs bd prime
+if python3 -c "
+import json
+d = json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))
+hooks = d['hooks']['PreCompact']
+commands = [h['command'] for group in hooks for h in group['hooks']]
+assert any('bd prime' in cmd for cmd in commands), 'PreCompact does not run bd prime'
+" 2>/dev/null; then
+    pass "PreCompact hook runs 'bd prime'"
+else
+    fail "PreCompact hook does NOT run 'bd prime'"
+fi
+
 echo ""
 
 # --- 17. README dependencies — no optional plugins ---
