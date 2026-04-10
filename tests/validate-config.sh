@@ -633,6 +633,28 @@ fi
 
 echo ""
 
+# --- 25. CI pipeline ---
+echo "25. CI pipeline"
+
+if [[ -f "$PLUGIN_ROOT/.github/workflows/test.yml" ]]; then
+    pass "GitHub Actions workflow exists"
+    # Verify it references both test scripts
+    if grep -q "validate-config.sh" "$PLUGIN_ROOT/.github/workflows/test.yml" 2>/dev/null; then
+        pass "CI runs validate-config.sh"
+    else
+        fail "CI does NOT run validate-config.sh"
+    fi
+    if grep -q "test-behaviors.sh" "$PLUGIN_ROOT/.github/workflows/test.yml" 2>/dev/null; then
+        pass "CI runs test-behaviors.sh"
+    else
+        fail "CI does NOT run test-behaviors.sh"
+    fi
+else
+    fail "GitHub Actions workflow MISSING (.github/workflows/test.yml)"
+fi
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"
