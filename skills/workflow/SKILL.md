@@ -1,9 +1,9 @@
 ---
 name: workflow
-version: 2.4.2
+version: 2.4.3
 description: >
-  Full workflow reference: Beads + Superpowers + ECC.
-  TRIGGER: When starting work, when workflow is unclear, or via /claude-workstation:workflow.
+  Full workflow ref: Beads + Superpowers + ECC.
+  TRIGGER: Starting work, workflow unclear, or via /claude-workstation:workflow.
 ---
 
 # Unified Development Workflow
@@ -13,7 +13,7 @@ description: >
 | System | Role |
 |--------|------|
 | **Beads** | Task tracking (WHAT to work on) -- `bd` CLI |
-| **Superpowers** | Development methodology (HOW to work) -- rigid skills |
+| **Superpowers** | Dev methodology (HOW to work) -- rigid skills |
 | **ECC** | Domain expertise (WHO helps) -- language/domain skills |
 
 ## The Flow
@@ -22,28 +22,28 @@ description: >
 Task -> Brainstorm -> Plan -> Sub-tasks -> Implement (TDD) -> Review -> Verify -> Finish -> Close
 ```
 
-Every task follows the full pipeline. The pipeline self-scales to complexity.
+All tasks follow full pipeline. Self-scales to complexity.
 
 - **Brainstorm** produces spec in `docs/superpowers/specs/`
 - **Plan** produces plan in `docs/superpowers/plans/`
 - **Sub-tasks**: `bd create` for each + `bd dep add` for dependencies
 - **Implement**: `bd ready` -> claim -> TDD (RED -> verify fail -> GREEN -> verify pass -> REFACTOR) -> commit
-- **Verify**: run proving command fresh, read complete output + exit code, verify it supports the claim
+- **Verify**: run proving command fresh, read full output + exit code, verify supports claim
 
 ## Pre-Change Gate
 
 Before any file change, verify in order:
 
-1. **Task boundary** -- shifting from discussion to action? `bd create` first.
+1. **Task boundary** -- shifting discussion to action? `bd create` first.
 2. **Task exists?** -- no task = no change. No exceptions.
 3. **Scope confirmed this turn?** -- restate files/changes, get explicit "yes."
 
-Exceptions: files listed in plan/sub-task description, `/start` invocations.
+Exceptions: files in plan/sub-task description, `/start` invocations.
 
 ## Hard Rules
 
-- No code without a beads task
-- No production code without a failing test
+- No code without beads task
+- No production code without failing test
 - No completion claims without verification output
 - No trusting subagent reports without own verification
 - Query Context7 before implementing with any library/framework
@@ -52,25 +52,25 @@ Exceptions: files listed in plan/sub-task description, `/start` invocations.
 
 ## Skill Invocation Priority
 
-1. **Context7** -- fresh docs for any library/framework being used
+1. **Context7** -- fresh docs for any library/framework
 2. **Process skills** -- brainstorming, debugging, verification
 3. **Implementation skills** -- TDD, code-review, frontend-design
-4. **ECC domain skills** -- language-specific reviewers, build fixers
+4. **ECC domain skills** -- language reviewers, build fixers
 
 ## Task Decomposition
 
-Four dependency types (only `blocks` affects `bd ready`):
+Four dep types (only `blocks` affects `bd ready`):
 
 | Type | Affects `bd ready` | Use when |
 |------|-------------------|----------|
-| **blocks** | YES -- blocked task hidden from `bd ready` | Sequential work, technical prerequisites |
+| **blocks** | YES -- blocked task hidden from `bd ready` | Sequential work, technical prereqs |
 | **parent-child** | No | Epic -> sub-task structure |
 | **related** | No | Connected but independent work |
-| **discovered-from** | No | Side-quest found during implementation |
+| **discovered-from** | No | Side-quest found during impl |
 
-**Direction rule:** Think "X needs Y" -> `bd dep add X Y`
+**Direction rule:** "X needs Y" -> `bd dep add X Y`
 
-**Ready Fronts:** As sub-tasks close, blocked work automatically becomes ready. Use `bd ready` to see what's available NOW.
+**Ready Fronts:** Sub-tasks close -> blocked work auto-becomes ready. `bd ready` shows available NOW.
 
 ## Beads Quick Reference
 
@@ -81,18 +81,18 @@ ALL work MUST be tracked. No exceptions.
 | Create epic | `bd create -t epic "High-level goal"` |
 | Create sub-task | `bd create "Sub-task" -t task` + `bd dep add <sub> <epic> --type parent-child` |
 | Find available work | `bd ready` |
-| Claim a task | `bd update <id> --claim` (atomic: sets in_progress + lock) |
-| Close a task | `bd close <id> --reason "Done"` (auto-unblocks dependents) |
-| Log a side-quest | `bd create "Found: <issue>" -t bug` + `bd dep add <new> <current> --type discovered-from` |
+| Claim task | `bd update <id> --claim` (atomic: sets in_progress + lock) |
+| Close task | `bd close <id> --reason "Done"` (auto-unblocks dependents) |
+| Log side-quest | `bd create "Found: <issue>" -t bug` + `bd dep add <new> <current> --type discovered-from` |
 | Session recovery | `bd list --status=in_progress` -> `bd show <id>` -> read notes |
 
-**Multi-terminal:** Each terminal works on a DIFFERENT issue (exclusive lock via `--claim`).
+**Multi-terminal:** Each terminal works on DIFFERENT issue (exclusive lock via `--claim`).
 
-**Side-quest rule:** Finish current task first, then `bd ready` to pick up the parked issue. Size of fix does not reduce ceremony.
+**Side-quest rule:** Finish current task first, then `bd ready` for parked issue. Fix size doesn't reduce ceremony.
 
 ## Context7: Fresh Docs (MANDATORY)
 
-Before implementing with ANY external library, framework, or SDK -- query docs first.
+Query docs before implementing with ANY external library/framework/SDK.
 
 ```bash
 # 1. Resolve library ID
@@ -104,11 +104,11 @@ npx ctx7@latest docs <libraryId> "<your question>"
 
 **When:** Any library -- Next.js, Supabase, React, Tailwind, Zod, Prisma, BullMQ, LangChain, etc.
 
-**Who:** Main agent, subagents, and skills -- everyone queries Context7 before writing implementation code.
+**Who:** Main agent, subagents, skills -- all query Context7 before writing impl code.
 
-**Why:** Claude's training data is stale. APIs change. Context7 gives current docs.
+**Why:** Training data stale. APIs change. Context7 gives current docs.
 
-**Never write implementation code based on memory alone. Always verify with Context7 first.**
+**Never write impl code from memory alone. Verify with Context7 first.**
 
 ## Key Skills Reference
 
@@ -129,7 +129,7 @@ npx ctx7@latest docs <libraryId> "<your question>"
 
 ## Milestone Notes
 
-Update beads notes to preserve context across sessions and compaction.
+Update beads notes — preserve context across sessions + compaction.
 
 | Key | When | Key | When |
 |-----|------|-----|------|
@@ -143,14 +143,14 @@ Write via: `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "key: value"
 
 ## Side Quests
 
-Problem outside your confirmed scope -- even if your change caused it:
+Problem outside confirmed scope -- even if your change caused it:
 
 ```
 bd create --title="Found: <issue>" --type=bug
 bd dep add <new-id> <current-id> --type=discovered-from
 ```
 
-Finish current task first, then `bd ready`. Size of fix does not reduce ceremony.
+Finish current task first, then `bd ready`. Fix size doesn't reduce ceremony.
 
 ## Anti-Patterns
 
@@ -162,3 +162,4 @@ Finish current task first, then `bd ready`. Size of fix does not reduce ceremony
 - Trust subagent reports without own verification
 - Qualifier language ("should work", "probably fixed")
 - Implement with library without querying Context7
+
