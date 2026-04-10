@@ -40,6 +40,12 @@ Required plugins:
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | superpowers-marketplace | Development process skills — brainstorming, planning, TDD, code review, verification, debugging |
 | [ECC](https://github.com/affaan-m/everything-claude-code) | everything-claude-code | Language-specific and domain-specific skills, agents, patterns, and coding standards |
 
+Optional plugins:
+
+| Plugin | Marketplace | Purpose |
+|---|---|---|
+| [Caveman](https://github.com/JuliusBrussee/caveman) | caveman | Token-saving compression modes (lite, full, ultra). See Caveman Mode Rules in CLAUDE.md |
+
 ## Commands & Skills
 
 | Command | What it does |
