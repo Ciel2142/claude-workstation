@@ -8,7 +8,7 @@ steps:
     description: "Scan beads notes for milestone patterns in priority order"
     required: true
     detector:
-      description: "Check notes string for milestone keys in order: docs-updated, verification, completed, planned-tasks, plan, spec, debug, tier"
+      description: "Check notes string for milestone keys in order: docs-updated, verification, completed, planned-tasks, plan, spec, debug"
 
   - id: detect_docs_updated
     description: "Detect post-update-docs position from docs-updated: pattern"
@@ -43,13 +43,6 @@ steps:
     required: true
     detector:
       description: "If notes contain plan: return post-planning (priority 5)"
-      after_step: scan_milestones
-
-  - id: detect_tier_only
-    description: "Detect start position when only tier: is present"
-    required: true
-    detector:
-      description: "If notes contain only tier: with no other milestones, return start (priority 8)"
       after_step: scan_milestones
 
 scoring:

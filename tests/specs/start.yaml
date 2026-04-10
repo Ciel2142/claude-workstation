@@ -12,41 +12,26 @@ steps:
       before_step: check_side_quest
 
   - id: check_side_quest
-    description: "Check for side-quest indicators before tier assessment"
+    description: "Check for side-quest indicators before task creation"
     required: true
     detector:
       description: "Check for Found:/Discovered: prefix, --side-quest flag, or scope conflict with in-progress task"
       after_step: parse_args
-      before_step: walk_gates
-
-  - id: walk_gates
-    description: "Walk gates 1-5 to determine tier"
-    required: true
-    detector:
-      description: "Evaluate Gate 1 (ESCALATION), Gate 2 (SCOPE), Gate 3 (MULTI), Gate 4 (FEATURE), Gate 5 (DEFAULT) in order"
-      after_step: check_side_quest
       before_step: create_task
 
   - id: create_task
-    description: "Create beads task with correct type and priority"
+    description: "Create beads task with --type=task and default P2 priority"
     required: true
     detector:
-      description: "Run bd create with --type=task|epic and -p based on tier (Trivial/Small=task, Medium/Medium+=epic)"
-      after_step: walk_gates
+      description: "Run bd create with --type=task and -p 2 (or user override), then bd update to in_progress"
+      after_step: check_side_quest
 
-  - id: persist_tier
-    description: "Log tier to beads notes via bd-notes-append"
+  - id: present_choice
+    description: "Ask user: brainstorm first, or straight to planning?"
     required: true
     detector:
-      description: "Run bd-notes-append with tier: trivial|small|medium|medium+"
+      description: "Print task-id confirmation and present brainstorm/plan choice. Wait for user response."
       after_step: create_task
-
-  - id: present_recommendation
-    description: "Present workflow options table and wait for user choice"
-    required: true
-    detector:
-      description: "Print analysis with gate, tier, task-id, and recommendation table. Do NOT auto-invoke any skill."
-      after_step: persist_tier
 
 scoring:
   threshold_promote_to_hook: 0.6

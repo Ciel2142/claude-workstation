@@ -41,12 +41,5 @@ steps:
       description: "Output WARNING about no active beads task when bd list returns empty"
       after_step: query_in_progress
 
-  - id: warn_no_tier
-    description: "Warn if active task has no tier assessment"
-    required: true
-    detector:
-      description: "Run bd show on task, check notes for tier: pattern, warn if missing"
-      after_step: query_in_progress
-
 scoring:
   threshold_promote_to_hook: 0.8
