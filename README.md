@@ -6,7 +6,7 @@ A Claude Code plugin that restores your full development environment from a sing
 
 - **Unified Workflow** -- On-demand skill connecting Beads, Superpowers, and ECC (`/claude-workstation:workflow`)
 - **Lean Auto-Injection** -- SessionStart hook delivers ~30-line cheatsheet (down from ~200 lines)
-- **Auto-Tier Assessment** -- `/start` evaluates task descriptions and routes to the right workflow
+- **Task Kickoff** -- `/start` creates a beads task and routes to brainstorming or planning
 - **Session Hooks** -- SessionStart, PreToolUse, and Stop hooks for beads enforcement
 - **Test Suite** -- Config validation + dry-run scenarios
 
@@ -44,20 +44,17 @@ Required plugins:
 
 | Command | What it does |
 |---|---|
-| `/claude-workstation:start` | Auto-assess task tier, create beads task, start the right workflow |
+| `/claude-workstation:start` | Create beads task and choose workflow entry (brainstorm or plan) |
 | `/claude-workstation:workflow` | Full workflow reference (on-demand) |
 
 ### `/start` — Begin New Work
 
 ```bash
 /claude-workstation:start "Fix the login validation bug"
-# → Assesses tier → Small → creates task → starts TDD
+# → Creates task → "Brainstorm or plan?"
 
 /claude-workstation:start "Design a new notification system"
-# → Assesses tier → Medium+ → creates epic → starts brainstorming
-
-/claude-workstation:start "Fix typo in README"
-# → Assesses tier → Trivial → creates task → "Go fix it"
+# → Creates task → "Brainstorm or plan?"
 
 /claude-workstation:start --side-quest "Found: tokens aren't rotated"
 # → Detects side-quest → creates bug → links to current task → parks it
@@ -81,7 +78,7 @@ See `/claude-workstation:workflow` for the full reference, or the cheatsheet in 
 claude-workstation/
 ├── install.sh                # Bootstrap ECC + Beads with one command
 ├── skills/
-│   ├── start/SKILL.md         # /start -- auto-tier assessment & workflow start
+│   ├── start/SKILL.md         # /start -- task creation & workflow entry
 │   └── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
 ├── hooks/
 │   ├── hooks.json             # SessionStart + PreToolUse + Stop hooks
