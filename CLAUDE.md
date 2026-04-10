@@ -3,7 +3,7 @@
 Before starting ANY task, invoke `/claude-workstation:start "description"` to assess and route.
 For the full workflow reference, invoke `/claude-workstation:workflow`.
 
-### Quick Reference (scale ceremony to complexity)
+### Quick Reference
 
 1. **Task** -- `bd create "Goal"` (every change gets tracked)
 2. **Brainstorm** -- `superpowers:brainstorming` (design before code)
@@ -22,7 +22,6 @@ For the full workflow reference, invoke `/claude-workstation:workflow`.
 - No completion claims without verification output
 - No trusting subagent reports without own verification
 - Query Context7 before implementing with any library/framework
-- Escalation upward only -- if work grows, re-assess tier, never downgrade
 - Invoke `/ecc:strategic-compact` every 3rd closed sub-task
 - Outside scope = side-quest: `bd create -t bug` + `bd dep add new current --type=discovered-from`, finish current first
 
