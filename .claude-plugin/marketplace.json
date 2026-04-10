@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "claude-workstation",
-  "description": "Personal dev environment — unified Beads + Superpowers + ECC workflow with auto-tier assessment and session hooks. One install restores everything.",
+  "description": "Personal dev environment — unified Beads + Superpowers + ECC workflow with session hooks. One install restores everything.",
   "owner": {
     "name": "Ciel2142"
   },
@@ -9,8 +9,8 @@
     {
       "name": "claude-workstation",
       "source": "./",
-      "description": "Unified development workflow with size-based routing, auto-tier assessment, and session hooks",
-      "version": "2.2.2"
+      "description": "Unified development workflow with session hooks",
+      "version": "2.3.0"
     }
   ]
 }
