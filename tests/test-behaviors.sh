@@ -98,36 +98,36 @@ STATUS
 open"
 export CAPTURE_FILE
 PATH="$TMPDIR_BD:$PATH" \
-    bash "$PLUGIN_ROOT/hooks/bd-notes-append" "task-123" "tier: small" 2>/dev/null
+    bash "$PLUGIN_ROOT/hooks/bd-notes-append" "task-123" "spec: docs/spec.md" 2>/dev/null
 if [[ -f "$CAPTURE_FILE" ]]; then
     CAPTURED=$(cat "$CAPTURE_FILE")
-    if [[ "$CAPTURED" == "tier: small" ]]; then
-        pass "1a. empty notes — captures exactly 'tier: small'"
+    if [[ "$CAPTURED" == "spec: docs/spec.md" ]]; then
+        pass "1a. empty notes — captures exactly 'spec: docs/spec.md'"
     else
-        fail "1a. empty notes — expected 'tier: small', got: $(printf '%q' "$CAPTURED")"
+        fail "1a. empty notes — expected 'spec: docs/spec.md', got: $(printf '%q' "$CAPTURED")"
     fi
 else
     fail "1a. empty notes — capture file not written"
 fi
 
-# 1b. Existing notes: bd show returns task with existing 'tier: small' in NOTES
+# 1b. Existing notes: bd show returns task with existing 'spec: docs/spec.md' in NOTES
 rm -f "$CAPTURE_FILE"
 export BD_SHOW_OUTPUT="TITLE
 Test task
 NOTES
-tier: small
+spec: docs/spec.md
 STATUS
 open"
 PATH="$TMPDIR_BD:$PATH" \
     bash "$PLUGIN_ROOT/hooks/bd-notes-append" "task-123" "plan: docs/plan.md" 2>/dev/null
 if [[ -f "$CAPTURE_FILE" ]]; then
     CAPTURED=$(cat "$CAPTURE_FILE")
-    EXPECTED="tier: small
+    EXPECTED="spec: docs/spec.md
 plan: docs/plan.md"
     if [[ "$CAPTURED" == "$EXPECTED" ]]; then
         pass "1b. existing notes — appends new line preserving existing content"
     else
-        fail "1b. existing notes — expected 'tier: small\\nplan: docs/plan.md', got: $(printf '%q' "$CAPTURED")"
+        fail "1b. existing notes — expected 'spec: docs/spec.md\\nplan: docs/plan.md', got: $(printf '%q' "$CAPTURED")"
     fi
 else
     fail "1b. existing notes — capture file not written"
@@ -147,7 +147,7 @@ rm -f "$CAPTURE_FILE"
 export BD_SHOW_OUTPUT="TITLE
 Test task
 NOTES
-tier: small
+spec: docs/spec.md
 IMPORTANT NOTE
 plan: docs/plan.md
 STATUS
@@ -170,7 +170,7 @@ rm -f "$CAPTURE_FILE"
 export BD_SHOW_OUTPUT="TITLE
 Test task
 NOTES
-tier: medium+
+spec: docs/spec.md
 plan: docs/plan.md
 DEPENDS ON
   other-task-123
@@ -249,7 +249,7 @@ else
     fail "2a. no task in progress — expected WARNING about 'No active beads task', got: $(printf '%q' "$GATE_OUT")"
 fi
 
-# 2b. Task exists, no tier in notes
+# 2b. Task exists — no output expected (tier check removed)
 rm -f "$GATE_CACHE"
 export BD_LIST_JSON_OUTPUT='[{"id": "test-456", "title": "Test task"}]'
 export BD_LIST_OUTPUT="  test-456  IN_PROGRESS  Test task"
@@ -261,28 +261,10 @@ STATUS
 in_progress"
 GATE_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
     bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
-if echo "$GATE_OUT" | grep -q "WARNING" && echo "$GATE_OUT" | grep -qi "no tier"; then
-    pass "2b. task exists, no tier — warns about missing tier assessment"
-else
-    fail "2b. task exists, no tier — expected WARNING about 'no tier', got: $(printf '%q' "$GATE_OUT")"
-fi
-
-# 2c. Task exists with tier — no output expected
-rm -f "$GATE_CACHE"
-export BD_LIST_JSON_OUTPUT='[{"id": "test-456", "title": "Test task"}]'
-export BD_LIST_OUTPUT="  test-456  IN_PROGRESS  Test task"
-export BD_SHOW_OUTPUT="TITLE
-Test task
-NOTES
-tier: small
-STATUS
-in_progress"
-GATE_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
-    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
 if [[ -z "$GATE_OUT" ]]; then
-    pass "2c. task with tier — outputs nothing (no warning)"
+    pass "2b. task exists — outputs nothing (no warning)"
 else
-    fail "2c. task with tier — expected empty output, got: $(printf '%q' "$GATE_OUT")"
+    fail "2b. task exists — expected empty output, got: $(printf '%q' "$GATE_OUT")"
 fi
 
 echo ""
@@ -309,8 +291,6 @@ detect_position() {
         echo "post-brainstorming"
     elif echo "$notes" | grep -q 'debug:'; then
         echo "mid-debugging"
-    elif echo "$notes" | grep -q 'tier:'; then
-        echo "start"
     else
         echo "unknown"
     fi
@@ -329,16 +309,15 @@ _assert_position() {
     fi
 }
 
-_assert_position "3a. tier only"           "tier: small"                                                "start"
-_assert_position "3b. tier + spec"         "$(printf 'tier: medium+\nspec: docs/specs/foo.md')"        "post-brainstorming"
-_assert_position "3c. tier + spec + plan"  "$(printf 'tier: medium+\nspec: docs/specs/foo.md\nplan: docs/plans/foo.md')" "post-planning"
-_assert_position "3d. with completed"      "$(printf 'tier: small\nplan: docs/plans/foo.md\ncompleted: 1,2,3')"          "mid-implementation"
-_assert_position "3e. with verification"   "$(printf 'tier: small\nplan: docs/plans/foo.md\ncompleted: 1,2\nverification: tests 47/47')" "post-verification"
-_assert_position "3f. with docs-updated"   "$(printf 'tier: small\nverification: tests 47/47\ndocs-updated: README refreshed')"          "post-update-docs"
-_assert_position "3g. with debug"          "$(printf 'tier: small\ndebug: root cause -- stale cache')"                  "mid-debugging"
-_assert_position "3h. empty string"        ""                                                           "unknown"
-_assert_position "3i. with planned-tasks"  "$(printf 'tier: medium\nplan: docs/plans/foo.md\nplanned-tasks: 5')"  "post-decomposition"
-_assert_position "3j. planned-tasks before completed" "$(printf 'tier: medium\nplanned-tasks: 3\ncompleted: 1')" "mid-implementation"
+_assert_position "3a. spec only"          "spec: docs/specs/foo.md"                                           "post-brainstorming"
+_assert_position "3b. spec + plan"        "$(printf 'spec: docs/specs/foo.md\nplan: docs/plans/foo.md')"      "post-planning"
+_assert_position "3c. with completed"     "$(printf 'plan: docs/plans/foo.md\ncompleted: 1,2,3')"             "mid-implementation"
+_assert_position "3d. with verification"  "$(printf 'plan: docs/plans/foo.md\ncompleted: 1,2\nverification: tests 47/47')" "post-verification"
+_assert_position "3e. with docs-updated"  "$(printf 'verification: tests 47/47\ndocs-updated: README refreshed')"          "post-update-docs"
+_assert_position "3f. with debug"         "$(printf 'debug: root cause -- stale cache')"                      "mid-debugging"
+_assert_position "3g. empty string"       ""                                                                   "unknown"
+_assert_position "3h. with planned-tasks" "$(printf 'plan: docs/plans/foo.md\nplanned-tasks: 5')"             "post-decomposition"
+_assert_position "3i. planned-tasks before completed" "$(printf 'planned-tasks: 3\ncompleted: 1')"            "mid-implementation"
 
 echo ""
 
