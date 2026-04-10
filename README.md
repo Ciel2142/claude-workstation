@@ -10,6 +10,18 @@ A Claude Code plugin that restores your full development environment from a sing
 - **Session Hooks** -- SessionStart, PreToolUse, and Stop hooks for beads enforcement
 - **Test Suite** -- Config validation + dry-run scenarios
 
+## Install
+
+```bash
+bash install.sh
+```
+
+This runs two steps in order:
+1. Finds the latest locally cached ECC plugin and runs its installer
+2. Installs Beads from the remote install script
+
+**Prerequisite:** The ECC plugin must already be cached locally (install it once via the Claude Code plugin marketplace).
+
 ## Dependencies
 
 Required plugins:
@@ -60,6 +72,7 @@ See `/claude-workstation:workflow` for the full reference, or the cheatsheet in 
 
 ```
 claude-workstation/
+├── install.sh                # Bootstrap ECC + Beads with one command
 ├── skills/
 │   ├── start/SKILL.md         # /start -- auto-tier assessment & workflow start
 │   ├── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
