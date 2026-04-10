@@ -10,7 +10,7 @@
       "name": "claude-workstation",
       "source": "./",
       "description": "Unified development workflow with size-based routing, auto-tier assessment, and session hooks",
-      "version": "2.2.1"
+      "version": "2.2.2"
     }
   ]
 }

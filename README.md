@@ -95,7 +95,6 @@ claude-workstation/
 │   ├── lib.sh                 # Cross-platform test helpers
 │   └── scenarios/             # Workflow dry-run scenario scripts
 ├── CLAUDE.md
-├── AGENTS.md
 └── README.md
 ```
 
