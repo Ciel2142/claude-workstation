@@ -12,15 +12,23 @@ A Claude Code plugin that restores your full development environment from a sing
 
 ## Install
 
+### 1. Install Required Plugins
+
+Install each plugin from the Claude Code marketplace (`/install-plugin`):
+
+| Plugin | Marketplace name |
+|---|---|
+| [Beads](https://github.com/steveyegge/beads) | `beads-marketplace` |
+| [Superpowers](https://github.com/obra/superpowers-marketplace) | `superpowers-marketplace` |
+| [ECC](https://github.com/affaan-m/everything-claude-code) | `everything-claude-code` |
+
+### 2. Run Bootstrap Script
+
 ```bash
 bash install.sh
 ```
 
-This runs two steps in order:
-1. Finds the latest locally cached ECC plugin and runs its installer
-2. Installs Beads from the remote install script
-
-**Prerequisite:** The ECC plugin must already be cached locally (install it once via the Claude Code plugin marketplace).
+This runs the ECC installer (from the locally cached plugin) and the Beads installer.
 
 ## Dependencies
 
