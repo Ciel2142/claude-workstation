@@ -1,7 +1,7 @@
 ## Workflow: Beads + Superpowers + ECC
 
-Before starting ANY task, invoke `/claude-workstation:start "description"` to assess and route.
-For the full workflow reference, invoke `/claude-workstation:workflow`.
+Any task → `/claude-workstation:start "description"` first.
+Full ref → `/claude-workstation:workflow`.
 
 ### Quick Reference
 
@@ -21,8 +21,8 @@ For the full workflow reference, invoke `/claude-workstation:workflow`.
 - No production code without a failing test
 - No completion claims without verification output
 - No trusting subagent reports without own verification
-- Query Context7 before implementing with any library/framework
-- Invoke `/ecc:strategic-compact` every 3rd closed sub-task
+- Query Context7 before any library/framework impl
+- `/ecc:strategic-compact` every 3rd closed sub-task
 - Outside scope = side-quest: `bd create -t bug` + `bd dep add new current --type=discovered-from`, finish current first
 
 ### Session
@@ -32,7 +32,18 @@ For the full workflow reference, invoke `/claude-workstation:workflow`.
 
 ### Prerequisites
 
-Install each plugin following its own documentation:
+Install per plugin docs:
 - [Beads](https://github.com/steveyegge/beads) -- task tracking
-- [Superpowers](https://github.com/obra/superpowers) -- development methodology
+- [Superpowers](https://github.com/obra/superpowers) -- dev methodology
 - [ECC](https://github.com/affaan-m/everything-claude-code) -- domain expertise
+
+### Caveman Mode Rules
+
+Default: **lite**. Code/commits/security: always normal.
+Escalate to **full** for: beads ops (responses + note content), pre-compaction context.
+Beads titles/descriptions: stay **normal** (human-scannable).
+
+**Pre-compaction** (when `/ecc:strategic-compact` suggests, and safe):
+1. Identify essential context not yet in beads
+2. Compress via caveman full → `bd update <id> --notes "..."`
+3. Then compact
