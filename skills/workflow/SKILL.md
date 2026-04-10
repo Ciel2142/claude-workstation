@@ -1,6 +1,6 @@
 ---
 name: workflow
-version: 2.2.2
+version: 2.3.0
 description: >
   Full workflow reference: Beads + Superpowers + ECC.
   TRIGGER: When starting work, when workflow is unclear, or via /claude-workstation:workflow.
@@ -22,7 +22,7 @@ description: >
 Task -> Brainstorm -> Plan -> Sub-tasks -> Implement (TDD) -> Review -> Verify -> Finish -> Close
 ```
 
-Not every task needs every step. `/claude-workstation:start` assesses complexity and suggests where to enter.
+Every task follows the full pipeline. The pipeline self-scales to complexity.
 
 - **Brainstorm** produces spec in `docs/superpowers/specs/`
 - **Plan** produces plan in `docs/superpowers/plans/`
@@ -47,7 +47,6 @@ Exceptions: files listed in plan/sub-task description, `/start` invocations.
 - No completion claims without verification output
 - No trusting subagent reports without own verification
 - Query Context7 before implementing with any library/framework
-- Escalation upward only -- if work grows, re-assess tier, never downgrade
 - Invoke `/ecc:strategic-compact` every 3rd closed sub-task
 - Outside scope = side-quest: `bd create -t bug` + `bd dep add new current --type=discovered-from`, finish current first
 
@@ -134,11 +133,11 @@ Update beads notes to preserve context across sessions and compaction.
 
 | Key | When | Key | When |
 |-----|------|-----|------|
-| `tier:` | After `/start` | `completed:` | Sub-task closes |
-| `spec:` | After brainstorming | `current:` | Claiming sub-task |
-| `plan:` | After writing plan | `debug:` | Root cause found |
-| `planned-tasks:` | Sub-tasks created | `verification:` | After verification |
-| `stopped:` | Session end / compact | `active-skill:` | Skill invoked |
+| `spec:` | After brainstorming | `completed:` | Sub-task closes |
+| `plan:` | After writing plan | `current:` | Claiming sub-task |
+| `planned-tasks:` | Sub-tasks created | `debug:` | Root cause found |
+| `stopped:` | Session end / compact | `verification:` | After verification |
+| `active-skill:` | Skill invoked | | |
 
 Write via: `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "key: value"`
 
