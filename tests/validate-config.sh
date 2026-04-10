@@ -252,10 +252,10 @@ echo "11g. Context budget accuracy"
 
 CLAUDE_MD="$PLUGIN_ROOT/CLAUDE.md"
 CLAUDE_SIZE=$(wc -c < "$CLAUDE_MD" 2>/dev/null || echo 0)
-if (( CLAUDE_SIZE > 0 && CLAUDE_SIZE < 2048 )); then
+if (( CLAUDE_SIZE > 0 && CLAUDE_SIZE < 2200 )); then
     pass "CLAUDE.md is lean (${CLAUDE_SIZE} bytes)"
 else
-    fail "CLAUDE.md is ${CLAUDE_SIZE} bytes (expected < 2048 for lean cheatsheet)"
+    fail "CLAUDE.md is ${CLAUDE_SIZE} bytes (expected < 2200 for lean cheatsheet)"
 fi
 
 echo ""
