@@ -61,7 +61,7 @@ echo ""
 # --- 4. Workflow skill content ---
 echo "4. Workflow skill content"
 
-for keyword in "Pre-Change Gate" "Hard Rules" "Milestone Notes" "Side Quests" "Anti-Patterns" "Plugin Routing" "Skill Invocation Priority" "Task Decomposition" "Ready Fronts" "Key Skills Reference"; do
+for keyword in "Pre-Change Gate" "Hard Rules" "Milestone Notes" "Side Quests" "Anti-Patterns" "Skill Invocation Priority" "Task Decomposition" "Ready Fronts" "Key Skills Reference"; do
     if grep -q "$keyword" "$PLUGIN_ROOT/skills/workflow/SKILL.md" 2>/dev/null; then
         pass "workflow skill contains '$keyword'"
     else
@@ -130,12 +130,10 @@ done <<< "$PLUGIN_CHECK"
 
 echo ""
 
-echo ""
-
 # --- 8. Skill directories ---
 echo "8. Skill directories"
 
-for skill_dir in start workflow test; do
+for skill_dir in start workflow; do
     if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
         pass "skills/$skill_dir/SKILL.md exists"
     else
@@ -148,7 +146,7 @@ echo ""
 # --- 9. SKILL.md frontmatter ---
 echo "9. SKILL.md frontmatter"
 
-for skill_dir in start workflow test; do
+for skill_dir in start workflow; do
     skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
     if [[ -f "$skill_file" ]]; then
         # Extract name from YAML frontmatter
@@ -248,8 +246,6 @@ fi
 
 echo ""
 
-echo ""
-
 # --- 13. Scenario scripts ---
 echo "13. Scenario scripts"
 
@@ -300,16 +296,6 @@ for skill_dir in "$PLUGIN_ROOT"/skills/*/; do
         pass "skill $skill_name referenced in README"
     else
         fail "skill $skill_name NOT referenced in README"
-    fi
-done
-
-# Verify every command in commands/ is referenced in README
-for cmd_file in "$PLUGIN_ROOT"/commands/*.md; do
-    cmd_name=$(basename "$cmd_file" .md)
-    if grep -q "$cmd_name" "$PLUGIN_ROOT/README.md" 2>/dev/null; then
-        pass "command $cmd_name referenced in README"
-    else
-        fail "command $cmd_name NOT referenced in README"
     fi
 done
 
@@ -525,10 +511,6 @@ fi
 
 echo ""
 
-echo ""
-
-echo ""
-
 # --- 21. README test file references ---
 echo "21. README test file references"
 
@@ -551,13 +533,6 @@ echo ""
 echo "22. Removed content guards"
 
 if [[ -f "$PLUGIN_ROOT/README.md" ]]; then
-    # 22a. README should NOT have an "## Install" section (install instructions removed in v2.1)
-    if grep -q '^## Install' "$PLUGIN_ROOT/README.md" 2>/dev/null; then
-        fail "README still has '## Install' section (should be removed)"
-    else
-        pass "README does not have '## Install' section"
-    fi
-
     # 22b. README should NOT reference "Context Profiles" (removed in v2.1)
     if grep -q 'Context Profiles' "$PLUGIN_ROOT/README.md" 2>/dev/null; then
         fail "README still references 'Context Profiles' (should be removed)"

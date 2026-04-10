@@ -38,7 +38,6 @@ Required plugins:
 |---|---|
 | `/claude-workstation:start` | Auto-assess task tier, create beads task, start the right workflow |
 | `/claude-workstation:workflow` | Full workflow reference (on-demand) |
-| `/claude-workstation:test` | Validate configuration and run scenarios |
 
 ### `/start` — Begin New Work
 
@@ -75,8 +74,7 @@ claude-workstation/
 ├── install.sh                # Bootstrap ECC + Beads with one command
 ├── skills/
 │   ├── start/SKILL.md         # /start -- auto-tier assessment & workflow start
-│   ├── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
-│   └── test/SKILL.md          # /test -- config validation
+│   └── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
 ├── hooks/
 │   ├── hooks.json             # SessionStart + PreToolUse + Stop hooks
 │   ├── bd-notes-append        # Safe notes append wrapper

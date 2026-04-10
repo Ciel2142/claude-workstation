@@ -1,6 +1,6 @@
 id: scope-health
 name: Scope Health Check
-source_rule: contexts/workflow.md
+source_rule: skills/workflow/SKILL.md
 version: "2.0"
 
 steps:

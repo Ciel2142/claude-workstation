@@ -29,7 +29,7 @@ For the full workflow reference, invoke `/claude-workstation:workflow`.
 ### Session
 
 - **Resume:** `bd list --status=in_progress` -> `bd show <id>` -> read notes for spec/plan paths
-- **Validate:** `/claude-workstation:test`
+- **Validate:** `bash tests/validate-config.sh`
 
 ### Prerequisites
 
