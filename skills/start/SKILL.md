@@ -131,22 +131,29 @@ with a brief explanation of why each fits or doesn't fit this specific task.
 | Medium | `/superpowers:writing-plans` | Explain: multi-file work benefits from planning the order of changes before TDD. Implementation via subagent-driven-development. |
 | Medium+ | `/superpowers:brainstorming` | Explain: new system/cross-cutting work needs requirements exploration before code. |
 
-**Format the recommendation as a choice table:**
+**Format the recommendation as a choice table.**
+
+ALWAYS include ALL of the following options in the table. Do not omit any.
+Mark exactly ONE option as `(recommended)` — whichever genuinely fits best
+for THIS specific task. The recommended option can be any letter, not just A.
+
+When the task involves a bug, `/superpowers:systematic-debugging`,
+`/superpowers:brainstorming`, and `/superpowers:writing-plans` should all
+be presented as viable alternatives with honest reasoning.
 
 | Option | Skill | Why it fits | Why it might not |
 |---|---|---|---|
-| **A (recommended)** | `<default for tier>` | `<specific reason for THIS task>` | `<honest caveat>` |
-| **B** | `<alternative 1>` | `<when this would be better>` | `<why it's not the default>` |
-| **C** | `<alternative 2 if applicable>` | `<when this would be better>` | `<why it's not the default>` |
+| **A** | `/superpowers:brainstorming` | `<specific reason for THIS task>` | `<honest caveat>` |
+| **B** | `/superpowers:writing-plans` | `<specific reason for THIS task>` | `<honest caveat>` |
+| **C** | `/superpowers:test-driven-development` | `<specific reason for THIS task>` | `<honest caveat>` |
+| **D** | `/superpowers:systematic-debugging` | `<specific reason for THIS task>` | `<honest caveat>` |
 
-Alternatives to consider (pick 1-2 relevant ones):
-- `/superpowers:brainstorming` — when scope is ambiguous or requirements need exploration
-- `/superpowers:test-driven-development` — when behavior change needs regression safety
-- `/superpowers:systematic-debugging` — when the task is investigating a bug
-- Direct edit + manual verify — when the task is truly trivial and ceremony is overhead
-- `/superpowers:writing-plans` — when the task needs architectural planning before TDD
+Append `(recommended)` to the letter of the option you actually recommend.
+For example: `| **C (recommended)** |` if TDD is the best fit.
 
-End with: **"My recommendation: Option A — `<one-sentence reason>`. Which would you like?"**
+End with: **"My recommendation: Option `<letter>` — `<one-sentence reason>`. Which would you like?"**
+
+The letter in the closing line MUST match the letter marked `(recommended)` in the table.
 
 **Wait for user response. Do NOT invoke any skill until the user picks an option.**
 
