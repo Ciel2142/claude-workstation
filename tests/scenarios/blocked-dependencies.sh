@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
-echo "=== Medium+ Tier: Calculator operations ==="
+echo "=== Blocked Dependencies: Calculator operations ==="
 # F18: No stale fallback — require scaffold.sh to have run
 TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "")
 if [ -z "$TEST_DIR" ] || [ ! -d "$TEST_DIR" ]; then echo "SKIP: No test directory (run scaffold.sh first)"; exit 0; fi
@@ -116,4 +116,4 @@ git commit -m "feat: add calculator dispatcher"
 bd close "$S3"
 bd close "$EPIC" --reason="All calculator operations implemented"
 
-echo "=== Medium+ Tier: PASS ==="
+echo "=== Blocked Dependencies: PASS ==="

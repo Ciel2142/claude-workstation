@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
-echo "=== Medium Tier: Multi-file feature ==="
+echo "=== Multi-Task Epic: Multi-file feature ==="
 # F18: No stale fallback — require scaffold.sh to have run
 TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "")
 if [ -z "$TEST_DIR" ] || [ ! -d "$TEST_DIR" ]; then echo "SKIP: No test directory (run scaffold.sh first)"; exit 0; fi
 cd "$TEST_DIR"
 
-# Epic (medium tier uses --type=epic)
+# Epic with sub-tasks
 EPIC=$(extract_id "$(bd create --title="Add subtract and modulo operations" --type=epic --priority=2 2>&1)")
 
 # Sub-tasks (simulates plan decomposition step)
@@ -95,4 +95,4 @@ bd close "$S2"
 
 bd close "$EPIC" --reason="All operations implemented"
 
-echo "=== Medium Tier: PASS ==="
+echo "=== Multi-Task Epic: PASS ==="

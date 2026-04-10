@@ -1,83 +1,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
-echo "=== Init Persistence: Tier stored in notes ==="
+echo "=== Init Persistence: Milestone notes ==="
 # F18: No stale fallback — require scaffold.sh to have run
 TEST_DIR=$(cat "${TMPDIR:-/tmp}/.workflow-test-dir-$(id -un)" 2>/dev/null || echo "")
 if [ -z "$TEST_DIR" ] || [ ! -d "$TEST_DIR" ]; then echo "SKIP: No test directory (run scaffold.sh first)"; exit 0; fi
 cd "$TEST_DIR"
 
-# Simulate /init for a trivial task — init writes tier to notes
-TRIV_ID=$(extract_id "$(bd create --title="Fix whitespace in utils" --type=task --priority=4 2>&1)")
-bd update "$TRIV_ID" --notes "tier: trivial"
+# Create a task and add milestone notes (no tier)
+TASK_ID=$(extract_id "$(bd create --title="Test milestone persistence" --type=task --priority=2 2>&1)")
+bd update "$TASK_ID" --notes "spec: docs/superpowers/specs/test-spec.md"
 
-# Verify tier was persisted
-TRIV_NOTES=$(bd show "$TRIV_ID" 2>&1)
-if echo "$TRIV_NOTES" | grep -q "tier: trivial"; then
-    echo "  Trivial tier persisted: PASS"
+# Verify spec was persisted
+NOTES=$(bd show "$TASK_ID" 2>&1)
+if echo "$NOTES" | grep -q "spec:"; then
+    echo "  Spec milestone persisted: PASS"
 else
-    echo "  Trivial tier NOT in notes: FAIL"; exit 1
+    echo "  Spec milestone NOT in notes: FAIL"; exit 1
 fi
 
-bd close "$TRIV_ID" --reason="Tier persistence test"
-
-# Simulate /init for a small task
-SMALL_ID=$(extract_id "$(bd create --title="Add modulo function" --type=task --priority=3 2>&1)")
-bd update "$SMALL_ID" --notes "tier: small"
-
-SMALL_NOTES=$(bd show "$SMALL_ID" 2>&1)
-if echo "$SMALL_NOTES" | grep -q "tier: small"; then
-    echo "  Small tier persisted: PASS"
-else
-    echo "  Small tier NOT in notes: FAIL"; exit 1
-fi
-
-bd close "$SMALL_ID" --reason="Tier persistence test"
-
-# Simulate /init for a medium+ epic with milestone progression
-# Note: bd update --notes replaces (not appends), so each milestone overwrites
-# the previous. Continue handles this by checking latest milestone first, and
-# falling back to task type inference for tier when tier: note is overwritten.
-EPIC_ID=$(extract_id "$(bd create --title="Add string operations" --type=epic --priority=2 2>&1)")
-bd update "$EPIC_ID" --notes "tier: medium+"
-
-# Verify tier is set initially
-EPIC_NOTES=$(bd show "$EPIC_ID" 2>&1)
-if echo "$EPIC_NOTES" | grep -q "tier: medium+"; then
-    echo "  Medium+ tier persisted initially: PASS"
-else
-    echo "  Medium+ tier NOT in notes: FAIL"; exit 1
-fi
-
-# Simulate milestone progression — cumulative approach (recommended by beads-milestones skill)
-# Each update includes ALL prior milestone state to avoid data loss
-bd update "$EPIC_ID" --notes "tier: medium+
-spec: docs/superpowers/specs/test-spec.md"
-bd update "$EPIC_ID" --notes "tier: medium+
-spec: docs/superpowers/specs/test-spec.md
+# Add plan milestone (cumulative)
+bd update "$TASK_ID" --notes "spec: docs/superpowers/specs/test-spec.md
 plan: docs/superpowers/plans/test-plan.md, 3 tasks"
 
-# Verify ALL milestones are visible (cumulative update preserves history)
-EPIC_NOTES=$(bd show "$EPIC_ID" 2>&1)
-if echo "$EPIC_NOTES" | grep -q "plan:"; then
-    echo "  Latest milestone (Plan) detected: PASS"
+# Verify both milestones visible
+NOTES=$(bd show "$TASK_ID" 2>&1)
+if echo "$NOTES" | grep -q "plan:"; then
+    echo "  Plan milestone persisted: PASS"
 else
-    echo "  Latest milestone NOT in notes: FAIL"; exit 1
+    echo "  Plan milestone NOT in notes: FAIL"; exit 1
 fi
-if echo "$EPIC_NOTES" | grep -q "tier: medium+"; then
-    echo "  Tier preserved in cumulative update: PASS"
+if echo "$NOTES" | grep -q "spec:"; then
+    echo "  Spec preserved in cumulative update: PASS"
 else
-    echo "  Tier lost in cumulative update: FAIL"; exit 1
-fi
-
-# Verify tier inference fallback: epic type → medium+ (since tier: was overwritten)
-EPIC_TYPE=$(bd show "$EPIC_ID" 2>&1)
-if echo "$EPIC_TYPE" | grep -qi "epic"; then
-    echo "  Tier fallback via task type (epic → medium+): PASS"
-else
-    echo "  Task type not detectable: FAIL"; exit 1
+    echo "  Spec lost in cumulative update: FAIL"; exit 1
 fi
 
-bd close "$EPIC_ID" --reason="Milestone progression test"
+bd close "$TASK_ID" --reason="Milestone persistence test"
 
 echo "=== Init Persistence: PASS ==="
