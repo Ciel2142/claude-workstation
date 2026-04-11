@@ -806,17 +806,7 @@ echo ""
 echo ""
 echo "12. milestone-gate"
 
-# Helper: compute gate cache dir (same logic as cache-utils.sh)
-_gate_cache_dir() {
-    local beads_path="$PLUGIN_ROOT/.beads"
-    local project_hash
-    project_hash=$(printf '%s' "$beads_path" | md5sum 2>/dev/null | cut -c1-8 \
-        || printf '%s' "$beads_path" | md5 2>/dev/null | cut -c1-8 \
-        || echo "default")
-    local cache_dir="${XDG_RUNTIME_DIR:-/tmp}"
-    echo "${cache_dir}/.beads-gate-${USER:-$(id -un)}-${project_hash}"
-}
-GATE_CACHE_NEW=$(_gate_cache_dir)
+# No gate cache — bd is queried directly every time
 
 # 12a. No active task → exit 2
 cat > "$TMPDIR_BD/bd" << 'MOCK'
@@ -824,7 +814,7 @@ cat > "$TMPDIR_BD/bd" << 'MOCK'
 echo "No issues found"
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 STDIN='{"tool_name":"Edit","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/hooks/cache-utils.sh"}}'
 EXIT_CODE=0
@@ -859,7 +849,7 @@ BD_SHOW
 esac
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 STDIN='{"tool_name":"Edit","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/hooks/cache-utils.sh"}}'
 EXIT_CODE=0
@@ -892,7 +882,7 @@ BD_SHOW
 esac
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 STDIN='{"tool_name":"Edit","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/hooks/cache-utils.sh"}}'
 EXIT_CODE=0
@@ -910,7 +900,7 @@ cat > "$TMPDIR_BD/bd" << 'MOCK'
 echo "No issues found"
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 STDIN='{"tool_name":"Write","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/README.md"}}'
 EXIT_CODE=0
@@ -1055,7 +1045,7 @@ BD_SHOW
 esac
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 STDIN='{"tool_name":"Bash","tool_input":{"command":"git commit -m \"feat: add feature\""}}'
 EXIT_CODE=0
@@ -1089,7 +1079,7 @@ BD_SHOW
 esac
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 STDIN='{"tool_name":"Bash","tool_input":{"command":"git commit -m \"feat: add feature\""}}'
 EXIT_CODE=0
@@ -1140,7 +1130,7 @@ BD_SHOW
 esac
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 EXIT_CODE=0
 OUTPUT=$(PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/stop-gate" 2>&1) || EXIT_CODE=$?
@@ -1172,7 +1162,7 @@ BD_SHOW
 esac
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 EXIT_CODE=0
 OUTPUT=$(PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/stop-gate" 2>&1) || EXIT_CODE=$?
@@ -1203,7 +1193,7 @@ BD_SHOW
 esac
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 EXIT_CODE=0
 OUTPUT=$(PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/stop-gate" 2>&1) || EXIT_CODE=$?
@@ -1220,7 +1210,7 @@ cat > "$TMPDIR_BD/bd" << 'MOCK'
 echo "No issues found"
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
+
 
 EXIT_CODE=0
 OUTPUT=$(PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/stop-gate" 2>&1) || EXIT_CODE=$?
@@ -1237,7 +1227,7 @@ fi
 echo ""
 echo "16. mid-session-reminder"
 
-# 16a. After 5+ edits without milestone → warning
+# 16a. Status echo on every Edit/Write (queries bd directly, no cache)
 cat > "$TMPDIR_BD/bd" << 'MOCK'
 #!/usr/bin/env bash
 case "$1" in
@@ -1256,47 +1246,25 @@ BD_SHOW
 esac
 MOCK
 chmod +x "$TMPDIR_BD/bd"
-rm -rf "$GATE_CACHE_NEW"
-
-# Pre-seed cache: 5 edits already, active task set
-mkdir -p "$GATE_CACHE_NEW"
-echo "5" > "$GATE_CACHE_NEW/edit-counter"
-echo "abc-123" > "$GATE_CACHE_NEW/active-task"
-
-STDIN='{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}'
-EXIT_CODE=0
-OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/mid-session-reminder" 2>&1) || EXIT_CODE=$?
-
-if [ "$EXIT_CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "edits since last milestone"; then
-    pass "16a. mid-session-reminder: 5+ edits → warning"
-else
-    fail "16a. mid-session-reminder: expected warning, got exit $EXIT_CODE: $OUTPUT"
-fi
-
-# 16b. Status echo on every Edit/Write
-rm -rf "$GATE_CACHE_NEW"
-mkdir -p "$GATE_CACHE_NEW"
-echo "0" > "$GATE_CACHE_NEW/edit-counter"
-echo "abc-123" > "$GATE_CACHE_NEW/active-task"
 
 STDIN='{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}'
 EXIT_CODE=0
 OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/mid-session-reminder" 2>&1) || EXIT_CODE=$?
 
 if [ "$EXIT_CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "task:abc-123"; then
-    pass "16b. mid-session-reminder: status echo on edit"
+    pass "16a. mid-session-reminder: status echo on edit"
 else
-    fail "16b. mid-session-reminder: expected status, got exit $EXIT_CODE: $OUTPUT"
+    fail "16a. mid-session-reminder: expected status, got exit $EXIT_CODE: $OUTPUT"
 fi
 
-# 16c. Always exits 0 (never blocks)
+# 16b. Always exits 0 (never blocks)
 EXIT_CODE=0
 OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/mid-session-reminder" 2>&1) || EXIT_CODE=$?
 
 if [ "$EXIT_CODE" -eq 0 ]; then
-    pass "16c. mid-session-reminder: always exits 0"
+    pass "16b. mid-session-reminder: always exits 0"
 else
-    fail "16c. mid-session-reminder: expected exit 0, got exit $EXIT_CODE"
+    fail "16b. mid-session-reminder: expected exit 0, got exit $EXIT_CODE"
 fi
 
 # ---------------------------------------------------------------------------

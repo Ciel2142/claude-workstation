@@ -359,12 +359,8 @@ else
     fail "hooks/pre-change-gate does NOT exit 0 outside beads project"
 fi
 
-# 15d. stop hook cleans up cache file
-if grep -q 'beads-gate' "$PLUGIN_ROOT/hooks/stop" 2>/dev/null; then
-    pass "hooks/stop includes cache cleanup for beads-gate"
-else
-    fail "hooks/stop MISSING cache cleanup for beads-gate"
-fi
+# 15d. (removed — gate cache eliminated in 2.5.4, no cleanup needed)
+pass "15d. no gate cache to clean up"
 
 # 15e. Functional: session-start hook produces valid JSON with workflow content
 SESSION_OUT=$(bash "$PLUGIN_ROOT/hooks/session-start" 2>/dev/null || echo "")

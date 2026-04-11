@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Mid-session reminder: advisory, never blocks.
-# - Tracks edit count, warns after 5+ edits without milestone progression
-# - Echoes current task/phase status on every Edit/Write
+# Echoes current task/phase status on every Edit/Write.
 # Registered as PostToolUse hook for Edit and Write in hooks.json.
 # Always exits 0.
 
@@ -31,10 +30,6 @@ if [ -z "$TASK_ID" ] || [ "$TASK_ID" = "BD_UNREACHABLE" ]; then
     exit 0
 fi
 
-# --- Increment edit counter ---
-increment_edit_count
-EDIT_COUNT=$(get_edit_count)
-
 # --- Get milestones ---
 MILESTONES=$(get_milestones "$TASK_ID")
 if [ "$MILESTONES" = "BD_UNREACHABLE" ]; then
@@ -43,11 +38,6 @@ fi
 
 PHASE=$(get_current_phase "$MILESTONES")
 NEXT=$(get_next_phase "$PHASE")
-
-# --- Warn on edit staleness ---
-if [ "$EDIT_COUNT" -ge 5 ]; then
-    echo "⚠ ${EDIT_COUNT} edits since last milestone. Current phase: ${PHASE}. Update milestone or explain."
-fi
 
 # --- Always echo status ---
 echo "✓ task:${TASK_ID} | phase:${PHASE} | next: ${NEXT}"
