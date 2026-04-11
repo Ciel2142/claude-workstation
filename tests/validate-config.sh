@@ -104,8 +104,8 @@ if echo "$HOOK_OUTPUT" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 ctx = d['hookSpecificOutput']['additionalContext']
-assert 'Quick Reference' in ctx, 'Quick Reference missing from escaped content'
-assert 'Hard Rules' in ctx, 'Hard Rules missing from escaped content'
+assert 'RIGID REF' in ctx, 'RIGID REF missing from escaped content'
+assert 'workflow/SKILL.md' in ctx, 'workflow reference missing from escaped content'
 assert '\"yes\"' not in ctx or 'yes' in ctx, 'quote escaping corrupted content'
 " 2>/dev/null; then
     pass "session-start hook JSON escaping preserves content correctly"
@@ -258,6 +258,12 @@ else
     fail "CLAUDE.md is ${CLAUDE_SIZE} bytes (expected < 3500 for lean cheatsheet)"
 fi
 
+if grep -q "RIGID REF" "$CLAUDE_MD" 2>/dev/null; then
+    pass "CLAUDE.md contains RIGID REF pointers"
+else
+    fail "CLAUDE.md MISSING RIGID REF pointers"
+fi
+
 echo ""
 
 # --- 13. Scenario scripts ---
@@ -349,7 +355,7 @@ if echo "$SESSION_OUT" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/d
 else
     fail "session-start hook output is NOT valid JSON (functional)"
 fi
-if echo "$SESSION_OUT" | grep -q "Quick Reference"; then
+if echo "$SESSION_OUT" | grep -q "RIGID REF"; then
     pass "session-start injects CLAUDE.md content (functional)"
 else
     fail "session-start does NOT inject CLAUDE.md content (functional)"
@@ -569,11 +575,11 @@ WORKFLOW_SKILL="$PLUGIN_ROOT/skills/workflow/SKILL.md"
 CLAUDE_MD="$PLUGIN_ROOT/CLAUDE.md"
 
 # Hard rules in CLAUDE.md (always-on)
-for rule in "No code without a beads task" "No production code without a failing test" "No completion claims without verification output" "strategic-compact"; do
+for rule in "RIGID REF" "workflow/SKILL.md" "agent-roles/SKILL.md" "strategic-compact"; do
     if grep -q "$rule" "$CLAUDE_MD" 2>/dev/null; then
-        pass "CLAUDE.md contains hard rule: '$rule'"
+        pass "CLAUDE.md contains: '$rule'"
     else
-        fail "CLAUDE.md MISSING hard rule: '$rule'"
+        fail "CLAUDE.md MISSING: '$rule'"
     fi
 done
 
@@ -713,10 +719,10 @@ done
 # 12.6 (removed — pre-change-gate hook deleted)
 
 # 12.7 CLAUDE.md contains enforcement hooks reference
-if grep -q "milestone-gate" "$PLUGIN_ROOT/CLAUDE.md" && grep -q "agent-roles" "$PLUGIN_ROOT/CLAUDE.md"; then
-    pass "12.7 CLAUDE.md contains enforcement hooks + agent-roles reference"
+if grep -q "RIGID REF" "$PLUGIN_ROOT/CLAUDE.md" && grep -q "agent-roles" "$PLUGIN_ROOT/CLAUDE.md"; then
+    pass "12.7 CLAUDE.md contains RIGID REF pointers + agent-roles reference"
 else
-    fail "12.7 CLAUDE.md missing enforcement hooks reference"
+    fail "12.7 CLAUDE.md missing RIGID REF pointers"
 fi
 
 # 12.8 Workflow SKILL.md contains milestone chain

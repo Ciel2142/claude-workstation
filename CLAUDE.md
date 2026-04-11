@@ -1,59 +1,15 @@
 ## Workflow: Beads + Superpowers + ECC
 
-Any task → `/claude-workstation:start "description"` first.
-Full ref → `/claude-workstation:workflow`.
+New task: `bd create --title="..." --type=task` then brainstorm or plan.
+Reference: `/claude-workstation:workflow`
+Orchestrator: `/claude-workstation:orchestrator`
 
-### Quick Reference
+> **RIGID REF:** Read `skills/workflow/SKILL.md` for hard rules, milestones,
+> enforcement hooks, side-quest detection, and session recovery.
+> Do not act on these from memory.
 
-1. **Task** -- `bd create "Goal"` (every change gets tracked)
-2. **Brainstorm** -- `superpowers:brainstorming` (design before code)
-3. **Plan** -- `superpowers:writing-plans` (decompose into sub-tasks)
-4. **Scaffold** -- `/claude-workstation:task-scaffolder` (create tasks from plan)
-5. **Sub-tasks** -- `bd create` for each + `bd dep add` (parent-child, blocks)
-6. **Implement** -- `bd ready` -> pick -> `bd update --claim` -> TDD (RED -> GREEN -> REFACTOR)
-7. **Review** -- `superpowers:requesting-code-review`
-8. **Verify** -- `superpowers:verification-before-completion` (evidence before claims)
-9. **Finish** -- `superpowers:finishing-a-development-branch`
-10. **Close** -- `bd close <id>`
-
-Or use `/claude-workstation:orchestrator` to automate steps 6-10.
-
-### Hard Rules
-
-- No code without a beads task
-- No production code without a failing test
-- No completion claims without verification output
-- No trusting subagent reports without own verification
-- Query Context7 before any library/framework impl
-- `/ecc:strategic-compact` every 3rd closed sub-task
-- Outside scope = side-quest: `bd create -t bug` + `bd dep add new current --type=discovered-from`, finish current first
-
-### Enforcement Hooks
-
-Hooks block (`exit 2`) when workflow steps are skipped:
-
-| Gate | Trigger | Blocks unless |
-|------|---------|---------------|
-| milestone-gate | Edit/Write | Active sub-task with `[M] task:claimed` |
-| agent-gate | Agent dispatch | Prompt contains protocol template or `BEAD-ROLE:default` (see `agent-roles` skill) |
-| commit-gate | git commit | `[M] review:quality` present |
-| stop-gate | Session end | All tasks have `[M] verified` or `[M] paused` |
-
-### Milestone Format
-
-`[M] <phase> <freetext>` — append via `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "[M] phase detail"`
-
-Phases: task:created → task:claimed → tdd:red → tdd:red-verified → tdd:green → tdd:green-verified → tdd:refactor → tdd:ready-for-review → review:spec → review:quality → verified
-
-### Subagent Protocol
-
-Before dispatching any subagent, check the `agent-roles` skill for the correct role and template.
-Five roles: implementer, reviewer, planner, build-fixer, default (add `BEAD-ROLE:default` to prompt).
-
-### Session
-
-- **Resume:** `bd list --status=in_progress` -> `bd show <id>` -> read notes for spec/plan paths
-- **Validate:** `bash tests/validate-config.sh`
+> **RIGID REF:** Read `skills/agent-roles/SKILL.md` § "How to use" before
+> dispatching any subagent. Do not act on role mapping from memory.
 
 ### Prerequisites
 
