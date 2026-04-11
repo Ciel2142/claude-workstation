@@ -340,27 +340,7 @@ else
     fail "hooks.json MISSING PreToolUse entries for Edit and Write"
 fi
 
-# 15b. pre-change-gate script exists and is executable
-if [[ -f "$PLUGIN_ROOT/hooks/pre-change-gate" ]]; then
-    pass "hooks/pre-change-gate exists"
-    if [[ -x "$PLUGIN_ROOT/hooks/pre-change-gate" ]]; then
-        pass "hooks/pre-change-gate is executable"
-    else
-        fail "hooks/pre-change-gate is NOT executable"
-    fi
-else
-    fail "hooks/pre-change-gate MISSING"
-fi
-
-# 15c. pre-change-gate exits 0 outside a beads project (guard clause)
-if (cd /tmp && bash "$PLUGIN_ROOT/hooks/pre-change-gate") 2>/dev/null; then
-    pass "hooks/pre-change-gate exits 0 outside beads project"
-else
-    fail "hooks/pre-change-gate does NOT exit 0 outside beads project"
-fi
-
-# 15d. (removed — gate cache eliminated in 2.5.4, no cleanup needed)
-pass "15d. no gate cache to clean up"
+# 15b-d. (removed — pre-change-gate retired in 2.5.3, replaced by milestone-gate)
 
 # 15e. Functional: session-start hook produces valid JSON with workflow content
 SESSION_OUT=$(bash "$PLUGIN_ROOT/hooks/session-start" 2>/dev/null || echo "")
@@ -375,19 +355,7 @@ else
     fail "session-start does NOT inject CLAUDE.md content (functional)"
 fi
 
-# 15f. Functional: pre-change-gate warns when no task is in_progress
-# Run in a temp dir with beads initialized but no in_progress tasks
-if command -v bd >/dev/null 2>&1; then
-    GATE_OUT=$(cd "$PLUGIN_ROOT" && bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || echo "")
-    # If there are no in_progress tasks, it should warn; if there are, it should be empty
-    # Either way, it should exit 0 and not crash
-    GATE_EXIT=$?
-    if [ "${GATE_EXIT:-0}" -eq 0 ] 2>/dev/null; then
-        pass "pre-change-gate runs without error in project (functional)"
-    else
-        fail "pre-change-gate crashed in project (functional)"
-    fi
-fi
+# 15f. (removed — pre-change-gate retired, replaced by milestone-gate)
 
 # 15g. Functional: session-start with missing CLAUDE.md outputs warning JSON
 REAL_CLAUDE="$PLUGIN_ROOT/CLAUDE.md"
@@ -631,7 +599,7 @@ echo "24. Behavioral spec files"
 SPECS_DIR="$PLUGIN_ROOT/tests/specs"
 if [ -d "$SPECS_DIR" ]; then
     pass "tests/specs/ directory exists"
-    for spec_name in pre-change-gate bd-notes-append position-detection scope-health start; do
+    for spec_name in bd-notes-append scope-health start; do
         if [ -f "$SPECS_DIR/${spec_name}.yaml" ]; then
             pass "specs/${spec_name}.yaml exists"
         else
@@ -714,12 +682,7 @@ for hook in milestone-gate agent-gate commit-gate stop-gate mid-session-reminder
     fi
 done
 
-# 12.6 pre-change-gate is NOT referenced in hooks.json (retired)
-if grep -q "pre-change-gate" "$PLUGIN_ROOT/hooks/hooks.json"; then
-    fail "12.6 hooks.json still references retired pre-change-gate"
-else
-    pass "12.6 pre-change-gate retired from hooks.json"
-fi
+# 12.6 (removed — pre-change-gate hook deleted)
 
 # 12.7 CLAUDE.md contains enforcement hooks reference
 if grep -q "milestone-gate" "$PLUGIN_ROOT/CLAUDE.md" && grep -q "agent-roles" "$PLUGIN_ROOT/CLAUDE.md"; then

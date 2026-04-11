@@ -75,9 +75,13 @@ See `/claude-workstation:workflow` for the full reference, or the cheatsheet in 
 
 | Hook | When | What |
 |---|---|---|
-| **SessionStart** | Session begins | Injects lean cheatsheet (~30 lines) via `additionalContext` + auto-inits beads |
-| **PreToolUse** | Before Edit/Write | Warns if no active beads task exists (pre-change-gate) |
-| **Stop** | Session ends | Warns about untracked commits, lists in-progress tasks |
+| **SessionStart** | Session begins | Injects lean cheatsheet via `additionalContext` + auto-inits beads |
+| **PreCompact** | Before compaction | Injects in-progress task state into context |
+| **PreToolUse: Edit/Write** | Before file changes | Blocks unless active sub-task with `[M] task:claimed` (milestone-gate) |
+| **PreToolUse: Agent** | Before subagent dispatch | Blocks unless prompt contains protocol template or `BEAD-ROLE:default` (agent-gate) |
+| **PreToolUse: Bash** | Before bash commands | Blocks `git commit` unless `[M] review:quality` present (commit-gate) |
+| **PostToolUse: Edit/Write** | After file changes | Echoes current task/phase status (mid-session-reminder) |
+| **Stop** | Session ends | Blocks unless all tasks have `[M] verified` or `[M] paused` (stop-gate) + warns about untracked commits (stop) |
 
 ## Project Structure
 
@@ -89,11 +93,17 @@ claude-workstation/
 │   ├── start/SKILL.md         # /start -- task creation & workflow entry
 │   └── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
 ├── hooks/
-│   ├── hooks.json             # SessionStart + PreToolUse + Stop hooks
+│   ├── hooks.json             # Hook event → script wiring
+│   ├── cache-utils.sh         # Shared utility functions for hooks
 │   ├── bd-notes-append        # Safe notes append wrapper
-│   ├── session-start          # Cheatsheet injection script
-│   ├── pre-change-gate        # Beads task enforcement before file edits
-│   └── stop                   # Session-end reminder script
+│   ├── session-start          # Cheatsheet injection + beads auto-init
+│   ├── milestone-gate         # Blocks Edit/Write without active claimed sub-task
+│   ├── agent-gate             # Blocks Agent dispatch without role sentinel
+│   ├── commit-gate            # Blocks git commit without review:quality milestone
+│   ├── stop-gate              # Blocks session end without verified/paused milestones
+│   ├── mid-session-reminder   # Echoes task/phase status after edits
+│   ├── precompact-state       # Injects workflow state before compaction
+│   └── stop                   # Session-end advisory warnings
 ├── tests/
 │   ├── validate-config.sh     # Config validation
 │   ├── test-behaviors.sh      # Behavioral tests for hooks

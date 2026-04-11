@@ -15,22 +15,6 @@ echo "=== Claude Workstation Behavioral Tests ==="
 echo ""
 
 # ---------------------------------------------------------------------------
-# Helper: compute the gate cache path for the plugin's .beads dir
-# (mirrors the logic in pre-change-gate and stop)
-# ---------------------------------------------------------------------------
-_gate_cache() {
-    local beads_path="$PLUGIN_ROOT/.beads"
-    local project_hash
-    project_hash=$(printf '%s' "$beads_path" | md5sum 2>/dev/null | cut -c1-8 \
-        || printf '%s' "$beads_path" | md5 2>/dev/null | cut -c1-8 \
-        || echo "default")
-    local cache_dir="${XDG_RUNTIME_DIR:-/tmp}"
-    echo "${cache_dir}/.beads-gate-${USER:-$(id -un)}-${project_hash}"
-}
-
-GATE_CACHE=$(_gate_cache)
-
-# ---------------------------------------------------------------------------
 # Section 1: bd-notes-append tests
 # ---------------------------------------------------------------------------
 echo "1. bd-notes-append"
@@ -193,79 +177,7 @@ fi
 
 echo ""
 
-# ---------------------------------------------------------------------------
-# Section 2: pre-change-gate tests
-# ---------------------------------------------------------------------------
-echo "2. pre-change-gate"
-
-# Build a separate temp dir for gate mock (includes git passthrough)
-TMPDIR_GATE=$(mktemp -d)
-trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_GATE"' EXIT
-
-cat > "$TMPDIR_GATE/bd" << 'MOCK'
-#!/usr/bin/env bash
-SUBCOMMAND="${1:-}"
-shift || true
-
-case "$SUBCOMMAND" in
-    list)
-        # Check for --json flag
-        HAS_JSON=0
-        HAS_STATUS=""
-        for arg in "$@"; do
-            case "$arg" in
-                --json) HAS_JSON=1 ;;
-                --status=*) HAS_STATUS="${arg#--status=}" ;;
-            esac
-        done
-        if [[ "$HAS_JSON" -eq 1 ]]; then
-            echo "$BD_LIST_JSON_OUTPUT"
-        else
-            echo "$BD_LIST_OUTPUT"
-        fi
-        ;;
-    show)
-        echo "$BD_SHOW_OUTPUT"
-        ;;
-    *)
-        echo "mock bd: unknown subcommand $SUBCOMMAND" >&2
-        exit 1
-        ;;
-esac
-exit 0
-MOCK
-chmod +x "$TMPDIR_GATE/bd"
-
-# 2a. No task in progress
-rm -rf "$GATE_CACHE"
-export BD_LIST_JSON_OUTPUT="[]"
-export BD_LIST_OUTPUT="No issues found."
-export BD_SHOW_OUTPUT=""
-GATE_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
-    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
-if echo "$GATE_OUT" | grep -q "WARNING" && echo "$GATE_OUT" | grep -q "No active beads task"; then
-    pass "2a. no task in progress — warns about missing beads task"
-else
-    fail "2a. no task in progress — expected WARNING about 'No active beads task', got: $(printf '%q' "$GATE_OUT")"
-fi
-
-# 2b. Task exists — no output expected (tier check removed)
-rm -rf "$GATE_CACHE"
-export BD_LIST_JSON_OUTPUT='[{"id": "test-456", "title": "Test task"}]'
-export BD_LIST_OUTPUT="  test-456  IN_PROGRESS  Test task"
-export BD_SHOW_OUTPUT="TITLE
-Test task
-NOTES
-plan: docs/plan.md
-STATUS
-in_progress"
-GATE_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
-    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
-if [[ -z "$GATE_OUT" ]]; then
-    pass "2b. task exists — outputs nothing (no warning)"
-else
-    fail "2b. task exists — expected empty output, got: $(printf '%q' "$GATE_OUT")"
-fi
+# Section 2: (removed — pre-change-gate retired, replaced by milestone-gate)
 
 echo ""
 
@@ -328,7 +240,7 @@ echo "4. stop hook"
 
 # Build temp dir with mocked git and bd for stop hook tests
 TMPDIR_STOP=$(mktemp -d)
-trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_GATE" "$TMPDIR_STOP"' EXIT
+trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_STOP"' EXIT
 
 cat > "$TMPDIR_STOP/bd" << 'MOCK'
 #!/usr/bin/env bash
@@ -389,7 +301,7 @@ GITM
 chmod +x "$TMPDIR_STOP/git"
 
 # 4a. Clean session: no commits, no tasks of any status
-rm -rf "$GATE_CACHE"
+
 export GIT_LOG_OUTPUT=""
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="No issues found."
@@ -403,7 +315,7 @@ else
 fi
 
 # 4b. Commits exist + recently closed task — should NOT warn about no beads issues
-rm -rf "$GATE_CACHE"
+
 export GIT_LOG_OUTPUT="abc1234 feat: do something"
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="  task-789  CLOSED  Implement feature"
@@ -418,7 +330,7 @@ else
 fi
 
 # 4c. Commits exist + no issues at all — should warn
-rm -rf "$GATE_CACHE"
+
 export GIT_LOG_OUTPUT="abc1234 feat: do something"
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="No issues found."
@@ -433,7 +345,7 @@ else
 fi
 
 # 4d. F10 regression: commits + historical closed task (not recent) + no in-progress — SHOULD warn
-rm -rf "$GATE_CACHE"
+
 export GIT_LOG_OUTPUT="abc1234 feat: do something"
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="  task-100  CLOSED  Old historical task"
@@ -506,23 +418,9 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "6. untested hook paths (F15)"
 
-# 6a. pre-change-gate: no-bd guard — exits 0 silently when bd not in PATH
+# 6a. (removed — pre-change-gate retired)
 TMPDIR_NOBD=$(mktemp -d)
-trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_GATE" "$TMPDIR_STOP" "$TMPDIR_NOBD"' EXIT
-# Empty PATH dir with only git (needed for rev-parse)
-cat > "$TMPDIR_NOBD/git" << GITNOBD
-#!/usr/bin/env bash
-echo "$PLUGIN_ROOT"
-GITNOBD
-chmod +x "$TMPDIR_NOBD/git"
-# No bd in PATH — pre-change-gate should exit 0 with no output
-NOBD_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_NOBD" \
-    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
-if [ -z "$NOBD_OUT" ]; then
-    pass "6a. pre-change-gate no-bd guard — exits silently"
-else
-    fail "6a. pre-change-gate no-bd guard — expected no output, got: $(printf '%q' "$NOBD_OUT")"
-fi
+trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_STOP" "$TMPDIR_NOBD"' EXIT
 
 # 6b. stop hook: no-bd warning — should warn when bd not found
 # Use restricted PATH with only essential system commands (no bd)
@@ -548,18 +446,7 @@ else
     fi
 fi
 
-# 6d. pre-change-gate: cache hit — second call within 60s uses cache
-rm -rf "$GATE_CACHE"
-FIRST_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
-    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
-# Second call should hit cache and return same result
-SECOND_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
-    bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
-if [ "$FIRST_OUT" = "$SECOND_OUT" ]; then
-    pass "6d. pre-change-gate cache hit — consistent output on second call"
-else
-    fail "6d. pre-change-gate cache hit — first and second call differ"
-fi
+# 6d. (removed — pre-change-gate retired)
 
 echo ""
 
@@ -604,7 +491,7 @@ echo "8. session-start command injection prevention"
 
 TMPDIR_INJECT=$(mktemp -d)
 CANARY_FILE=$(mktemp -u "${TMPDIR_INJECT}/canary.XXXXXX")
-trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_GATE" "$TMPDIR_STOP" "$TMPDIR_NOBD" "$TMPDIR_INJECT"' EXIT
+trap 'rm -rf "$TMPDIR_BD" "$TMPDIR_STOP" "$TMPDIR_NOBD" "$TMPDIR_INJECT"' EXIT
 
 # Mock bd: record arguments, do nothing dangerous
 cat > "$TMPDIR_INJECT/bd" << 'MOCK_BD'
@@ -769,21 +656,10 @@ esac
 GITMOCK
     chmod +x "$TMPDIR_HANG/git"
 
-    # 11a. pre-change-gate with hanging bd — should exit within 12s (2 x 5s timeouts + margin)
-    rm -rf "$GATE_CACHE"
-    if timeout 12 bash -c "cd '$PLUGIN_ROOT' && PATH='$TMPDIR_HANG:$PATH' bash '$PLUGIN_ROOT/hooks/pre-change-gate'" 2>/dev/null; then
-        pass "11a. pre-change-gate completes when bd hangs (timeout works)"
-    else
-        EXIT_CODE=$?
-        if [ "$EXIT_CODE" -eq 124 ]; then
-            fail "11a. pre-change-gate timed out at 12s (internal timeout 5s did not fire)"
-        else
-            pass "11a. pre-change-gate exited with code $EXIT_CODE when bd hangs"
-        fi
-    fi
+    # 11a. (removed — pre-change-gate retired)
 
     # 11b. stop hook with hanging bd — should exit within 15s (multiple bd calls x 5s timeouts + margin)
-    rm -rf "$GATE_CACHE"
+    
     if timeout 15 bash -c "cd '$PLUGIN_ROOT' && PATH='$TMPDIR_HANG:$PATH' bash '$PLUGIN_ROOT/hooks/stop'" 2>/dev/null; then
         pass "11b. stop hook completes when bd hangs (timeout works)"
     else
