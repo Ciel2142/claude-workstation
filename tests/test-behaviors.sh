@@ -801,6 +801,163 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 12: milestone-gate tests
+# ---------------------------------------------------------------------------
+echo ""
+echo "12. milestone-gate"
+
+# Helper: compute gate cache dir (same logic as cache-utils.sh)
+_gate_cache_dir() {
+    local beads_path="$PLUGIN_ROOT/.beads"
+    local project_hash
+    project_hash=$(printf '%s' "$beads_path" | md5sum 2>/dev/null | cut -c1-8 \
+        || printf '%s' "$beads_path" | md5 2>/dev/null | cut -c1-8 \
+        || echo "default")
+    local cache_dir="${XDG_RUNTIME_DIR:-/tmp}"
+    echo "${cache_dir}/.beads-gate-${USER:-$(id -un)}-${project_hash}"
+}
+GATE_CACHE_NEW=$(_gate_cache_dir)
+
+# 12a. No active task → exit 2
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+echo "No issues found"
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+STDIN='{"tool_name":"Edit","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/hooks/cache-utils.sh"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/milestone-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 2 ] && echo "$OUTPUT" | grep -q "BLOCKED"; then
+    pass "12a. milestone-gate: no active task → exit 2 BLOCKED"
+else
+    fail "12a. milestone-gate: expected exit 2 BLOCKED, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 12b. Active task with [M] task:claimed → exit 0 with status
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+case "$1" in
+    list)
+        echo "ID        STATUS        TITLE"
+        echo "abc-123   in_progress   Test task" ;;
+    show)
+        cat << 'BD_SHOW'
+TITLE
+Test task
+STATUS
+in_progress
+NOTES
+[M] task:created sub-task
+[M] task:claimed work started
+[M] tdd:red wrote failing test
+PARENT
+BD_SHOW
+        ;;
+esac
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+STDIN='{"tool_name":"Edit","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/hooks/cache-utils.sh"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/milestone-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "task:abc-123"; then
+    pass "12b. milestone-gate: claimed task → exit 0 with status"
+else
+    fail "12b. milestone-gate: expected exit 0 + status, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 12c. Active task WITHOUT [M] task:claimed → exit 2
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+case "$1" in
+    list)
+        echo "ID        STATUS        TITLE"
+        echo "abc-123   in_progress   Test task" ;;
+    show)
+        cat << 'BD_SHOW'
+TITLE
+Test task
+STATUS
+in_progress
+NOTES
+[M] task:created sub-task
+PARENT
+BD_SHOW
+        ;;
+esac
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+STDIN='{"tool_name":"Edit","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/hooks/cache-utils.sh"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/milestone-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 2 ] && echo "$OUTPUT" | grep -q "not claimed"; then
+    pass "12c. milestone-gate: unclaimed task → exit 2"
+else
+    fail "12c. milestone-gate: expected exit 2 (unclaimed), got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 12d. Exempt file (*.md) → exit 0 silently even without task
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+echo "No issues found"
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+STDIN='{"tool_name":"Write","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/README.md"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/milestone-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "12d. milestone-gate: exempt file (*.md) → exit 0"
+else
+    fail "12d. milestone-gate: expected exit 0 for *.md, got exit $EXIT_CODE"
+fi
+
+# 12e. Exempt file (docs/**) → exit 0
+STDIN='{"tool_name":"Edit","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/docs/superpowers/specs/test.md"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/milestone-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "12e. milestone-gate: exempt file (docs/**) → exit 0"
+else
+    fail "12e. milestone-gate: expected exit 0 for docs/**, got exit $EXIT_CODE"
+fi
+
+# 12f. Exempt file (test file) → exit 0
+STDIN='{"tool_name":"Write","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/tests/test-new.sh"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/milestone-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "12f. milestone-gate: exempt file (tests/**) → exit 0"
+else
+    fail "12f. milestone-gate: expected exit 0 for tests/**, got exit $EXIT_CODE"
+fi
+
+# 12g. BEADS_GATE_BYPASS=1 → exit 0 with warning
+STDIN='{"tool_name":"Edit","tool_input":{"file_path":"'"${PLUGIN_ROOT}"'/hooks/cache-utils.sh"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" BEADS_GATE_BYPASS=1 bash "$PLUGIN_ROOT/hooks/milestone-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "BEADS_GATE_BYPASS"; then
+    pass "12g. milestone-gate: BEADS_GATE_BYPASS=1 → exit 0 with warning"
+else
+    fail "12g. milestone-gate: expected bypass warning, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="

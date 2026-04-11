@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# Milestone gate: blocks Edit/Write without active sub-task bead + [M] task:claimed.
+# Registered as PreToolUse hook for Edit and Write in hooks.json.
+# Exit 2 = block. Exit 0 = allow.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=cache-utils.sh
+. "$SCRIPT_DIR/cache-utils.sh"
+
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+EXEMPTIONS_FILE="${PLUGIN_ROOT}/templates/gate-exemptions.txt"
+
+# --- Bypass ---
+if [ "${BEADS_GATE_BYPASS:-}" = "1" ]; then
+    echo "⚠ BEADS_GATE_BYPASS=1 — milestone gate bypassed"
+    exit 0
+fi
+
+# --- Guards ---
+if ! check_beads_available; then
+    exit 0
+fi
+
+# --- Read stdin JSON ---
+STDIN=$(cat)
+FILE_PATH=$(json_field "$STDIN" "tool_input.file_path")
+
+# --- Check file exemptions ---
+if [ -n "$FILE_PATH" ] && [ -f "$EXEMPTIONS_FILE" ]; then
+    # Convert to path relative to git root
+    REL_PATH="$FILE_PATH"
+    if [ -n "$GIT_ROOT" ]; then
+        REL_PATH="${FILE_PATH#$GIT_ROOT/}"
+    fi
+
+    while IFS= read -r pattern || [ -n "$pattern" ]; do
+        # Skip comments and blank lines
+        [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${pattern// /}" ]] && continue
+        # Trim whitespace
+        pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+        pattern="${pattern%"${pattern##*[![:space:]]}"}"
+
+        matched=false
+        case "$pattern" in
+            "**/"*)
+                # **/ prefix: match suffix anywhere in path
+                suffix="${pattern#\*\*/}"
+                # shellcheck disable=SC2254
+                case "$REL_PATH" in
+                    $suffix|*/$suffix) matched=true ;;
+                esac
+                ;;
+            *"/**")
+                # /** suffix: match any file under prefix
+                prefix="${pattern%/\*\*}"
+                [[ "$REL_PATH" == "$prefix/"* ]] && matched=true
+                ;;
+            *)
+                # Simple glob (e.g., *.md)
+                # shellcheck disable=SC2254
+                case "$REL_PATH" in
+                    $pattern) matched=true ;;
+                esac
+                ;;
+        esac
+
+        if $matched; then
+            exit 0
+        fi
+    done < "$EXEMPTIONS_FILE"
+fi
+
+# --- Check active task ---
+TASK_ID=$(get_active_task)
+
+if [ "$TASK_ID" = "BD_UNREACHABLE" ]; then
+    echo "⚠ Beads server unreachable — milestone gate bypassed. Re-run bd show when server recovers."
+    exit 0
+fi
+
+if [ -z "$TASK_ID" ]; then
+    echo "🚫 BLOCKED: No active sub-task bead. Create one before editing files:"
+    echo "   bd create --title=\"...\" --type=task -p 2"
+    echo "   bd dep add <new-id> <parent-id> --type parent-child"
+    echo "   bd update <new-id> --claim"
+    exit 2
+fi
+
+# --- Check milestones ---
+MILESTONES=$(get_milestones "$TASK_ID")
+
+if [ "$MILESTONES" = "BD_UNREACHABLE" ]; then
+    echo "⚠ Beads server unreachable — milestone gate bypassed."
+    exit 0
+fi
+
+if ! printf '%s' "$MILESTONES" | grep -q '^\[M\] task:claimed'; then
+    echo "🚫 BLOCKED: Task $TASK_ID exists but not claimed. Claim it first:"
+    echo "   bd update $TASK_ID --claim"
+    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" $TASK_ID \"[M] task:claimed work started\""
+    exit 2
+fi
+
+# --- Status line (always output on success) ---
+PHASE=$(get_current_phase "$MILESTONES")
+NEXT=$(get_next_phase "$PHASE")
+echo "✓ task:${TASK_ID} | phase:${PHASE} | next: ${NEXT}"
+
+exit 0
