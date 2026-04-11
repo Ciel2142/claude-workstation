@@ -49,12 +49,12 @@ for task_id in $TASK_IDS; do
 done
 
 if [ -n "$MISSING" ]; then
-    echo "🚫 BLOCKED: In-progress tasks missing verified/paused milestone:"
-    printf '%b' "$MISSING"
-    echo ""
-    echo "   Either verify completion or pause with reason:"
-    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" <id> \"[M] verified done\""
-    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" <id> \"[M] paused <reason>\""
+    echo "🚫 BLOCKED: In-progress tasks missing verified/paused milestone:" >&2
+    printf '%b' "$MISSING" >&2
+    echo "" >&2
+    echo "   Either verify completion or pause with reason:" >&2
+    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" <id> \"[M] verified done\"" >&2
+    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" <id> \"[M] paused <reason>\"" >&2
     exit 2
 fi
 

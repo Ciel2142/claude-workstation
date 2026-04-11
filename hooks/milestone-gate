@@ -82,10 +82,10 @@ if [ "$TASK_ID" = "BD_UNREACHABLE" ]; then
 fi
 
 if [ -z "$TASK_ID" ]; then
-    echo "🚫 BLOCKED: No active sub-task bead. Create one before editing files:"
-    echo "   bd create --title=\"...\" --type=task -p 2"
-    echo "   bd dep add <new-id> <parent-id> --type parent-child"
-    echo "   bd update <new-id> --claim"
+    echo "🚫 BLOCKED: No active sub-task bead. Create one before editing files:" >&2
+    echo "   bd create --title=\"...\" --type=task -p 2" >&2
+    echo "   bd dep add <new-id> <parent-id> --type parent-child" >&2
+    echo "   bd update <new-id> --claim" >&2
     exit 2
 fi
 
@@ -98,9 +98,9 @@ if [ "$MILESTONES" = "BD_UNREACHABLE" ]; then
 fi
 
 if ! printf '%s' "$MILESTONES" | grep -q '^\[M\] task:claimed'; then
-    echo "🚫 BLOCKED: Task $TASK_ID exists but not claimed. Claim it first:"
-    echo "   bd update $TASK_ID --claim"
-    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" $TASK_ID \"[M] task:claimed work started\""
+    echo "🚫 BLOCKED: Task $TASK_ID exists but not claimed. Claim it first:" >&2
+    echo "   bd update $TASK_ID --claim" >&2
+    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" $TASK_ID \"[M] task:claimed work started\"" >&2
     exit 2
 fi
 

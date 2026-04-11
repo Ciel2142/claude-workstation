@@ -34,11 +34,11 @@ if printf '%s' "$STDIN" | grep -q 'BEAD-PROTOCOL-v1'; then
 fi
 
 # --- Block ---
-echo "🚫 BLOCKED: Subagent prompt missing BEAD-PROTOCOL-v1 sentinel."
-echo "   Include the appropriate protocol template in the prompt:"
-echo "   - templates/protocol-implementer.md (code changes)"
-echo "   - templates/protocol-reviewer.md (reviews)"
-echo "   - templates/protocol-planner.md (planning)"
-echo "   - templates/protocol-build-fixer.md (build fixes)"
-echo "   Or add BEAD-EXEMPT:research for research-only agents."
+echo "🚫 BLOCKED: Subagent prompt missing BEAD-PROTOCOL-v1 sentinel." >&2
+echo "   Include the appropriate protocol template in the prompt:" >&2
+echo "   - templates/protocol-implementer.md (code changes)" >&2
+echo "   - templates/protocol-reviewer.md (reviews)" >&2
+echo "   - templates/protocol-planner.md (planning)" >&2
+echo "   - templates/protocol-build-fixer.md (build fixes)" >&2
+echo "   Or add BEAD-EXEMPT:research for research-only agents." >&2
 exit 2

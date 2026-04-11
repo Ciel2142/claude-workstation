@@ -39,7 +39,7 @@ if [ "$TASK_ID" = "BD_UNREACHABLE" ]; then
 fi
 
 if [ -z "$TASK_ID" ]; then
-    echo "🚫 BLOCKED: Cannot commit without an active beads task."
+    echo "🚫 BLOCKED: Cannot commit without an active beads task." >&2
     exit 2
 fi
 
@@ -53,10 +53,10 @@ fi
 
 if ! printf '%s' "$MILESTONES" | grep -q '^\[M\] review:quality'; then
     PHASE=$(get_current_phase "$MILESTONES")
-    echo "🚫 BLOCKED: Cannot commit without code quality review."
-    echo "   Task: $TASK_ID | Current phase: $PHASE"
-    echo "   Complete quality review first, then:"
-    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" $TASK_ID \"[M] review:quality passed\""
+    echo "🚫 BLOCKED: Cannot commit without code quality review." >&2
+    echo "   Task: $TASK_ID | Current phase: $PHASE" >&2
+    echo "   Complete quality review first, then:" >&2
+    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" $TASK_ID \"[M] review:quality passed\"" >&2
     exit 2
 fi
 
