@@ -1,6 +1,6 @@
 ---
 name: agent-roles
-version: 2.6.0
+version: 2.7.0
 description: >
   Subagent role registry. Check before dispatching any Agent.
   TRIGGER: Before any Agent dispatch, or when agent-gate blocks a subagent.
