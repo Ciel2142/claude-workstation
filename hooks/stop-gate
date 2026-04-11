@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Stop gate: blocks session end unless all in-progress beads have verified/paused.
+# Registered as Stop hook in hooks.json (runs after advisory stop hook).
+# Exit 2 = block. Exit 0 = allow.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=cache-utils.sh
+. "$SCRIPT_DIR/cache-utils.sh"
+
+# --- Bypass ---
+if [ "${BEADS_GATE_BYPASS:-}" = "1" ]; then
+    echo "⚠ BEADS_GATE_BYPASS=1 — stop gate bypassed"
+    exit 0
+fi
+
+# --- Guards ---
+if ! check_beads_available; then
+    exit 0
+fi
+
+# --- Get all in-progress tasks ---
+LISTING=$($BD_TIMEOUT bd list --status=in_progress 2>/dev/null || echo "")
+TASK_IDS=$(echo "$LISTING" | grep -v 'No issues\|^$\|Total:\|Status:' | awk 'NR>1 && NF>0{print $1}' || true)
+
+if [ -z "$TASK_IDS" ]; then
+    exit 0
+fi
+
+# --- Check each task for verified or paused ---
+MISSING=""
+for task_id in $TASK_IDS; do
+    MILESTONES=$(get_milestones "$task_id")
+
+    # If server unreachable, don't block
+    if [ "$MILESTONES" = "BD_UNREACHABLE" ]; then
+        echo "⚠ Beads server unreachable — stop gate bypassed for $task_id."
+        continue
+    fi
+
+    HAS_VERIFIED=$(printf '%s' "$MILESTONES" | grep -c '^\[M\] verified' || true)
+    HAS_PAUSED=$(printf '%s' "$MILESTONES" | grep -c '^\[M\] paused' || true)
+
+    if [ "$HAS_VERIFIED" -eq 0 ] && [ "$HAS_PAUSED" -eq 0 ]; then
+        PHASE=$(get_current_phase "$MILESTONES")
+        MISSING="${MISSING}   ${task_id} (phase: ${PHASE})\n"
+    fi
+done
+
+if [ -n "$MISSING" ]; then
+    echo "🚫 BLOCKED: In-progress tasks missing verified/paused milestone:"
+    printf '%b' "$MISSING"
+    echo ""
+    echo "   Either verify completion or pause with reason:"
+    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" <id> \"[M] verified done\""
+    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" <id> \"[M] paused <reason>\""
+    exit 2
+fi
+
+exit 0

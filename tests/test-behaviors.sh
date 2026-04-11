@@ -1108,6 +1108,123 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 15: stop-gate tests
+# ---------------------------------------------------------------------------
+echo ""
+echo "15. stop-gate"
+
+# 15a. In-progress task without verified/paused → exit 2
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+case "$1" in
+    list)
+        echo "ID        STATUS        TITLE"
+        echo "abc-123   in_progress   Test task" ;;
+    show)
+        cat << 'BD_SHOW'
+TITLE
+Test task
+NOTES
+[M] task:claimed work started
+[M] tdd:green-verified all pass
+PARENT
+BD_SHOW
+        ;;
+esac
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+EXIT_CODE=0
+OUTPUT=$(PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/stop-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 2 ] && echo "$OUTPUT" | grep -q "BLOCKED"; then
+    pass "15a. stop-gate: in-progress without verified → exit 2"
+else
+    fail "15a. stop-gate: expected exit 2, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 15b. In-progress task with [M] verified → exit 0
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+case "$1" in
+    list)
+        echo "ID        STATUS        TITLE"
+        echo "abc-123   in_progress   Test task" ;;
+    show)
+        cat << 'BD_SHOW'
+TITLE
+Test task
+NOTES
+[M] task:claimed work started
+[M] review:quality passed
+[M] verified all tests pass, feature works
+PARENT
+BD_SHOW
+        ;;
+esac
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+EXIT_CODE=0
+OUTPUT=$(PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/stop-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "15b. stop-gate: verified task → exit 0"
+else
+    fail "15b. stop-gate: expected exit 0, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 15c. In-progress task with [M] paused → exit 0
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+case "$1" in
+    list)
+        echo "ID        STATUS        TITLE"
+        echo "abc-123   in_progress   Test task" ;;
+    show)
+        cat << 'BD_SHOW'
+TITLE
+Test task
+NOTES
+[M] task:claimed work started
+[M] paused context pressure, saving state
+PARENT
+BD_SHOW
+        ;;
+esac
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+EXIT_CODE=0
+OUTPUT=$(PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/stop-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "15c. stop-gate: paused task → exit 0"
+else
+    fail "15c. stop-gate: expected exit 0, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 15d. No in-progress tasks → exit 0
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+echo "No issues found"
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+EXIT_CODE=0
+OUTPUT=$(PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/stop-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "15d. stop-gate: no in-progress tasks → exit 0"
+else
+    fail "15d. stop-gate: expected exit 0, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
