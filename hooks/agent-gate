@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Agent gate: blocks Agent dispatch without BEAD-PROTOCOL-v1 sentinel in prompt.
+# Registered as PreToolUse hook for Agent in hooks.json.
+# Exit 2 = block. Exit 0 = allow.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=cache-utils.sh
+. "$SCRIPT_DIR/cache-utils.sh"
+
+# --- Bypass ---
+if [ "${BEADS_GATE_BYPASS:-}" = "1" ]; then
+    echo "⚠ BEADS_GATE_BYPASS=1 — agent gate bypassed"
+    exit 0
+fi
+
+# --- Guards ---
+if ! check_beads_available; then
+    exit 0
+fi
+
+# --- Read stdin JSON ---
+STDIN=$(cat)
+
+# --- Check for exemptions ---
+if printf '%s' "$STDIN" | grep -q 'BEAD-EXEMPT:research\|BEAD-EXEMPT:exploration'; then
+    exit 0
+fi
+
+# --- Check for protocol sentinel ---
+if printf '%s' "$STDIN" | grep -q 'BEAD-PROTOCOL-v1'; then
+    exit 0
+fi
+
+# --- Block ---
+echo "🚫 BLOCKED: Subagent prompt missing BEAD-PROTOCOL-v1 sentinel."
+echo "   Include the appropriate protocol template in the prompt:"
+echo "   - templates/protocol-implementer.md (code changes)"
+echo "   - templates/protocol-reviewer.md (reviews)"
+echo "   - templates/protocol-planner.md (planning)"
+echo "   - templates/protocol-build-fixer.md (build fixes)"
+echo "   Or add BEAD-EXEMPT:research for research-only agents."
+exit 2

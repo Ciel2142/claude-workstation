@@ -958,6 +958,58 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 13: agent-gate tests
+# ---------------------------------------------------------------------------
+echo ""
+echo "13. agent-gate"
+
+# 13a. Prompt without BEAD-PROTOCOL-v1 → exit 2
+STDIN='{"tool_name":"Agent","tool_input":{"prompt":"Do the task without any protocol","description":"test"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | bash "$PLUGIN_ROOT/hooks/agent-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 2 ] && echo "$OUTPUT" | grep -q "BLOCKED"; then
+    pass "13a. agent-gate: no sentinel → exit 2 BLOCKED"
+else
+    fail "13a. agent-gate: expected exit 2, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 13b. Prompt with BEAD-PROTOCOL-v1 → exit 0
+STDIN='{"tool_name":"Agent","tool_input":{"prompt":"Implement the feature.\n<!-- BEAD-PROTOCOL-v1:implementer -->","description":"test"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | bash "$PLUGIN_ROOT/hooks/agent-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "13b. agent-gate: sentinel present → exit 0"
+else
+    fail "13b. agent-gate: expected exit 0, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 13c. Prompt with BEAD-EXEMPT:research → exit 0
+STDIN='{"tool_name":"Agent","tool_input":{"prompt":"Research how auth works. BEAD-EXEMPT:research","description":"test"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | bash "$PLUGIN_ROOT/hooks/agent-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "13c. agent-gate: BEAD-EXEMPT:research → exit 0"
+else
+    fail "13c. agent-gate: expected exit 0 for exempt, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 13d. BEADS_GATE_BYPASS=1 → exit 0
+STDIN='{"tool_name":"Agent","tool_input":{"prompt":"No protocol","description":"test"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | BEADS_GATE_BYPASS=1 bash "$PLUGIN_ROOT/hooks/agent-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "BEADS_GATE_BYPASS"; then
+    pass "13d. agent-gate: BEADS_GATE_BYPASS=1 → exit 0 with warning"
+else
+    fail "13d. agent-gate: expected bypass, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
