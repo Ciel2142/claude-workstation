@@ -7,6 +7,8 @@
 
 Five files carry overlapping content. Same concepts (hard rules, milestone chain, subagent protocol, side-quest flow, compact trigger) appear in 2-3 places each. Drift risk, maintenance burden, wasted context tokens.
 
+Additionally, the `start` skill is a thin wrapper (~5 commands + 1 routing question in 110 lines) that adds little value over what workflow already describes. Its only unique content — side-quest auto-detection — is 3 lines of heuristic that belong in workflow.
+
 ## Approach
 
 **Distributed ownership with rigid reference pointers.**
@@ -29,7 +31,7 @@ The `§` + heading gives agents a precise read target. "Do not act from memory" 
 | **workflow** | Pipeline overview, hard rules, milestone chain, dep types, Context7, pre-change gate, anti-patterns, skill ref table, session recovery | Orchestrator dispatch detail (§ Orchestrator Protocol), subagent template table (§ Subagent Protocol), side-quest creation commands (§ Side Quests) |
 | **orchestrator** | Dispatch loop, cycle limits, verdict parsing, compact trigger, automated side-quest creation, rigid rules, anti-rationalizations | Nothing removed — already self-contained |
 | **agent-roles** | Role-to-template mapping, role examples, orchestrator context | Nothing removed — already self-contained |
-| **start** | User-initiated side-quest flow, task creation, routing | Enforcement Integration section (lines 103-110) |
+| **start** | **DELETED** — absorbed into workflow | Entire skill removed |
 
 ## File Changes
 
@@ -41,12 +43,13 @@ After: ~25 lines — entry points, prerequisites, caveman rules, pointers.
 ```markdown
 ## Workflow: Beads + Superpowers + ECC
 
-Entry: `/claude-workstation:start "description"`
+New task: `bd create --title="..." --type=task` then brainstorm or plan.
 Reference: `/claude-workstation:workflow`
 Orchestrator: `/claude-workstation:orchestrator`
 
 > **RIGID REF:** Read `skills/workflow/SKILL.md` for hard rules, milestones,
-> enforcement hooks, and session recovery. Do not act on these from memory.
+> enforcement hooks, side-quest detection, and session recovery.
+> Do not act on these from memory.
 
 > **RIGID REF:** Read `skills/agent-roles/SKILL.md` § "How to use" before
 > dispatching any subagent. Do not act on role mapping from memory.
@@ -65,6 +68,7 @@ Removed sections:
 - Milestone Format + phases — lives in workflow § "Enforcement Milestones"
 - Subagent Protocol — lives in agent-roles
 - Session recovery — lives in workflow § "Beads Quick Reference"
+- Entry point `/claude-workstation:start` — skill deleted, replaced with inline `bd create`
 
 ### workflow (moderate shrink)
 
@@ -86,28 +90,42 @@ Remove three sections, replace with rigid refs:
 > dispatch loop. Do not act on orchestrator rules from memory.
 ```
 
-**Remove § "Side Quests" (lines 199-205).** Replace with:
+**Expand § "Side Quests" (lines 199-205).** Absorb start's side-quest detection heuristic and creation flow:
+
 ```markdown
 ## Side Quests
 
 Problem outside confirmed scope — even if your change caused it.
 
-> **RIGID REF:** For user-initiated side-quests, read `skills/start/SKILL.md`
-> § "SIDE-QUEST FLOW". For automated side-quests during orchestration, read
-> `skills/orchestrator/SKILL.md` § "ANALYZE SPEC REVIEW REPORT".
+**Detection** — new work is a side-quest when ANY of:
+- Description starts with "Found:" or "Discovered:"
+- User explicitly flags it
+- Active in-progress task exists AND new work touches files not in current task's description/plan
+
+**Creation:**
+\```bash
+bd create --title="Found: <issue>" --type=bug
+bd dep add <new-id> <current-id> --type=discovered-from
+\```
+
+Finish current task first, then `bd ready` for parked issue. Fix size doesn't reduce ceremony.
+
+For automated side-quests during orchestration (review findings), see
+`skills/orchestrator/SKILL.md` § "ANALYZE SPEC REVIEW REPORT".
 ```
 
-Net: ~219 lines → ~195 lines.
+Net: ~219 lines → ~200 lines (absorbed start content, removed orchestrator/subagent sections).
 
-### start (minor)
+### start — DELETED
 
-**Remove § "Enforcement Integration" (lines 103-110).** Replace with:
-```markdown
-## Enforcement Integration
+Entire skill removed. Its content absorbed:
+- **Side-quest detection heuristic** → workflow § "Side Quests"
+- **Side-quest creation flow** → workflow § "Side Quests"
+- **Task creation** (`bd create` + `bd update`) → trivial, no skill needed
+- **Routing** (brainstorm vs plan) → agent follows workflow pipeline naturally
+- **Enforcement Integration** → was already a duplicate of workflow § "Enforcement Milestones"
 
-> **RIGID REF:** Read `skills/workflow/SKILL.md` § "Enforcement Milestones"
-> for the full milestone chain and gate requirements. Do not act from memory.
-```
+Files to delete: `skills/start/SKILL.md`, `skills/start/` directory.
 
 ### orchestrator — no changes
 
@@ -122,8 +140,9 @@ Already self-contained. Owns role-to-template mapping.
 - No behavioral changes. Same workflow, same gates, same enforcement.
 - No hook changes. All hooks remain identical.
 - No template changes. Protocol templates untouched.
-- No test changes needed. `validate-config.sh` checks structure, not prose.
+- `validate-config.sh` needs update: remove start from skill list check.
 - Orchestrator and agent-roles are untouched files.
+- `start` skill is deleted, but its behavior is preserved in workflow.
 
 ## Risk
 
@@ -134,4 +153,4 @@ Already self-contained. Owns role-to-template mapping.
 
 ## Version
 
-Patch bump: 2.6.0 → 2.6.1 (doc cleanup, no behavioral change).
+Minor bump: 2.6.0 → 2.7.0 (skill removed — surface area change, even though behavior preserved).
