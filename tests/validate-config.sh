@@ -669,6 +669,77 @@ fi
 
 echo ""
 
+# ── Section 12: Enforcement hooks ────────────────────────────────────────────
+echo ""
+echo "12. Enforcement hooks"
+
+# 12.1 New hook scripts exist and are executable
+for hook in milestone-gate agent-gate commit-gate stop-gate mid-session-reminder precompact-state; do
+    HOOK_PATH="$PLUGIN_ROOT/hooks/$hook"
+    if [ -x "$HOOK_PATH" ]; then
+        pass "12.1 hooks/$hook exists and is executable"
+    else
+        fail "12.1 hooks/$hook missing or not executable"
+    fi
+done
+
+# 12.2 cache-utils.sh exists
+if [ -f "$PLUGIN_ROOT/hooks/cache-utils.sh" ]; then
+    pass "12.2 hooks/cache-utils.sh exists"
+else
+    fail "12.2 hooks/cache-utils.sh missing"
+fi
+
+# 12.3 Templates directory exists with required files
+for tmpl in gate-exemptions.txt protocol-base.md protocol-implementer.md protocol-reviewer.md protocol-planner.md protocol-build-fixer.md; do
+    if [ -f "$PLUGIN_ROOT/templates/$tmpl" ]; then
+        pass "12.3 templates/$tmpl exists"
+    else
+        fail "12.3 templates/$tmpl missing"
+    fi
+done
+
+# 12.4 All protocol templates contain BEAD-PROTOCOL-v1 sentinel
+for tmpl in protocol-base.md protocol-implementer.md protocol-reviewer.md protocol-planner.md protocol-build-fixer.md; do
+    if grep -q 'BEAD-PROTOCOL-v1' "$PLUGIN_ROOT/templates/$tmpl"; then
+        pass "12.4 templates/$tmpl contains BEAD-PROTOCOL-v1 sentinel"
+    else
+        fail "12.4 templates/$tmpl missing BEAD-PROTOCOL-v1 sentinel"
+    fi
+done
+
+# 12.5 hooks.json references new hooks
+for hook in milestone-gate agent-gate commit-gate stop-gate mid-session-reminder precompact-state; do
+    if grep -q "$hook" "$PLUGIN_ROOT/hooks/hooks.json"; then
+        pass "12.5 hooks.json references $hook"
+    else
+        fail "12.5 hooks.json missing reference to $hook"
+    fi
+done
+
+# 12.6 pre-change-gate is NOT referenced in hooks.json (retired)
+if grep -q "pre-change-gate" "$PLUGIN_ROOT/hooks/hooks.json"; then
+    fail "12.6 hooks.json still references retired pre-change-gate"
+else
+    pass "12.6 pre-change-gate retired from hooks.json"
+fi
+
+# 12.7 CLAUDE.md contains enforcement hooks reference
+if grep -q "milestone-gate" "$PLUGIN_ROOT/CLAUDE.md" && grep -q "BEAD-PROTOCOL-v1" "$PLUGIN_ROOT/CLAUDE.md"; then
+    pass "12.7 CLAUDE.md contains enforcement hooks + protocol reference"
+else
+    fail "12.7 CLAUDE.md missing enforcement hooks reference"
+fi
+
+# 12.8 Workflow SKILL.md contains milestone chain
+if grep -q "tdd:red-verified" "$PLUGIN_ROOT/skills/workflow/SKILL.md" && grep -q "Subagent Protocol" "$PLUGIN_ROOT/skills/workflow/SKILL.md"; then
+    pass "12.8 Workflow SKILL.md contains milestone chain + subagent protocol"
+else
+    fail "12.8 Workflow SKILL.md missing enforcement sections"
+fi
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"
