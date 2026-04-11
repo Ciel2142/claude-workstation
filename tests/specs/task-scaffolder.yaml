@@ -1,0 +1,55 @@
+id: task-scaffolder
+name: Task Scaffolder
+source_rule: skills/task-scaffolder/SKILL.md
+version: "1.0"
+
+steps:
+  - id: read_plan
+    description: "Read plan file and identify task sections"
+    required: true
+    detector:
+      description: "Skill reads plan file, extracts Task N sections"
+
+  - id: create_epic
+    description: "Create epic task as parent"
+    required: true
+    detector:
+      description: "bd create --type=epic with plan title"
+      after_step: read_plan
+
+  - id: create_subtasks
+    description: "Create sub-task for each plan task with parent-child dep"
+    required: true
+    detector:
+      description: "bd create + bd dep add parent-child for each task"
+      after_step: create_epic
+
+  - id: wire_blocks
+    description: "Wire blocks dependencies between sequential tasks"
+    required: true
+    detector:
+      description: "bd dep add --type=blocks for task ordering"
+      after_step: create_subtasks
+
+  - id: tag_roles
+    description: "Tag each task with role in notes"
+    required: true
+    detector:
+      description: "[M] task:created role:<role> in notes"
+      after_step: create_subtasks
+
+  - id: print_summary
+    description: "Print task graph summary"
+    required: true
+    detector:
+      description: "Output lists all tasks, deps, and execution options"
+      after_step: wire_blocks
+
+  - id: no_execution
+    description: "Does not execute any task or dispatch any agent"
+    required: true
+    detector:
+      description: "Skill returns control to user without executing"
+
+scoring:
+  threshold_promote_to_hook: 0.8

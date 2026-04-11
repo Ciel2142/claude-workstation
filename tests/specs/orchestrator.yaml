@@ -1,0 +1,89 @@
+id: orchestrator
+name: Orchestrator Loop
+source_rule: skills/orchestrator/SKILL.md
+version: "1.0"
+
+steps:
+  - id: activate_caveman
+    description: "Activate caveman full mode as first action"
+    required: true
+    detector:
+      description: "/caveman full invoked before any other action"
+
+  - id: pick_task
+    description: "Pick ready task from bd ready"
+    required: true
+    detector:
+      description: "bd ready → select first available task"
+      after_step: activate_caveman
+
+  - id: dispatch_implementer
+    description: "Dispatch implementer with protocol template"
+    required: true
+    detector:
+      description: "Agent dispatched with protocol-implementer.md content"
+      after_step: pick_task
+
+  - id: verify_implementer
+    description: "Check implementer left tdd:ready-for-review milestone"
+    required: true
+    detector:
+      description: "bd show <id> → check [M] tdd:ready-for-review present"
+      after_step: dispatch_implementer
+
+  - id: dispatch_spec_review
+    description: "Dispatch spec reviewer with protocol template"
+    required: true
+    detector:
+      description: "Agent dispatched with protocol-reviewer.md, type=spec"
+      after_step: verify_implementer
+
+  - id: analyze_spec_report
+    description: "Parse spec review report, route findings"
+    required: true
+    detector:
+      description: "Parse VERDICT, create side-quests for MEDIUM+ findings"
+      after_step: dispatch_spec_review
+
+  - id: dispatch_quality_review
+    description: "Dispatch quality reviewer with protocol template"
+    required: true
+    detector:
+      description: "Agent dispatched with protocol-reviewer.md, type=quality"
+      after_step: analyze_spec_report
+
+  - id: analyze_quality_report
+    description: "Parse quality review report, route findings"
+    required: true
+    detector:
+      description: "Parse VERDICT, create side-quests for MEDIUM+ findings"
+      after_step: dispatch_quality_review
+
+  - id: close_task
+    description: "Close task after both reviews pass"
+    required: true
+    detector:
+      description: "bd close <id> only after spec + quality PASS"
+      after_step: analyze_quality_report
+
+  - id: compact_trigger
+    description: "Check compact trigger every 3rd closure"
+    required: true
+    detector:
+      description: "closure_counter % 3 == 0 → bd remember + /ecc:strategic-compact"
+      after_step: close_task
+
+  - id: cycle_limit
+    description: "Max 3 cycles per review type before escalation"
+    required: true
+    detector:
+      description: "cycle > 3 → bd human <id>, stop task"
+
+  - id: side_quest_blocks
+    description: "Side-quests use blocks dep, not discovered-from"
+    required: true
+    detector:
+      description: "bd dep add <parent> <bug> --type=blocks"
+
+scoring:
+  threshold_promote_to_hook: 0.8
