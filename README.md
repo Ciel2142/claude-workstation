@@ -52,6 +52,7 @@ Optional plugins:
 |---|---|
 | `/claude-workstation:start` | Create beads task and choose workflow entry (brainstorm or plan) |
 | `/claude-workstation:workflow` | Full workflow reference (on-demand) |
+| `/claude-workstation:agent-roles` | Subagent role registry -- maps agent purpose to protocol template |
 
 ### `/start` — Begin New Work
 
@@ -84,6 +85,7 @@ See `/claude-workstation:workflow` for the full reference, or the cheatsheet in 
 claude-workstation/
 ├── install.sh                # Bootstrap ECC + Beads with one command
 ├── skills/
+│   ├── agent-roles/SKILL.md   # /agent-roles -- subagent role registry
 │   ├── start/SKILL.md         # /start -- task creation & workflow entry
 │   └── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
 ├── hooks/

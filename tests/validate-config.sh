@@ -726,8 +726,8 @@ else
 fi
 
 # 12.7 CLAUDE.md contains enforcement hooks reference
-if grep -q "milestone-gate" "$PLUGIN_ROOT/CLAUDE.md" && grep -q "BEAD-PROTOCOL-v1" "$PLUGIN_ROOT/CLAUDE.md"; then
-    pass "12.7 CLAUDE.md contains enforcement hooks + protocol reference"
+if grep -q "milestone-gate" "$PLUGIN_ROOT/CLAUDE.md" && grep -q "agent-roles" "$PLUGIN_ROOT/CLAUDE.md"; then
+    pass "12.7 CLAUDE.md contains enforcement hooks + agent-roles reference"
 else
     fail "12.7 CLAUDE.md missing enforcement hooks reference"
 fi
