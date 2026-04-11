@@ -1,6 +1,6 @@
 ---
 name: task-scaffolder
-version: 2.5.7
+version: 2.6.0
 description: >
   Reads a plan and creates beads tasks with full dependency graph.
   TRIGGER: After plan is written, before implementation begins.
