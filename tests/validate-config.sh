@@ -726,8 +726,8 @@ else
 fi
 
 # 12.8 Workflow SKILL.md contains milestone chain
-if grep -q "tdd:red-verified" "$PLUGIN_ROOT/skills/workflow/SKILL.md" && grep -q "Subagent Protocol" "$PLUGIN_ROOT/skills/workflow/SKILL.md"; then
-    pass "12.8 Workflow SKILL.md contains milestone chain + subagent protocol"
+if grep -q "tdd:red-verified" "$PLUGIN_ROOT/skills/workflow/SKILL.md" && grep -q "RIGID REF" "$PLUGIN_ROOT/skills/workflow/SKILL.md"; then
+    pass "12.8 Workflow SKILL.md contains milestone chain + RIGID REF pointers"
 else
     fail "12.8 Workflow SKILL.md missing enforcement sections"
 fi

@@ -166,45 +166,33 @@ Write milestones: `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "[M] 
 
 ## Subagent Protocol
 
-ALL subagents MUST include a protocol template from `templates/`:
-
-| Template | Agent Type |
-|----------|-----------|
-| `protocol-implementer.md` | Code changes (full TDD chain) |
-| `protocol-reviewer.md` | Code review (structured report only) |
-| `protocol-planner.md` | Planning (plan milestones) |
-| `protocol-build-fixer.md` | Build fixes (fix milestones) |
-
-Each ends with `<!-- BEAD-PROTOCOL-v1:<type> -->` sentinel. The agent-gate hook blocks dispatch without it.
-
-Default role (no template): add `BEAD-ROLE:default` to prompt. Use for any agent that doesn't match implementer/reviewer/planner/build-fixer.
+> **RIGID REF:** Read `skills/agent-roles/SKILL.md` for role-to-template
+> mapping before dispatching any subagent. Do not act from memory.
 
 ## Orchestrator Protocol
 
-For automated execution, use `/claude-workstation:orchestrator`. The orchestrator:
-
-- Dispatches implementer → waits for `tdd:ready-for-review`
-- Dispatches spec reviewer → analyzes report
-- Dispatches quality reviewer → analyzes report
-- Creates blocking side-quests for MEDIUM+ findings
-- Routes bugs to implementer, design flaws to planner
-- Closes task only after both reviews pass
-- Compacts every 3rd closure (persists state via `bd remember` first)
-
-See `skills/orchestrator/SKILL.md` for the full rigid protocol.
-
-For manual execution (subagent-driven-dev or inline), the main agent takes the orchestrator role and follows the same rules.
+> **RIGID REF:** Read `skills/orchestrator/SKILL.md` for the full rigid
+> dispatch loop. Do not act on orchestrator rules from memory.
 
 ## Side Quests
 
-Problem outside confirmed scope -- even if your change caused it:
+Problem outside confirmed scope — even if your change caused it.
 
-```
+**Detection** — new work is a side-quest when ANY of:
+- Description starts with "Found:" or "Discovered:"
+- User explicitly flags it
+- Active in-progress task exists AND new work touches files not in current task's description/plan
+
+**Creation:**
+```bash
 bd create --title="Found: <issue>" --type=bug
 bd dep add <new-id> <current-id> --type=discovered-from
 ```
 
-Finish current task first, then `bd ready`. Fix size doesn't reduce ceremony.
+Finish current task first, then `bd ready` for parked issue. Fix size doesn't reduce ceremony.
+
+For automated side-quests during orchestration (review findings), see
+`skills/orchestrator/SKILL.md` § "ANALYZE SPEC REVIEW REPORT".
 
 ## Anti-Patterns
 
