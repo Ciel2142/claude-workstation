@@ -1225,6 +1225,74 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Section 16: mid-session-reminder tests
+# ---------------------------------------------------------------------------
+echo ""
+echo "16. mid-session-reminder"
+
+# 16a. After 5+ edits without milestone → warning
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+case "$1" in
+    list)
+        echo "ID        STATUS        TITLE"
+        echo "abc-123   in_progress   Test task" ;;
+    show)
+        cat << 'BD_SHOW'
+TITLE
+Test task
+NOTES
+[M] task:claimed work started
+PARENT
+BD_SHOW
+        ;;
+esac
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+# Pre-seed cache: 5 edits already, active task set
+mkdir -p "$GATE_CACHE_NEW"
+echo "5" > "$GATE_CACHE_NEW/edit-counter"
+echo "abc-123" > "$GATE_CACHE_NEW/active-task"
+
+STDIN='{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/mid-session-reminder" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "edits since last milestone"; then
+    pass "16a. mid-session-reminder: 5+ edits → warning"
+else
+    fail "16a. mid-session-reminder: expected warning, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 16b. Status echo on every Edit/Write
+rm -rf "$GATE_CACHE_NEW"
+mkdir -p "$GATE_CACHE_NEW"
+echo "0" > "$GATE_CACHE_NEW/edit-counter"
+echo "abc-123" > "$GATE_CACHE_NEW/active-task"
+
+STDIN='{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/mid-session-reminder" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "task:abc-123"; then
+    pass "16b. mid-session-reminder: status echo on edit"
+else
+    fail "16b. mid-session-reminder: expected status, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 16c. Always exits 0 (never blocks)
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/mid-session-reminder" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "16c. mid-session-reminder: always exits 0"
+else
+    fail "16c. mid-session-reminder: expected exit 0, got exit $EXIT_CODE"
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="
