@@ -6,7 +6,7 @@ A Claude Code plugin that restores your full development environment from a sing
 
 - **Unified Workflow** -- On-demand skill connecting Beads, Superpowers, and ECC (`/claude-workstation:workflow`)
 - **Lean Auto-Injection** -- SessionStart hook delivers ~30-line cheatsheet (down from ~200 lines)
-- **Task Kickoff** -- `/start` creates a beads task and routes to brainstorming or planning
+- **Task Kickoff** -- `bd create` + brainstorm or plan (no separate skill needed)
 - **Session Hooks** -- SessionStart, PreToolUse, and Stop hooks for beads enforcement
 - **Test Suite** -- Config validation + dry-run scenarios
 
@@ -50,24 +50,10 @@ Optional plugins:
 
 | Command | What it does |
 |---|---|
-| `/claude-workstation:start` | Create beads task and choose workflow entry (brainstorm or plan) |
 | `/claude-workstation:workflow` | Full workflow reference (on-demand) |
 | `/claude-workstation:agent-roles` | Subagent role registry -- maps agent purpose to protocol template |
 | `/claude-workstation:task-scaffolder` | Read plan, create beads tasks with dependency graph |
 | `/claude-workstation:orchestrator` | Automated impl→review→fix cycle (rigid protocol) |
-
-### `/start` — Begin New Work
-
-```bash
-/claude-workstation:start "Fix the login validation bug"
-# → Creates task → "Brainstorm or plan?"
-
-/claude-workstation:start "Design a new notification system"
-# → Creates task → "Brainstorm or plan?"
-
-/claude-workstation:start --side-quest "Found: tokens aren't rotated"
-# → Detects side-quest → creates bug → links to current task → parks it
-```
 
 ## Workflow
 
@@ -93,7 +79,6 @@ claude-workstation/
 ├── skills/
 │   ├── agent-roles/SKILL.md   # /agent-roles -- subagent role registry
 │   ├── orchestrator/SKILL.md  # /orchestrator -- automated impl→review→fix cycle
-│   ├── start/SKILL.md         # /start -- task creation & workflow entry
 │   ├── task-scaffolder/SKILL.md # /task-scaffolder -- plan-to-tasks transformer
 │   └── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
 ├── hooks/

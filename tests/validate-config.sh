@@ -147,7 +147,7 @@ echo ""
 # --- 8. Skill directories ---
 echo "8. Skill directories"
 
-for skill_dir in start workflow task-scaffolder orchestrator agent-roles; do
+for skill_dir in workflow task-scaffolder orchestrator agent-roles; do
     if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
         pass "skills/$skill_dir/SKILL.md exists"
     else
@@ -160,7 +160,7 @@ echo ""
 # --- 9. SKILL.md frontmatter ---
 echo "9. SKILL.md frontmatter"
 
-for skill_dir in start workflow task-scaffolder orchestrator agent-roles; do
+for skill_dir in workflow task-scaffolder orchestrator agent-roles; do
     skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
     if [[ -f "$skill_file" ]]; then
         # Extract name from YAML frontmatter
@@ -605,7 +605,7 @@ echo "24. Behavioral spec files"
 SPECS_DIR="$PLUGIN_ROOT/tests/specs"
 if [ -d "$SPECS_DIR" ]; then
     pass "tests/specs/ directory exists"
-    for spec_name in bd-notes-append scope-health start task-scaffolder orchestrator; do
+    for spec_name in bd-notes-append scope-health task-scaffolder orchestrator; do
         if [ -f "$SPECS_DIR/${spec_name}.yaml" ]; then
             pass "specs/${spec_name}.yaml exists"
         else
