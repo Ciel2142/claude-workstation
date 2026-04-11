@@ -147,7 +147,7 @@ echo ""
 # --- 8. Skill directories ---
 echo "8. Skill directories"
 
-for skill_dir in start workflow; do
+for skill_dir in start workflow task-scaffolder orchestrator agent-roles; do
     if [[ -f "$PLUGIN_ROOT/skills/$skill_dir/SKILL.md" ]]; then
         pass "skills/$skill_dir/SKILL.md exists"
     else
@@ -160,7 +160,7 @@ echo ""
 # --- 9. SKILL.md frontmatter ---
 echo "9. SKILL.md frontmatter"
 
-for skill_dir in start workflow; do
+for skill_dir in start workflow task-scaffolder orchestrator agent-roles; do
     skill_file="$PLUGIN_ROOT/skills/$skill_dir/SKILL.md"
     if [[ -f "$skill_file" ]]; then
         # Extract name from YAML frontmatter
@@ -599,7 +599,7 @@ echo "24. Behavioral spec files"
 SPECS_DIR="$PLUGIN_ROOT/tests/specs"
 if [ -d "$SPECS_DIR" ]; then
     pass "tests/specs/ directory exists"
-    for spec_name in bd-notes-append scope-health start; do
+    for spec_name in bd-notes-append scope-health start task-scaffolder orchestrator; do
         if [ -f "$SPECS_DIR/${spec_name}.yaml" ]; then
             pass "specs/${spec_name}.yaml exists"
         else
@@ -672,6 +672,34 @@ for tmpl in protocol-base.md protocol-implementer.md protocol-reviewer.md protoc
         fail "12.4 templates/$tmpl missing BEAD-PROTOCOL-v1 sentinel"
     fi
 done
+
+# 12.9 protocol-implementer.md does NOT contain bd close
+if grep -q 'bd close' "$PLUGIN_ROOT/templates/protocol-implementer.md"; then
+    fail "12.9 protocol-implementer.md still contains 'bd close'"
+else
+    pass "12.9 protocol-implementer.md does not contain 'bd close'"
+fi
+
+# 12.10 protocol-implementer.md contains ready-for-review
+if grep -q 'ready-for-review' "$PLUGIN_ROOT/templates/protocol-implementer.md"; then
+    pass "12.10 protocol-implementer.md contains 'ready-for-review'"
+else
+    fail "12.10 protocol-implementer.md missing 'ready-for-review'"
+fi
+
+# 12.11 protocol-reviewer.md does NOT contain bd create
+if grep -qE 'bd create|bd dep add' "$PLUGIN_ROOT/templates/protocol-reviewer.md"; then
+    fail "12.11 protocol-reviewer.md still contains task creation commands"
+else
+    pass "12.11 protocol-reviewer.md is report-only (no task creation)"
+fi
+
+# 12.12 protocol-reviewer.md contains VERDICT format
+if grep -q 'VERDICT:' "$PLUGIN_ROOT/templates/protocol-reviewer.md"; then
+    pass "12.12 protocol-reviewer.md contains structured report format"
+else
+    fail "12.12 protocol-reviewer.md missing VERDICT report format"
+fi
 
 # 12.5 hooks.json references new hooks
 for hook in milestone-gate agent-gate commit-gate stop-gate mid-session-reminder precompact-state; do
