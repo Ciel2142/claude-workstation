@@ -1010,6 +1010,104 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# Section 14: commit-gate tests
+# ---------------------------------------------------------------------------
+echo ""
+echo "14. commit-gate"
+
+# 14a. Non-git-commit command → exit 0 (no interference)
+STDIN='{"tool_name":"Bash","tool_input":{"command":"git status"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | bash "$PLUGIN_ROOT/hooks/commit-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "14a. commit-gate: git status → exit 0 (not gated)"
+else
+    fail "14a. commit-gate: expected exit 0 for non-commit, got exit $EXIT_CODE"
+fi
+
+# 14b. git commit without review:quality → exit 2
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+case "$1" in
+    list)
+        echo "ID        STATUS        TITLE"
+        echo "abc-123   in_progress   Test task" ;;
+    show)
+        cat << 'BD_SHOW'
+TITLE
+Test task
+NOTES
+[M] task:claimed work started
+[M] tdd:green all tests pass
+[M] tdd:green-verified confirmed
+[M] tdd:refactor cleanup done
+PARENT
+BD_SHOW
+        ;;
+esac
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+STDIN='{"tool_name":"Bash","tool_input":{"command":"git commit -m \"feat: add feature\""}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/commit-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 2 ] && echo "$OUTPUT" | grep -q "BLOCKED"; then
+    pass "14b. commit-gate: git commit without review:quality → exit 2"
+else
+    fail "14b. commit-gate: expected exit 2, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 14c. git commit WITH review:quality → exit 0
+cat > "$TMPDIR_BD/bd" << 'MOCK'
+#!/usr/bin/env bash
+case "$1" in
+    list)
+        echo "ID        STATUS        TITLE"
+        echo "abc-123   in_progress   Test task" ;;
+    show)
+        cat << 'BD_SHOW'
+TITLE
+Test task
+NOTES
+[M] task:claimed work started
+[M] tdd:refactor cleanup done
+[M] review:spec passed
+[M] review:quality passed — no blocking issues
+PARENT
+BD_SHOW
+        ;;
+esac
+MOCK
+chmod +x "$TMPDIR_BD/bd"
+rm -rf "$GATE_CACHE_NEW"
+
+STDIN='{"tool_name":"Bash","tool_input":{"command":"git commit -m \"feat: add feature\""}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/commit-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "14c. commit-gate: git commit with review:quality → exit 0"
+else
+    fail "14c. commit-gate: expected exit 0, got exit $EXIT_CODE: $OUTPUT"
+fi
+
+# 14d. ls command → exit 0 (Bash commands unrelated to git commit)
+STDIN='{"tool_name":"Bash","tool_input":{"command":"ls -la"}}'
+EXIT_CODE=0
+OUTPUT=$(echo "$STDIN" | bash "$PLUGIN_ROOT/hooks/commit-gate" 2>&1) || EXIT_CODE=$?
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+    pass "14d. commit-gate: ls → exit 0 (not gated)"
+else
+    fail "14d. commit-gate: expected exit 0 for ls, got exit $EXIT_CODE"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo "=== Behavioral Test Summary ==="

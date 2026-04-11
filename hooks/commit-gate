@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Commit gate: blocks git commit without review:quality milestone.
+# Registered as PreToolUse hook for Bash in hooks.json.
+# Only triggers on commands containing "git commit". Other Bash usage unaffected.
+# Exit 2 = block. Exit 0 = allow.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=cache-utils.sh
+. "$SCRIPT_DIR/cache-utils.sh"
+
+# --- Read stdin JSON ---
+STDIN=$(cat)
+COMMAND=$(json_field "$STDIN" "tool_input.command")
+
+# --- Only trigger on git commit ---
+if [ -z "$COMMAND" ] || ! printf '%s' "$COMMAND" | grep -qE '\bgit[[:space:]]+commit\b'; then
+    exit 0
+fi
+
+# --- Bypass ---
+if [ "${BEADS_GATE_BYPASS:-}" = "1" ]; then
+    echo "⚠ BEADS_GATE_BYPASS=1 — commit gate bypassed"
+    exit 0
+fi
+
+# --- Guards ---
+if ! check_beads_available; then
+    exit 0
+fi
+
+# --- Check active task ---
+TASK_ID=$(get_active_task)
+
+if [ "$TASK_ID" = "BD_UNREACHABLE" ]; then
+    echo "⚠ Beads server unreachable — commit gate bypassed."
+    exit 0
+fi
+
+if [ -z "$TASK_ID" ]; then
+    echo "🚫 BLOCKED: Cannot commit without an active beads task."
+    exit 2
+fi
+
+# --- Check for review:quality milestone ---
+MILESTONES=$(get_milestones "$TASK_ID")
+
+if [ "$MILESTONES" = "BD_UNREACHABLE" ]; then
+    echo "⚠ Beads server unreachable — commit gate bypassed."
+    exit 0
+fi
+
+if ! printf '%s' "$MILESTONES" | grep -q '^\[M\] review:quality'; then
+    PHASE=$(get_current_phase "$MILESTONES")
+    echo "🚫 BLOCKED: Cannot commit without code quality review."
+    echo "   Task: $TASK_ID | Current phase: $PHASE"
+    echo "   Complete quality review first, then:"
+    echo "   bash \"\${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append\" $TASK_ID \"[M] review:quality passed\""
+    exit 2
+fi
+
+exit 0
