@@ -1,0 +1,33 @@
+# File patterns exempt from milestone gate (PreToolUse Edit|Write).
+# Exempt files can be edited without an active sub-task bead.
+# One pattern per line. Comments start with #.
+#
+# Syntax:
+#   *.ext         — match any file with extension
+#   prefix/**     — match any file under prefix/
+#   **/name/**    — match name/ anywhere in path
+#   **/pattern.*  — match pattern.* anywhere in path
+
+# Documentation
+docs/**
+*.md
+
+# Beads internal state
+.beads/**
+
+# Specs and plans
+docs/superpowers/**
+
+# Claude config
+.claude/**
+
+# Test files (TDD: must write tests before production code)
+**/testdata/**
+**/*_test.*
+**/*_test_*
+**/test/**
+**/*.test.*
+**/*.spec.*
+**/tests/**
+**/__tests__/**
+**/fixtures/**
