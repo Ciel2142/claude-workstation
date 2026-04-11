@@ -1,6 +1,6 @@
 ---
 name: workflow
-version: 2.5.5
+version: 2.5.6
 description: >
   Full workflow ref: Beads + Superpowers + ECC.
   TRIGGER: Starting work, workflow unclear, or via /claude-workstation:workflow.
