@@ -982,15 +982,15 @@ else
     fail "13b. agent-gate: expected exit 0, got exit $EXIT_CODE: $OUTPUT"
 fi
 
-# 13c. Prompt with BEAD-EXEMPT:research → exit 0
-STDIN='{"tool_name":"Agent","tool_input":{"prompt":"Research how auth works. BEAD-EXEMPT:research","description":"test"}}'
+# 13c. Prompt with BEAD-ROLE:default → exit 0
+STDIN='{"tool_name":"Agent","tool_input":{"prompt":"Research how auth works. BEAD-ROLE:default","description":"test"}}'
 EXIT_CODE=0
 OUTPUT=$(echo "$STDIN" | PATH="$TMPDIR_BD:$PATH" bash "$PLUGIN_ROOT/hooks/agent-gate" 2>&1) || EXIT_CODE=$?
 
 if [ "$EXIT_CODE" -eq 0 ]; then
-    pass "13c. agent-gate: BEAD-EXEMPT:research → exit 0"
+    pass "13c. agent-gate: BEAD-ROLE:default → exit 0"
 else
-    fail "13c. agent-gate: expected exit 0 for exempt, got exit $EXIT_CODE: $OUTPUT"
+    fail "13c. agent-gate: BEAD-ROLE:default → exit 0 (got exit $EXIT_CODE)"
 fi
 
 # 13d. BEADS_GATE_BYPASS=1 → exit 0

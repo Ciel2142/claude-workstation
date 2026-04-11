@@ -23,8 +23,8 @@ fi
 # --- Read stdin JSON ---
 STDIN=$(cat)
 
-# --- Check for exemptions ---
-if printf '%s' "$STDIN" | grep -q 'BEAD-EXEMPT:research\|BEAD-EXEMPT:exploration'; then
+# --- Check for default role (no template needed) ---
+if printf '%s' "$STDIN" | grep -q 'BEAD-ROLE:default'; then
     exit 0
 fi
 
@@ -34,11 +34,8 @@ if printf '%s' "$STDIN" | grep -q 'BEAD-PROTOCOL-v1'; then
 fi
 
 # --- Block ---
-echo "🚫 BLOCKED: Subagent prompt missing BEAD-PROTOCOL-v1 sentinel." >&2
-echo "   Include the appropriate protocol template in the prompt:" >&2
-echo "   - templates/protocol-implementer.md (code changes)" >&2
-echo "   - templates/protocol-reviewer.md (reviews)" >&2
-echo "   - templates/protocol-planner.md (planning)" >&2
-echo "   - templates/protocol-build-fixer.md (build fixes)" >&2
-echo "   Or add BEAD-EXEMPT:research for research-only agents." >&2
+echo "🚫 BLOCKED: Subagent prompt missing role sentinel." >&2
+echo "   Check agent-roles skill. Include one of:" >&2
+echo "   - Protocol template (implementer/reviewer/planner/build-fixer)" >&2
+echo "   - BEAD-ROLE:default (anything else)" >&2
 exit 2
