@@ -10,7 +10,7 @@
       "name": "claude-workstation",
       "source": "./",
       "description": "Unified development workflow with session hooks",
-      "version": "2.5.4"
+      "version": "2.5.5"
     }
   ]
 }
