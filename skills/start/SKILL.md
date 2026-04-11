@@ -1,6 +1,6 @@
 ---
 name: start
-version: 2.5.0
+version: 2.5.1
 description: >
   Create beads task, choose workflow entry point.
   TRIGGER: Starting new work or user describes task.

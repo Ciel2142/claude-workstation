@@ -1,6 +1,6 @@
 ---
 name: workflow
-version: 2.5.0
+version: 2.5.1
 description: >
   Full workflow ref: Beads + Superpowers + ECC.
   TRIGGER: Starting work, workflow unclear, or via /claude-workstation:workflow.
@@ -83,6 +83,7 @@ ALL work MUST be tracked. No exceptions.
 | Find available work | `bd ready` |
 | Claim task | `bd update <id> --claim` (atomic: sets in_progress + lock) |
 | Close task | `bd close <id> --reason "Done"` (auto-unblocks dependents) |
+| Clean memories | After closing epic/last sub-task: `bd memories` → `bd forget <key>` for session-scoped memories. Stale memories bloat every future session via `bd prime`. |
 | Log side-quest | `bd create "Found: <issue>" -t bug` + `bd dep add <new> <current> --type discovered-from` |
 | Session recovery | `bd list --status=in_progress` -> `bd show <id>` -> read notes |
 
