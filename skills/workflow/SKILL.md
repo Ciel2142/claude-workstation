@@ -155,7 +155,8 @@ TDD milestone chain — each requires predecessors:
 | `tdd:green` | tdd:red-verified | Implementation passes |
 | `tdd:green-verified` | tdd:green | All tests pass |
 | `tdd:refactor` | tdd:green-verified | Cleanup complete |
-| `review:spec` | tdd:refactor | Spec compliance passed |
+| `tdd:ready-for-review` | tdd:refactor | Handed off to orchestrator for review |
+| `review:spec` | tdd:ready-for-review | Spec compliance passed |
 | `review:quality` | review:spec | Code quality review passed |
 | `verified` | review:quality | Verification-before-completion done |
 
@@ -170,7 +171,7 @@ ALL subagents MUST include a protocol template from `templates/`:
 | Template | Agent Type |
 |----------|-----------|
 | `protocol-implementer.md` | Code changes (full TDD chain) |
-| `protocol-reviewer.md` | Code review (findings + side-quests) |
+| `protocol-reviewer.md` | Code review (structured report only) |
 | `protocol-planner.md` | Planning (plan milestones) |
 | `protocol-build-fixer.md` | Build fixes (fix milestones) |
 
@@ -178,28 +179,21 @@ Each ends with `<!-- BEAD-PROTOCOL-v1:<type> -->` sentinel. The agent-gate hook 
 
 Default role (no template): add `BEAD-ROLE:default` to prompt. Use for any agent that doesn't match implementer/reviewer/planner/build-fixer.
 
-## Controller Protocol
+## Orchestrator Protocol
 
-The main/controller agent tracks its own orchestration milestones:
+For automated execution, use `/claude-workstation:orchestrator`. The orchestrator:
 
-```
-[M] dispatch:impl:<sub-task-id> dispatched implementer
-[M] dispatch:review-spec:<sub-task-id> dispatched spec reviewer
-[M] dispatch:review-quality:<sub-task-id> dispatched quality reviewer
-[M] controller:milestone-check:<sub-task-id> verified milestones present
-[M] controller:rejected:<sub-task-id> missing milestones, re-dispatching
-```
+- Dispatches implementer → waits for `tdd:ready-for-review`
+- Dispatches spec reviewer → analyzes report
+- Dispatches quality reviewer → analyzes report
+- Creates blocking side-quests for MEDIUM+ findings
+- Routes bugs to implementer, design flaws to planner
+- Closes task only after both reviews pass
+- Compacts every 3rd closure (persists state via `bd remember` first)
 
-## Controller Verification (MANDATORY)
+See `skills/orchestrator/SKILL.md` for the full rigid protocol.
 
-After ANY subagent returns, the controller MUST:
-
-1. `bd show <sub-task-id>` — check expected milestones are present
-2. Verify side-quest beads created for any CRITICAL/HIGH review findings
-3. If milestones missing → reject work, re-dispatch or fix directly
-4. Only AFTER milestone validation → dispatch next reviewer/task
-
-Never trust subagent reports at face value. Always verify with `bd show`.
+For manual execution (subagent-driven-dev or inline), the main agent takes the orchestrator role and follows the same rules.
 
 ## Side Quests
 
