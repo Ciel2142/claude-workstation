@@ -8,7 +8,7 @@ description: >
 
 # Agent Roles
 
-Before dispatching any subagent, match its purpose to a role from this table. Include the corresponding protocol template in the prompt. If nothing matches, use **research** (default).
+Before dispatching any subagent, match its purpose to a role from this table. Include the corresponding protocol template in the prompt. **If nothing matches, use default.**
 
 Do not invent roles outside this table.
 
@@ -18,20 +18,22 @@ Do not invent roles outside this table.
 | **reviewer** | `templates/protocol-reviewer.md` | reviews code, logs findings |
 | **planner** | `templates/protocol-planner.md` | creates implementation plans |
 | **build-fixer** | `templates/protocol-build-fixer.md` | fixes build or test errors |
-| **research** | *exempt* — add `BEAD-EXEMPT:research` to prompt | reads, searches, explores **(default)** |
+| **default** | *none* — add `BEAD-ROLE:default` to prompt | **nothing above matches** |
 
 ## How to use
 
 1. Decide what the subagent will **do** (not what it's called)
 2. Find the matching role above
 3. If role has a template → read that template file, include its content in the prompt
-4. If role is research → add the text `BEAD-EXEMPT:research` anywhere in the prompt
-5. If unsure → use research (exempt). Safe default.
+4. **If nothing matches → add `BEAD-ROLE:default` anywhere in the prompt**
 
 ## Examples
 
 **Dispatching an Explore agent** (reads codebase):
-→ Role: research → add `BEAD-EXEMPT:research` to prompt
+→ Role: default → add `BEAD-ROLE:default` to prompt
+
+**Dispatching a doc-updater agent** (writes docs, not code):
+→ Role: default → add `BEAD-ROLE:default` to prompt
 
 **Dispatching a code-reviewer agent** (reviews code):
 → Role: reviewer → include `templates/protocol-reviewer.md` in prompt

@@ -32,7 +32,7 @@ Hooks block (`exit 2`) when workflow steps are skipped:
 | Gate | Trigger | Blocks unless |
 |------|---------|---------------|
 | milestone-gate | Edit/Write | Active sub-task with `[M] task:claimed` |
-| agent-gate | Agent dispatch | Prompt contains protocol template or `BEAD-EXEMPT:research` (see `agent-roles` skill) |
+| agent-gate | Agent dispatch | Prompt contains protocol template or `BEAD-ROLE:default` (see `agent-roles` skill) |
 | commit-gate | git commit | `[M] review:quality` present |
 | stop-gate | Session end | All tasks have `[M] verified` or `[M] paused` |
 
@@ -45,7 +45,7 @@ Phases: task:created → task:claimed → tdd:red → tdd:red-verified → tdd:g
 ### Subagent Protocol
 
 Before dispatching any subagent, check the `agent-roles` skill for the correct role and template.
-Five roles: implementer, reviewer, planner, build-fixer, research (default = exempt).
+Five roles: implementer, reviewer, planner, build-fixer, default (add `BEAD-ROLE:default` to prompt).
 
 ### Session
 

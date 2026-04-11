@@ -176,7 +176,7 @@ ALL subagents MUST include a protocol template from `templates/`:
 
 Each ends with `<!-- BEAD-PROTOCOL-v1:<type> -->` sentinel. The agent-gate hook blocks dispatch without it.
 
-Research-only agents: add `BEAD-EXEMPT:research` or `BEAD-EXEMPT:exploration` to prompt.
+Default role (no template): add `BEAD-ROLE:default` to prompt. Use for any agent that doesn't match implementer/reviewer/planner/build-fixer.
 
 ## Controller Protocol
 
