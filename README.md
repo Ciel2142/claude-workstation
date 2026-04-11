@@ -1,105 +1,204 @@
 # Claude Workstation
 
-A Claude Code plugin that restores your full development environment from a single install.
+A Claude Code plugin that unifies three powerful systems — **Beads**, **Superpowers**, and **ECC** — into a single, enforced development workflow. One install restores your full dev environment.
 
-## What's Included
+## What Problem Does This Solve?
 
-- **Unified Workflow** -- On-demand skill connecting Beads, Superpowers, and ECC (`/claude-workstation:workflow`)
-- **Lean Auto-Injection** -- SessionStart hook delivers ~30-line cheatsheet (down from ~200 lines)
-- **Task Kickoff** -- `bd create` + brainstorm or plan (no separate skill needed)
-- **Session Hooks** -- SessionStart, PreToolUse, and Stop hooks for beads enforcement
-- **Test Suite** -- Config validation + dry-run scenarios
+Claude Code is powerful but undisciplined by default. Without structure:
+- Tasks get lost between sessions
+- Code ships without tests or review
+- Subagents run without proper protocol
+- Context evaporates on compaction
 
-## Install
+**Claude Workstation** wires three plugins together with enforcement hooks that **block bad behavior at the tool level** — not with suggestions, but with hard gates that terminate operations when workflow steps are skipped.
+
+## The Stack
+
+```
+┌─────────────────────────────────────────────────────┐
+│              Claude Workstation Plugin               │
+│                                                     │
+│  🔒 Hooks ─── 📋 Skills ─── 📄 Protocol Templates  │
+└──────┬──────────────┬──────────────┬────────────────┘
+       │              │              │
+       ▼              ▼              ▼
+   ┌────────┐   ┌────────────┐   ┌─────┐
+   │ Beads  │   │Superpowers │   │ ECC │
+   │ (WHAT) │   │   (HOW)    │   │(WHO)│
+   └────────┘   └────────────┘   └─────┘
+```
+
+| System | Role | What It Provides |
+|--------|------|------------------|
+| [**Beads**](https://github.com/steveyegge/beads) | Task tracking | Dolt-powered issue tracker with deps, milestones, persistent state across sessions |
+| [**Superpowers**](https://github.com/obra/superpowers-marketplace) | Dev methodology | Brainstorming, planning, TDD, code review, verification, debugging skills |
+| [**ECC**](https://github.com/affaan-m/everything-claude-code) | Domain expertise | Language-specific reviewers, build fixers, agents, coding standards |
+
+## The Workflow
+
+Every piece of work follows the same pipeline. No shortcuts, no exceptions.
+
+```
+Task → Brainstorm → Plan → Sub-tasks → TDD (red→green→refactor) → Review → Verify → Close
+```
+
+**In practice:**
+
+1. **Task** — `bd create --title="Add rate limiting" --type=task`
+2. **Brainstorm** — Design before code (produces spec)
+3. **Plan** — Decompose into sub-tasks with exact file paths and test code
+4. **Sub-tasks** — `bd create` each + wire dependencies with `bd dep add`
+5. **TDD** — Write failing test → make it pass → refactor → commit
+6. **Review** — Spec compliance first, then code quality
+7. **Verify** — Run proof commands, read output, confirm claims
+8. **Close** — `bd close <id>` (auto-unblocks dependent tasks)
+
+## Enforcement Hooks
+
+Hooks **block tool calls** when workflow steps are skipped. These aren't warnings — they terminate the operation (`exit 2`).
+
+| Gate | Triggers On | Blocks Unless |
+|------|------------|---------------|
+| **milestone-gate** | Edit, Write | Active sub-task with `[M] task:claimed` milestone |
+| **agent-gate** | Agent dispatch | Prompt includes protocol template or `BEAD-ROLE:default` |
+| **commit-gate** | `git commit` | `[M] review:quality` present in task notes |
+| **stop-gate** | Session end | All tasks have `[M] verified` or `[M] paused` |
+| **mid-session-reminder** | After Edit/Write | *(advisory only)* — echoes current task/phase status |
+
+## TDD Milestone Chain
+
+Each task progresses through a strict milestone sequence. Hooks enforce the chain — you can't skip steps.
+
+```
+task:created → task:claimed → tdd:red → tdd:red-verified → tdd:green
+  → tdd:green-verified → tdd:refactor → tdd:ready-for-review
+  → review:spec → review:quality → verified
+```
+
+## Skills
+
+Four on-demand skills, invoked via `/claude-workstation:<name>`:
+
+| Skill | Purpose | Type |
+|-------|---------|------|
+| [`workflow`](skills/workflow/SKILL.md) | Full workflow reference — hard rules, milestones, deps, Context7, side-quests | On-demand ref |
+| [`orchestrator`](skills/orchestrator/SKILL.md) | Automated impl→review→fix cycle per task | Rigid protocol |
+| [`task-scaffolder`](skills/task-scaffolder/SKILL.md) | Read a plan file, create beads tasks with dependency graph | Rigid protocol |
+| [`agent-roles`](skills/agent-roles/SKILL.md) | Subagent role registry — maps purpose to protocol template | Lookup table |
+
+### Orchestrator
+
+The orchestrator automates TDD → Review → Fix → Close by dispatching subagents in a loop:
+
+```mermaid
+graph TD
+    START["bd ready → pick task"] --> CLAIM["Claim task"]
+    CLAIM --> IMPL["🤖 Dispatch implementer"]
+    IMPL --> CHECK{"[M] tdd:ready-for-review?"}
+    CHECK -->|"missing"| IMPL
+    CHECK -->|"present"| SPEC["🔍 Dispatch spec reviewer"]
+    SPEC --> SV{"Spec verdict?"}
+    SV -->|"PASS"| QUAL["🔍 Dispatch quality reviewer"]
+    SV -->|"BLOCKED"| FIX1["Create bug → dispatch fix"] --> SPEC
+    QUAL --> QV{"Quality verdict?"}
+    QV -->|"PASS"| CLOSE["Close task"]
+    QV -->|"BLOCKED"| FIX2["Create bug → dispatch fix"] --> QUAL
+    CLOSE -->|"every 3rd"| COMPACT["strategic-compact"]
+    CLOSE -->|"more tasks"| START
+```
+
+### Agent Roles
+
+Every subagent must be equipped with the right protocol before dispatch. The `agent-gate` hook enforces this.
+
+| Role | Template | Use When Agent... |
+|------|----------|-------------------|
+| **implementer** | `protocol-implementer.md` | Writes or edits code |
+| **reviewer** | `protocol-reviewer.md` | Reviews code, logs findings |
+| **planner** | `protocol-planner.md` | Creates implementation plans |
+| **build-fixer** | `protocol-build-fixer.md` | Fixes build or test errors |
+| **default** | *none* — add `BEAD-ROLE:default` | Nothing above matches |
+
+## Installation
 
 ### 1. Install Required Plugins
 
-Install each plugin from the Claude Code marketplace (`/install-plugin`):
+From Claude Code, run `/install-plugin` for each:
 
-| Plugin | Marketplace name |
-|---|---|
+| Plugin | Marketplace Name |
+|--------|-----------------|
 | [Beads](https://github.com/steveyegge/beads) | `beads-marketplace` |
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | `superpowers-marketplace` |
 | [ECC](https://github.com/affaan-m/everything-claude-code) | `everything-claude-code` |
 
-### 2. Run Bootstrap Script
+Optional: [Caveman](https://github.com/JuliusBrussee/caveman) (`caveman`) — token-saving compression modes.
+
+### 2. Install This Plugin
+
+```
+/install-plugin claude-workstation
+```
+
+### 3. Run Bootstrap Script
 
 ```bash
 bash install.sh
 ```
 
-This runs the ECC installer (from the locally cached plugin) and the Beads installer.
+Installs ECC agents/rules (from the locally cached plugin) and the Beads CLI.
 
-## Dependencies
+### 4. Initialize Beads in Your Project
 
-Required plugins:
+```bash
+bd init
+```
 
-| Plugin | Marketplace | Purpose |
-|---|---|---|
-| [Beads](https://github.com/steveyegge/beads) | beads-marketplace | Dolt-powered issue tracker with dependencies, milestones, and persistent task state across sessions |
-| [Superpowers](https://github.com/obra/superpowers-marketplace) | superpowers-marketplace | Development process skills — brainstorming, planning, TDD, code review, verification, debugging |
-| [ECC](https://github.com/affaan-m/everything-claude-code) | everything-claude-code | Language-specific and domain-specific skills, agents, patterns, and coding standards |
+## Quick Start
 
-Optional plugins:
+```bash
+# Create a task
+bd create --title="Add user authentication" --type=feature
 
-| Plugin | Marketplace | Purpose |
-|---|---|---|
-| [Caveman](https://github.com/JuliusBrussee/caveman) | caveman | Token-saving compression modes (lite, full, ultra). See Caveman Mode Rules in CLAUDE.md |
+# Follow the workflow
+/claude-workstation:workflow
 
-## Commands & Skills
-
-| Command | What it does |
-|---|---|
-| `/claude-workstation:workflow` | Full workflow reference (on-demand) |
-| `/claude-workstation:agent-roles` | Subagent role registry -- maps agent purpose to protocol template |
-| `/claude-workstation:task-scaffolder` | Read plan, create beads tasks with dependency graph |
-| `/claude-workstation:orchestrator` | Automated impl→review→fix cycle (rigid protocol) |
-
-## Workflow
-
-See `/claude-workstation:workflow` for the full reference, or the cheatsheet in CLAUDE.md for the quick version.
-
-## Hooks
-
-| Hook | When | What |
-|---|---|---|
-| **SessionStart** | Session begins | Injects lean cheatsheet via `additionalContext` + auto-inits beads |
-| **PreCompact** | Before compaction | Injects in-progress task state into context |
-| **PreToolUse: Edit/Write** | Before file changes | Blocks unless active sub-task with `[M] task:claimed` (milestone-gate) |
-| **PreToolUse: Agent** | Before subagent dispatch | Blocks unless prompt contains protocol template or `BEAD-ROLE:default` (agent-gate) |
-| **PreToolUse: Bash** | Before bash commands | Blocks `git commit` unless `[M] review:quality` present (commit-gate) |
-| **PostToolUse: Edit/Write** | After file changes | Echoes current task/phase status (mid-session-reminder) |
-| **Stop** | Session ends | Blocks unless all tasks have `[M] verified` or `[M] paused` (stop-gate) + warns about untracked commits (stop) |
+# Or let the orchestrator handle everything
+/claude-workstation:orchestrator
+```
 
 ## Project Structure
 
 ```
 claude-workstation/
-├── install.sh                # Bootstrap ECC + Beads with one command
+├── install.sh                    # Bootstrap ECC + Beads
+├── CLAUDE.md                     # Pointers to workflow + agent-roles
 ├── skills/
-│   ├── agent-roles/SKILL.md   # /agent-roles -- subagent role registry
-│   ├── orchestrator/SKILL.md  # /orchestrator -- automated impl→review→fix cycle
-│   ├── task-scaffolder/SKILL.md # /task-scaffolder -- plan-to-tasks transformer
-│   └── workflow/SKILL.md      # /workflow -- full workflow reference (on-demand)
+│   ├── workflow/SKILL.md         # Full workflow reference
+│   ├── orchestrator/SKILL.md     # Automated impl→review→fix cycle
+│   ├── task-scaffolder/SKILL.md  # Plan → beads tasks transformer
+│   └── agent-roles/SKILL.md     # Subagent role registry
+├── templates/
+│   ├── protocol-implementer.md   # Implementer subagent protocol
+│   ├── protocol-reviewer.md      # Reviewer subagent protocol
+│   ├── protocol-planner.md       # Planner subagent protocol
+│   ├── protocol-build-fixer.md   # Build-fixer subagent protocol
+│   └── protocol-base.md          # Shared protocol base
 ├── hooks/
-│   ├── hooks.json             # Hook event → script wiring
-│   ├── cache-utils.sh         # Shared utility functions for hooks
-│   ├── bd-notes-append        # Safe notes append wrapper
-│   ├── session-start          # Cheatsheet injection + beads auto-init
-│   ├── milestone-gate         # Blocks Edit/Write without active claimed sub-task
-│   ├── agent-gate             # Blocks Agent dispatch without role sentinel
-│   ├── commit-gate            # Blocks git commit without review:quality milestone
-│   ├── stop-gate              # Blocks session end without verified/paused milestones
-│   ├── mid-session-reminder   # Echoes task/phase status after edits
-│   ├── precompact-state       # Injects workflow state before compaction
-│   └── stop                   # Session-end advisory warnings
+│   ├── hooks.json                # Hook event → script wiring
+│   ├── milestone-gate            # Blocks Edit/Write without claimed task
+│   ├── agent-gate                # Blocks Agent without role sentinel
+│   ├── commit-gate               # Blocks git commit without review
+│   ├── stop-gate                 # Blocks session end without verification
+│   ├── session-start             # Cheatsheet injection + beads auto-init
+│   ├── mid-session-reminder      # Echoes task/phase after edits
+│   └── ...                       # precompact-state, stop, bd-notes-append
 ├── tests/
-│   ├── validate-config.sh     # Config validation
-│   ├── test-behaviors.sh      # Behavioral tests for hooks
-│   ├── lib.sh                 # Cross-platform test helpers
-│   └── scenarios/             # Workflow dry-run scenario scripts
-├── CLAUDE.md
-└── README.md
+│   ├── validate-config.sh        # 133 config validation checks
+│   ├── test-behaviors.sh         # 74 behavioral tests for hooks
+│   └── scenarios/                # Workflow dry-run scripts
+└── .claude-plugin/
+    ├── plugin.json               # Plugin metadata (v2.7.0)
+    └── marketplace.json          # Marketplace listing
 ```
 
 ## License
