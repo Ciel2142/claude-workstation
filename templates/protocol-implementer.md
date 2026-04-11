@@ -24,14 +24,16 @@ bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "[M] tdd:refactor <what 
 
 Multiple TDD cycles allowed — repeat red→green as needed, then one refactor at end.
 
-## After Completion
+## After TDD Complete — Hand Off to Orchestrator
 
 ```bash
-bd close <id>
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "[M] tdd:ready-for-review implementation complete"
 ```
+
+**Do NOT close the task.** Return control to the orchestrator. Only the orchestrator closes tasks.
 
 ## SKIP NONE OF THESE
 
-Your work will be rejected if milestones are missing. The controller agent verifies every milestone after you return.
+Your work will be rejected if milestones are missing. The orchestrator verifies every milestone after you return.
 
 <!-- BEAD-PROTOCOL-v1:implementer -->
