@@ -8,12 +8,15 @@ Full ref → `/claude-workstation:workflow`.
 1. **Task** -- `bd create "Goal"` (every change gets tracked)
 2. **Brainstorm** -- `superpowers:brainstorming` (design before code)
 3. **Plan** -- `superpowers:writing-plans` (decompose into sub-tasks)
-4. **Sub-tasks** -- `bd create` for each + `bd dep add` (parent-child, blocks)
-5. **Implement** -- `bd ready` -> pick -> `bd update --claim` -> TDD (RED -> GREEN -> REFACTOR)
-6. **Review** -- `superpowers:requesting-code-review`
-7. **Verify** -- `superpowers:verification-before-completion` (evidence before claims)
-8. **Finish** -- `superpowers:finishing-a-development-branch`
-9. **Close** -- `bd close <id>`
+4. **Scaffold** -- `/claude-workstation:task-scaffolder` (create tasks from plan)
+5. **Sub-tasks** -- `bd create` for each + `bd dep add` (parent-child, blocks)
+6. **Implement** -- `bd ready` -> pick -> `bd update --claim` -> TDD (RED -> GREEN -> REFACTOR)
+7. **Review** -- `superpowers:requesting-code-review`
+8. **Verify** -- `superpowers:verification-before-completion` (evidence before claims)
+9. **Finish** -- `superpowers:finishing-a-development-branch`
+10. **Close** -- `bd close <id>`
+
+Or use `/claude-workstation:orchestrator` to automate steps 6-10.
 
 ### Hard Rules
 
@@ -40,7 +43,7 @@ Hooks block (`exit 2`) when workflow steps are skipped:
 
 `[M] <phase> <freetext>` — append via `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "[M] phase detail"`
 
-Phases: task:created → task:claimed → tdd:red → tdd:red-verified → tdd:green → tdd:green-verified → tdd:refactor → review:spec → review:quality → verified
+Phases: task:created → task:claimed → tdd:red → tdd:red-verified → tdd:green → tdd:green-verified → tdd:refactor → tdd:ready-for-review → review:spec → review:quality → verified
 
 ### Subagent Protocol
 
