@@ -43,3 +43,14 @@ else
     bd update "$TASK_ID" --notes "${CURRENT_NOTES}
 ${NEW_LINE}"
 fi
+
+# --- Cache write-through ---
+# After successful bd update, write to local milestone cache + reset edit counter
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/cache-utils.sh" ]; then
+    # shellcheck source=cache-utils.sh
+    . "$SCRIPT_DIR/cache-utils.sh"
+    ensure_cache_dir
+    echo "$NEW_LINE" >> "${GATE_CACHE_DIR}/milestones-${TASK_ID}"
+    echo 0 > "${GATE_CACHE_DIR}/edit-counter"
+fi

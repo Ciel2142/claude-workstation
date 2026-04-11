@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# PreCompact state dump: injects current workflow state before context compaction.
+# Runs alongside bd prime. Always exits 0 (advisory).
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=cache-utils.sh
+. "$SCRIPT_DIR/cache-utils.sh"
+
+if ! check_beads_available; then
+    exit 0
+fi
+
+# Get all in-progress tasks
+LISTING=$($BD_TIMEOUT bd list --status=in_progress 2>/dev/null || echo "")
+TASK_IDS=$(echo "$LISTING" | grep -v 'No issues\|^$\|Total:\|Status:' | awk 'NR>1 && NF>0{print $1}' || true)
+
+if [ -z "$TASK_IDS" ]; then
+    echo "WORKFLOW STATE: No in-progress tasks"
+    exit 0
+fi
+
+echo "WORKFLOW STATE:"
+for task_id in $TASK_IDS; do
+    MILESTONES=$(get_milestones "$task_id")
+    if [ "$MILESTONES" = "BD_UNREACHABLE" ]; then
+        echo "  Task: $task_id (server unreachable)"
+        continue
+    fi
+    PHASE=$(get_current_phase "$MILESTONES")
+    NEXT=$(get_next_phase "$PHASE")
+    echo "  Task: $task_id | phase:$PHASE | next: $NEXT"
+done
+echo "  RULE: each sub-task needs full [M] progression before close"
+
+exit 0
