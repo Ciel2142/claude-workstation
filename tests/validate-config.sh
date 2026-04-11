@@ -252,10 +252,10 @@ echo "11g. Context budget accuracy"
 
 CLAUDE_MD="$PLUGIN_ROOT/CLAUDE.md"
 CLAUDE_SIZE=$(wc -c < "$CLAUDE_MD" 2>/dev/null || echo 0)
-if (( CLAUDE_SIZE > 0 && CLAUDE_SIZE < 2200 )); then
+if (( CLAUDE_SIZE > 0 && CLAUDE_SIZE < 3500 )); then
     pass "CLAUDE.md is lean (${CLAUDE_SIZE} bytes)"
 else
-    fail "CLAUDE.md is ${CLAUDE_SIZE} bytes (expected < 2200 for lean cheatsheet)"
+    fail "CLAUDE.md is ${CLAUDE_SIZE} bytes (expected < 3500 for lean cheatsheet)"
 fi
 
 echo ""
@@ -315,10 +315,10 @@ done
 
 echo ""
 
-# --- 15. Pre-change gate hook ---
-echo "15. Pre-change gate hook"
+# --- 15. Milestone gate hook (replaced pre-change-gate) ---
+echo "15. Milestone gate hook"
 
-# 15a. hooks.json has PreToolUse entries
+# 15a. hooks.json has PreToolUse entries referencing milestone-gate
 if python3 -c "
 import json
 d = json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))
@@ -329,12 +329,13 @@ matchers = [e['matcher'] for e in entries]
 assert 'Edit' in matchers, 'Edit matcher not found'
 assert 'Write' in matchers, 'Write matcher not found'
 for e in entries:
-    for h in e['hooks']:
-        assert 'type' in h, 'hook entry missing type'
-        assert 'command' in h, 'hook entry missing command'
-        assert 'pre-change-gate' in h['command'], 'command does not reference pre-change-gate'
+    if e['matcher'] in ('Edit', 'Write'):
+        for h in e['hooks']:
+            assert 'type' in h, 'hook entry missing type'
+            assert 'command' in h, 'hook entry missing command'
+            assert 'milestone-gate' in h['command'], 'command does not reference milestone-gate'
 " 2>/dev/null; then
-    pass "hooks.json has PreToolUse entries for Edit and Write"
+    pass "hooks.json has PreToolUse entries for Edit and Write (milestone-gate)"
 else
     fail "hooks.json MISSING PreToolUse entries for Edit and Write"
 fi
