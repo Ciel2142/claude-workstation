@@ -54,6 +54,10 @@ if [ ! -f "$CHEATSHEET_FILE" ]; then
     WORKFLOW_CONTENT="warning: CLAUDE.md not found at ${CHEATSHEET_FILE} — workflow context not injected"
 else
     WORKFLOW_CONTENT=$(cat "$CHEATSHEET_FILE")
+    WORKFLOW_CONTENT="${WORKFLOW_CONTENT}
+
+---
+ENFORCEMENT: milestone-gate (Edit/Write), agent-gate (Agent), commit-gate (Bash), stop-gate (Stop) are ACTIVE. exit 2 = blocked."
 fi
 
 # Step 3: Escape for JSON embedding

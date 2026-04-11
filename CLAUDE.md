@@ -25,6 +25,28 @@ Full ref → `/claude-workstation:workflow`.
 - `/ecc:strategic-compact` every 3rd closed sub-task
 - Outside scope = side-quest: `bd create -t bug` + `bd dep add new current --type=discovered-from`, finish current first
 
+### Enforcement Hooks
+
+Hooks block (`exit 2`) when workflow steps are skipped:
+
+| Gate | Trigger | Blocks unless |
+|------|---------|---------------|
+| milestone-gate | Edit/Write | Active sub-task with `[M] task:claimed` |
+| agent-gate | Agent dispatch | Prompt contains `BEAD-PROTOCOL-v1` sentinel |
+| commit-gate | git commit | `[M] review:quality` present |
+| stop-gate | Session end | All tasks have `[M] verified` or `[M] paused` |
+
+### Milestone Format
+
+`[M] <phase> <freetext>` — append via `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "[M] phase detail"`
+
+Phases: task:created → task:claimed → tdd:red → tdd:red-verified → tdd:green → tdd:green-verified → tdd:refactor → review:spec → review:quality → verified
+
+### Subagent Protocol
+
+ALL subagent prompts MUST include protocol template from `templates/protocol-*.md`.
+Sentinel: `<!-- BEAD-PROTOCOL-v1:<type> -->`. Research-only: use `BEAD-EXEMPT:research`.
+
 ### Session
 
 - **Resume:** `bd list --status=in_progress` -> `bd show <id>` -> read notes for spec/plan paths

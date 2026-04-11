@@ -95,3 +95,16 @@ When side-quest detected:
    ```
 
 5. **Do NOT invoke any skill.** Return control to user to continue current work.
+
+---
+
+## Enforcement Integration
+
+After planning produces sub-tasks, each sub-task MUST be:
+1. Created as a beads task: `bd create --title="..." --type=task`
+2. Linked to parent: `bd dep add <sub> <parent> --type parent-child`
+3. Claimed before work: `bd update <sub> --claim`
+4. Milestone-tracked: `[M] task:created`, `[M] task:claimed`, then full TDD chain
+
+The milestone-gate hook blocks file edits without a claimed sub-task bead.
+Subagent prompts MUST include `templates/protocol-*.md` (agent-gate enforces this).

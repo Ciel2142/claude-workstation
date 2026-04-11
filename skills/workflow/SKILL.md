@@ -141,6 +141,65 @@ Update beads notes — preserve context across sessions + compaction.
 
 Write via: `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "key: value"`
 
+## Enforcement Milestones
+
+TDD milestone chain — each requires predecessors:
+
+| Phase | Prerequisite | Detail |
+|-------|-------------|--------|
+| `task:created` | — | Sub-task bead exists |
+| `task:claimed` | task:created | Work started (`bd update --claim`) |
+| `tdd:red` | task:claimed | Failing test written |
+| `tdd:red-verified` | tdd:red | Test fails correctly |
+| `tdd:green` | tdd:red-verified | Implementation passes |
+| `tdd:green-verified` | tdd:green | All tests pass |
+| `tdd:refactor` | tdd:green-verified | Cleanup complete |
+| `review:spec` | tdd:refactor | Spec compliance passed |
+| `review:quality` | review:spec | Code quality review passed |
+| `verified` | review:quality | Verification-before-completion done |
+
+Multiple TDD cycles allowed. Special: `paused <reason>` accepted by stop-gate.
+
+Write milestones: `bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "[M] tdd:red wrote failing test for X"`
+
+## Subagent Protocol
+
+ALL subagents MUST include a protocol template from `templates/`:
+
+| Template | Agent Type |
+|----------|-----------|
+| `protocol-implementer.md` | Code changes (full TDD chain) |
+| `protocol-reviewer.md` | Code review (findings + side-quests) |
+| `protocol-planner.md` | Planning (plan milestones) |
+| `protocol-build-fixer.md` | Build fixes (fix milestones) |
+
+Each ends with `<!-- BEAD-PROTOCOL-v1:<type> -->` sentinel. The agent-gate hook blocks dispatch without it.
+
+Research-only agents: add `BEAD-EXEMPT:research` or `BEAD-EXEMPT:exploration` to prompt.
+
+## Controller Protocol
+
+The main/controller agent tracks its own orchestration milestones:
+
+```
+[M] dispatch:impl:<sub-task-id> dispatched implementer
+[M] dispatch:review-spec:<sub-task-id> dispatched spec reviewer
+[M] dispatch:review-quality:<sub-task-id> dispatched quality reviewer
+[M] controller:milestone-check:<sub-task-id> verified milestones present
+[M] controller:rejected:<sub-task-id> missing milestones, re-dispatching
+```
+
+## Controller Verification (MANDATORY)
+
+After ANY subagent returns, the controller MUST:
+
+1. `bd show <sub-task-id>` — check expected milestones are present
+2. Verify side-quest beads created for any CRITICAL/HIGH review findings
+3. If milestones missing → reject work, re-dispatch or fix directly
+4. Only AFTER milestone validation → dispatch next reviewer/task
+
+Never trust subagent reports at face value. Always verify with `bd show`.
+
 ## Side Quests
 
 Problem outside confirmed scope -- even if your change caused it:
