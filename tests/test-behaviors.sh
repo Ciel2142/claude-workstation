@@ -1143,6 +1143,59 @@ else
     fail "16b. mid-session-reminder: expected exit 0, got exit $EXIT_CODE"
 fi
 
+echo ""
+
+# ---------------------------------------------------------------------------
+# Section 17: Protocol template content validation
+# ---------------------------------------------------------------------------
+echo "17. Protocol template content"
+
+# 17a. protocol-implementer.md does NOT contain bd close
+if grep -q 'bd close' "$PLUGIN_ROOT/templates/protocol-implementer.md"; then
+    fail "17a. protocol-implementer.md still contains 'bd close'"
+else
+    pass "17a. protocol-implementer.md has no 'bd close' (implementer never closes)"
+fi
+
+# 17b. protocol-implementer.md contains ready-for-review milestone
+if grep -q 'tdd:ready-for-review' "$PLUGIN_ROOT/templates/protocol-implementer.md"; then
+    pass "17b. protocol-implementer.md contains tdd:ready-for-review milestone"
+else
+    fail "17b. protocol-implementer.md missing tdd:ready-for-review milestone"
+fi
+
+# 17c. protocol-reviewer.md does NOT contain bd create or bd dep add
+if grep -qE 'bd create|bd dep add' "$PLUGIN_ROOT/templates/protocol-reviewer.md"; then
+    fail "17c. protocol-reviewer.md still contains task creation commands"
+else
+    pass "17c. protocol-reviewer.md is report-only (no task creation)"
+fi
+
+# 17d. protocol-reviewer.md contains VERDICT format
+if grep -q 'VERDICT: PASS | BLOCKED' "$PLUGIN_ROOT/templates/protocol-reviewer.md"; then
+    pass "17d. protocol-reviewer.md contains structured VERDICT format"
+else
+    fail "17d. protocol-reviewer.md missing structured VERDICT format"
+fi
+
+# 17e. protocol-reviewer.md contains all severity levels
+for sev in CRITICAL HIGH MEDIUM LOW INFO; do
+    if grep -q "$sev" "$PLUGIN_ROOT/templates/protocol-reviewer.md"; then
+        pass "17e. protocol-reviewer.md contains severity $sev"
+    else
+        fail "17e. protocol-reviewer.md missing severity $sev"
+    fi
+done
+
+# 17f. protocol-reviewer.md contains all categories
+for cat in code-bug test-gap style design-flaw architecture security; do
+    if grep -q "$cat" "$PLUGIN_ROOT/templates/protocol-reviewer.md"; then
+        pass "17f. protocol-reviewer.md contains category $cat"
+    else
+        fail "17f. protocol-reviewer.md missing category $cat"
+    fi
+done
+
 # ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------

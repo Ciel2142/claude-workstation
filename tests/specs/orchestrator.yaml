@@ -1,7 +1,7 @@
 id: orchestrator
 name: Orchestrator Loop
 source_rule: skills/orchestrator/SKILL.md
-version: "1.0"
+version: "2.0"
 
 steps:
   - id: activate_caveman

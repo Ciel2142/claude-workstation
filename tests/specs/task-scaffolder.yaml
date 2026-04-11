@@ -1,7 +1,7 @@
 id: task-scaffolder
 name: Task Scaffolder
 source_rule: skills/task-scaffolder/SKILL.md
-version: "1.0"
+version: "2.0"
 
 steps:
   - id: read_plan
