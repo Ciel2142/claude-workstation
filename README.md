@@ -195,6 +195,7 @@ claude-workstation/
 ├── tests/
 │   ├── validate-config.sh        # 133 config validation checks
 │   ├── test-behaviors.sh         # 74 behavioral tests for hooks
+│   ├── lib.sh                    # Shared test helpers and utilities
 │   └── scenarios/                # Workflow dry-run scripts
 └── .claude-plugin/
     ├── plugin.json               # Plugin metadata (v2.7.0)
