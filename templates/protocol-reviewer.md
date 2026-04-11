@@ -1,44 +1,77 @@
 # Reviewer Bead Protocol
 
-You are reviewing code. Track your review in the PARENT task's notes.
+You are reviewing code. Your ONLY output is a structured report. You do NOT create tasks, write milestones, or fix code.
 
-## Start Review
+## Self-Gather Context
 
-```bash
-bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <parent-task-id> "[M] review:<type>:started reviewing <scope>"
+Before reviewing, gather your own context:
+- `git diff` to see what changed
+- Read the spec file (path provided by orchestrator)
+- Read modified files directly
+- Check test coverage
+
+## Structured Report Format
+
+Return EXACTLY this format. The orchestrator parses it to decide next action.
+
+```
+REVIEW: <spec|quality>
+TASK: <task-id>
+VERDICT: PASS | BLOCKED
+
+FINDINGS:
+- [SEVERITY] category: description
 ```
 
-Where `<type>` is: `spec` | `quality` | `security`
+### Severities
 
-## For EACH Finding
+| Severity | Effect |
+|----------|--------|
+| CRITICAL | BLOCKED — security vulnerability, data loss risk |
+| HIGH | BLOCKED — bug, significant quality issue |
+| MEDIUM | BLOCKED — maintainability concern, test gap |
+| LOW | PASS — minor suggestion, noted but not blocking |
+| INFO | PASS — informational observation |
 
-```bash
-bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <parent-task-id> "[M] review:<type>:finding:<severity> <description>"
+Any CRITICAL, HIGH, or MEDIUM finding → verdict MUST be BLOCKED.
+Only LOW and INFO findings → verdict is PASS.
+Zero findings → verdict is PASS with empty FINDINGS section.
+
+### Categories
+
+Use exactly one per finding: `code-bug`, `test-gap`, `style`, `design-flaw`, `architecture`, `security`
+
+## Example: PASS Report
+
+```
+REVIEW: quality
+TASK: claude-workstation-ab12
+VERDICT: PASS
+
+FINDINGS:
+- [LOW] style: variable name `x` could be more descriptive in cache-utils.sh:45
+- [INFO] code-bug: consider edge case when bd is unreachable (already handled by timeout)
 ```
 
-Severity: CRITICAL | HIGH | MEDIUM | LOW | INFO
+## Example: BLOCKED Report
 
-## For CRITICAL or HIGH Findings — Create Side-Quest (MANDATORY)
+```
+REVIEW: spec
+TASK: claude-workstation-ab12
+VERDICT: BLOCKED
 
-```bash
-bd create --title="Found: <issue>" --type=bug -p <severity-maps-to-priority>
-bd dep add <new-id> <parent-task-id> --type discovered-from
+FINDINGS:
+- [HIGH] code-bug: milestone-gate does not check for ready-for-review phase
+- [MEDIUM] test-gap: no test for cycle counter reset after successful review
+- [LOW] style: inconsistent indentation in orchestrator skill lines 45-50
 ```
 
-You MUST create side-quest beads for CRITICAL and HIGH findings. Do not skip this.
+## Rules (Non-Negotiable)
 
-## Verdict
-
-Pass:
-
-```bash
-bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <parent-task-id> "[M] review:<type> passed — no blocking issues"
-```
-
-Block:
-
-```bash
-bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <parent-task-id> "[M] review:<type>:blocked <N> issues must fix"
-```
+1. **Report only.** Do NOT create beads tasks. Do NOT write milestones. Do NOT fix code.
+2. **Use exact format.** Orchestrator parses your output. Free-text breaks the loop.
+3. **Be specific.** "Code has issues" is not a finding. File, line, description required.
+4. **Correct severity.** Do not inflate or deflate. MEDIUM means "should fix for maintainability."
+5. **One category per finding.** Pick the most accurate one.
 
 <!-- BEAD-PROTOCOL-v1:reviewer -->
