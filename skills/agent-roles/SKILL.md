@@ -46,3 +46,14 @@ Do not invent roles outside this table.
 
 **Dispatching a planner or architect agent**:
 → Role: planner → include `templates/protocol-planner.md` in prompt
+
+## Orchestrator Context
+
+When the orchestrator skill (`/claude-workstation:orchestrator`) is active, it dispatches all agents. The orchestrator:
+
+- Dispatches **implementer** agents with `templates/protocol-implementer.md`
+- Dispatches **reviewer** agents with `templates/protocol-reviewer.md`
+- Dispatches **planner** agents with `templates/protocol-planner.md` (for design-flaw/architecture findings)
+- Dispatches **build-fixer** agents with `templates/protocol-build-fixer.md`
+
+The orchestrator itself uses `BEAD-ROLE:default` — it reads skills but does not match implementer/reviewer/planner/build-fixer roles.
