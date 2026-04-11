@@ -237,7 +237,7 @@ MOCK
 chmod +x "$TMPDIR_GATE/bd"
 
 # 2a. No task in progress
-rm -f "$GATE_CACHE"
+rm -rf "$GATE_CACHE"
 export BD_LIST_JSON_OUTPUT="[]"
 export BD_LIST_OUTPUT="No issues found."
 export BD_SHOW_OUTPUT=""
@@ -250,7 +250,7 @@ else
 fi
 
 # 2b. Task exists — no output expected (tier check removed)
-rm -f "$GATE_CACHE"
+rm -rf "$GATE_CACHE"
 export BD_LIST_JSON_OUTPUT='[{"id": "test-456", "title": "Test task"}]'
 export BD_LIST_OUTPUT="  test-456  IN_PROGRESS  Test task"
 export BD_SHOW_OUTPUT="TITLE
@@ -389,7 +389,7 @@ GITM
 chmod +x "$TMPDIR_STOP/git"
 
 # 4a. Clean session: no commits, no tasks of any status
-rm -f "$GATE_CACHE"
+rm -rf "$GATE_CACHE"
 export GIT_LOG_OUTPUT=""
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="No issues found."
@@ -403,7 +403,7 @@ else
 fi
 
 # 4b. Commits exist + recently closed task — should NOT warn about no beads issues
-rm -f "$GATE_CACHE"
+rm -rf "$GATE_CACHE"
 export GIT_LOG_OUTPUT="abc1234 feat: do something"
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="  task-789  CLOSED  Implement feature"
@@ -418,7 +418,7 @@ else
 fi
 
 # 4c. Commits exist + no issues at all — should warn
-rm -f "$GATE_CACHE"
+rm -rf "$GATE_CACHE"
 export GIT_LOG_OUTPUT="abc1234 feat: do something"
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="No issues found."
@@ -433,7 +433,7 @@ else
 fi
 
 # 4d. F10 regression: commits + historical closed task (not recent) + no in-progress — SHOULD warn
-rm -f "$GATE_CACHE"
+rm -rf "$GATE_CACHE"
 export GIT_LOG_OUTPUT="abc1234 feat: do something"
 export BD_LIST_IN_PROGRESS="No issues found."
 export BD_LIST_CLOSED="  task-100  CLOSED  Old historical task"
@@ -549,7 +549,7 @@ else
 fi
 
 # 6d. pre-change-gate: cache hit — second call within 60s uses cache
-rm -f "$GATE_CACHE"
+rm -rf "$GATE_CACHE"
 FIRST_OUT=$(cd "$PLUGIN_ROOT" && PATH="$TMPDIR_GATE:$PATH" \
     bash "$PLUGIN_ROOT/hooks/pre-change-gate" 2>/dev/null || true)
 # Second call should hit cache and return same result
@@ -770,7 +770,7 @@ GITMOCK
     chmod +x "$TMPDIR_HANG/git"
 
     # 11a. pre-change-gate with hanging bd — should exit within 12s (2 x 5s timeouts + margin)
-    rm -f "$GATE_CACHE"
+    rm -rf "$GATE_CACHE"
     if timeout 12 bash -c "cd '$PLUGIN_ROOT' && PATH='$TMPDIR_HANG:$PATH' bash '$PLUGIN_ROOT/hooks/pre-change-gate'" 2>/dev/null; then
         pass "11a. pre-change-gate completes when bd hangs (timeout works)"
     else
@@ -783,7 +783,7 @@ GITMOCK
     fi
 
     # 11b. stop hook with hanging bd — should exit within 15s (multiple bd calls x 5s timeouts + margin)
-    rm -f "$GATE_CACHE"
+    rm -rf "$GATE_CACHE"
     if timeout 15 bash -c "cd '$PLUGIN_ROOT' && PATH='$TMPDIR_HANG:$PATH' bash '$PLUGIN_ROOT/hooks/stop'" 2>/dev/null; then
         pass "11b. stop hook completes when bd hangs (timeout works)"
     else
