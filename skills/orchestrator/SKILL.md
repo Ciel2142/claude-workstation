@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-version: 2.7.0
+version: 2.7.1
 description: >
   Drives the impl→review→fix cycle per task. RIGID protocol.
   TRIGGER: After task-scaffolder creates tasks, user chooses orchestrator mode.

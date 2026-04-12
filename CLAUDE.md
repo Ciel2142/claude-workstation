@@ -1,6 +1,31 @@
 ## Workflow: Beads + Superpowers + ECC
 
-New task: `bd create --title="..." --type=task` then brainstorm or plan.
+### Intent Detection (ALWAYS ACTIVE)
+
+When the user expresses intent to **build, create, add, implement, plan, design,
+fix, refactor, or change** something — that is a workflow trigger. You MUST
+activate the workflow below before writing any code.
+
+**Trigger phrases include but are not limited to:**
+- "build me ...", "create a ...", "add ...", "implement ..."
+- "I want to ...", "let's make ...", "we need ..."
+- "plan ...", "design ...", "architect ..."
+- "fix ...", "refactor ...", "change ...", "update ..."
+- Any request that implies producing or modifying code
+
+**Route by intent:**
+
+| Intent | First step |
+|--------|------------|
+| New feature / creative work | `bd create` → `/superpowers:brainstorming` → plan → implement |
+| Bug fix / specific issue | `bd create -t bug` → `/superpowers:systematic-debugging` |
+| Refactor / cleanup | `bd create` → plan scope → implement |
+| Planning only (no code yet) | `bd create` → `/superpowers:brainstorming` |
+| Resuming work | `bd list --status=in_progress` → `bd show <id>` → continue |
+
+**The rule:** If the user's message would lead to code changes, create a beads
+task FIRST. No exceptions. Even "quick fixes" get tracked.
+
 Reference: `/claude-workstation:workflow`
 Orchestrator: `/claude-workstation:orchestrator`
 

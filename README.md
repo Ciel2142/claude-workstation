@@ -155,15 +155,29 @@ bd init
 
 ## Quick Start
 
+Just tell Claude what you want to build — the workflow activates automatically:
+
+```
+You: "build me a rate limiter for the API"
+You: "add user authentication"
+You: "fix the broken pagination"
+You: "refactor the database layer"
+```
+
+Claude detects the intent and routes to the right workflow step:
+
+| Intent | What happens |
+|--------|-------------|
+| New feature / creative work | Creates task → brainstorms → plans → implements with TDD |
+| Bug fix | Creates bug → systematic debugging |
+| Refactor / cleanup | Creates task → plans scope → implements |
+| Planning only | Creates task → brainstorms design |
+
+You can also invoke skills directly:
+
 ```bash
-# Create a task
-bd create --title="Add user authentication" --type=feature
-
-# Follow the workflow
-/claude-workstation:workflow
-
-# Or let the orchestrator handle everything
-/claude-workstation:orchestrator
+/claude-workstation:workflow       # Full workflow reference
+/claude-workstation:orchestrator   # Automated impl→review→fix cycle
 ```
 
 ## Project Structure
@@ -171,7 +185,7 @@ bd create --title="Add user authentication" --type=feature
 ```
 claude-workstation/
 ├── install.sh                    # Bootstrap ECC + Beads
-├── CLAUDE.md                     # Pointers to workflow + agent-roles
+├── CLAUDE.md                     # Intent detection + workflow routing + agent-roles
 ├── skills/
 │   ├── workflow/SKILL.md         # Full workflow reference
 │   ├── orchestrator/SKILL.md     # Automated impl→review→fix cycle
@@ -198,7 +212,7 @@ claude-workstation/
 │   ├── lib.sh                    # Shared test helpers and utilities
 │   └── scenarios/                # Workflow dry-run scripts
 └── .claude-plugin/
-    ├── plugin.json               # Plugin metadata (v2.7.0)
+    ├── plugin.json               # Plugin metadata (v2.7.1)
     └── marketplace.json          # Marketplace listing
 ```
 
