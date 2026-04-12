@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-version: 2.7.1
+version: 2.8.0
 description: >
   Drives the impl→review→fix cycle per task. RIGID protocol.
   TRIGGER: After task-scaffolder creates tasks, user chooses orchestrator mode.
@@ -140,11 +140,66 @@ Continue to Step 9.
 
 **If VERDICT: BLOCKED:** Same routing as Step 6. After all bugs fixed → re-dispatch quality reviewer (back to Step 7).
 
-### Step 9: CLOSE TASK
+### Step 9: DISPATCH VERIFIER
+
+After quality-review PASS, before close.
+
+1. Read the must_haves pointer:
+
+```bash
+MUST_HAVES_REF=$(bd show <task-id> | grep -oP '^must_haves:\s*\K.*$')
+PLAN_PATH="${MUST_HAVES_REF%%#*}"
+ANCHOR="${MUST_HAVES_REF##*#}"
+```
+
+If `$MUST_HAVES_REF` is empty, escalate:
+```bash
+bd human <task-id> --reason="no must_haves pointer — cannot verify"
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:escalated-verify:<task-id> no must_haves"
+```
+STOP this task, move to Step 1.
+
+2. Read `templates/protocol-verifier.md`. Dispatch verifier subagent with:
+- Task ID
+- Plan path
+- Anchor
+- Full protocol-verifier.md content
+
+Log:
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] verify:dispatched"
+```
+
+3. After verifier returns, parse the sentinel:
+
+```bash
+SENTINEL=$(echo "$VERIFIER_RESPONSE" | bash "${CLAUDE_PLUGIN_ROOT}/hooks/parse-sentinel.sh" || true)
+```
+
+4. Branch on sentinel:
+
+**`## VERIFICATION PASSED`:**
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] verify:passed"
+```
+Proceed to Step 9.6 (close task).
+
+**`## VERIFICATION FAILED`:**
+```bash
+bd human <task-id> --reason="verifier found unresolved issues"
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] verify:failed"
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:escalated-verify:<task-id>"
+```
+STOP this task, move to Step 1.
+
+**Sentinel missing:** re-dispatch verifier once. If still missing, escalate as VERIFICATION FAILED.
+
+### Step 9.6: CLOSE TASK
 
 ```bash
 bd close <task-id>
-bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:closed:<task-id> all reviews passed (closure #<N>)"
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:closed:<task-id> all reviews + verify passed (closure #<N>)"
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] verified"
 ```
 
 Increment `closure_counter`.
