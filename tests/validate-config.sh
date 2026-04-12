@@ -734,6 +734,79 @@ fi
 
 echo ""
 
+# --- 26. Protocol template sentinels ---
+echo "26. Protocol template sentinels"
+
+declare -A SENTINELS=(
+    [protocol-implementer.md]="## PLAN COMPLETE"
+    [protocol-reviewer.md]="## REVIEW PASS"
+    [protocol-planner.md]="## PLAN READY"
+    [protocol-build-fixer.md]="## BUILD FIXED"
+    [protocol-verifier.md]="## VERIFICATION PASSED"
+)
+
+for tmpl in "${!SENTINELS[@]}"; do
+    marker="${SENTINELS[$tmpl]}"
+    if [[ -f "$PLUGIN_ROOT/templates/$tmpl" ]] && grep -qF "$marker" "$PLUGIN_ROOT/templates/$tmpl"; then
+        pass "templates/$tmpl declares '$marker'"
+    else
+        fail "templates/$tmpl MISSING '$marker'"
+    fi
+done
+
+echo ""
+
+# --- 27. Verifier protocol template ---
+echo "27. Verifier protocol template"
+
+if [[ -f "$PLUGIN_ROOT/templates/protocol-verifier.md" ]] \
+    && grep -q "BEAD-PROTOCOL-v1:verifier" "$PLUGIN_ROOT/templates/protocol-verifier.md"; then
+    pass "templates/protocol-verifier.md exists with verifier protocol marker"
+else
+    fail "templates/protocol-verifier.md MISSING or no verifier marker"
+fi
+
+echo ""
+
+# --- 28. Gate taxonomy in workflow skill ---
+echo "28. Gate taxonomy"
+
+for keyword in "Gate Taxonomy" "pre-flight" "revision" "escalation" "abort"; do
+    if grep -q "$keyword" "$PLUGIN_ROOT/skills/workflow/SKILL.md"; then
+        pass "workflow contains '$keyword'"
+    else
+        fail "workflow MISSING '$keyword'"
+    fi
+done
+
+echo ""
+
+# --- 29. Verify milestone chain in workflow skill ---
+echo "29. Verify milestone chain"
+
+for ms in "verify:dispatched" "verify:passed" "verify:failed"; do
+    if grep -q "$ms" "$PLUGIN_ROOT/skills/workflow/SKILL.md"; then
+        pass "workflow declares milestone '$ms'"
+    else
+        fail "workflow MISSING milestone '$ms'"
+    fi
+done
+
+echo ""
+
+# --- 30. New hook scripts present and executable ---
+echo "30. New hook scripts"
+
+for hook in stall-check.sh parse-sentinel.sh parse-must-haves.sh spot-check-artifacts.sh; do
+    if [[ -x "$PLUGIN_ROOT/hooks/$hook" ]]; then
+        pass "hooks/$hook exists and is executable"
+    else
+        fail "hooks/$hook MISSING or not executable"
+    fi
+done
+
+echo ""
+
 # --- Summary ---
 echo "=== Summary ==="
 echo "  Passed: $PASS"
