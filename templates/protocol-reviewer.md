@@ -74,4 +74,14 @@ FINDINGS:
 4. **Correct severity.** Do not inflate or deflate. MEDIUM means "should fix for maintainability."
 5. **One category per finding.** Pick the most accurate one.
 
+
+## Completion Sentinel
+
+After your structured report, emit as the LAST H2 of your response body:
+
+- `## REVIEW PASS` if VERDICT is PASS
+- `## REVIEW BLOCKED` if VERDICT is BLOCKED
+
+The sentinel must match the VERDICT line. If they disagree, the orchestrator treats the response as corrupt and re-dispatches.
+
 <!-- BEAD-PROTOCOL-v1:reviewer -->
