@@ -95,8 +95,28 @@ bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:r
 Continue to Step 7.
 
 **If VERDICT: BLOCKED:**
+
+Count findings:
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:review-blocked:<task-id> spec <N> findings"
+ISSUE_COUNT=$(echo "$REVIEW_RESPONSE" | grep -cE '^\- \[(CRITICAL|HIGH|MEDIUM)\]')
+```
+
+**Stall check (BEFORE counting this toward cycle limit):**
+```bash
+set +e
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/stall-check.sh" <task-id> spec "$ISSUE_COUNT"
+STALL_RC=$?
+set -e
+if [ "$STALL_RC" -eq 1 ]; then
+    bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:stalled:<task-id> spec $ISSUE_COUNT"
+    bd human <task-id> --reason="spec review stalled, count not decreasing"
+    # STOP this task. Move to Step 1 (next task).
+fi
+```
+
+Then log and increment cycle counter:
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:review-blocked:<task-id> spec $ISSUE_COUNT findings"
 ```
 Increment `spec_cycles`. Check cycle limit (see CYCLE LIMIT below).
 
@@ -138,7 +158,27 @@ bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:r
 ```
 Continue to Step 9.
 
-**If VERDICT: BLOCKED:** Same routing as Step 6. After all bugs fixed → re-dispatch quality reviewer (back to Step 7).
+**If VERDICT: BLOCKED:**
+
+Count findings:
+```bash
+ISSUE_COUNT=$(echo "$REVIEW_RESPONSE" | grep -cE '^\- \[(CRITICAL|HIGH|MEDIUM)\]')
+```
+
+**Stall check:**
+```bash
+set +e
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/stall-check.sh" <task-id> quality "$ISSUE_COUNT"
+STALL_RC=$?
+set -e
+if [ "$STALL_RC" -eq 1 ]; then
+    bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:stalled:<task-id> quality $ISSUE_COUNT"
+    bd human <task-id> --reason="quality review stalled, count not decreasing"
+    # STOP this task. Move to Step 1.
+fi
+```
+
+Same routing as Step 6. After all bugs fixed → re-dispatch quality reviewer (back to Step 7).
 
 ### Step 9: DISPATCH VERIFIER
 
