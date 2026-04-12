@@ -4,6 +4,21 @@ You are implementing code changes. Follow the full TDD milestone chain.
 
 ## Before ANY Code Changes
 
+Read the task's `must_haves` block first:
+
+```bash
+# Find the pointer in beads notes
+bd show <task-id> | grep '^must_haves:' || echo "WARNING: no must_haves pointer — escalate to orchestrator"
+# Extract fields (run for each field needed)
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/parse-must-haves.sh" <plan-path> <anchor> truths
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/parse-must-haves.sh" <plan-path> <anchor> artifacts
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/parse-must-haves.sh" <plan-path> <anchor> key_links
+```
+
+The truths are your acceptance criteria. Your TDD test must drive at least one truth. Your implementation must touch every artifact. Your wiring must satisfy every key_link.
+
+## TDD Preamble
+
 ```bash
 bd create --title="<task-description>" --type=task -p 2
 bd dep add <new-id> <parent-id> --type parent-child
@@ -35,5 +50,15 @@ bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <id> "[M] tdd:ready-for-revie
 ## SKIP NONE OF THESE
 
 Your work will be rejected if milestones are missing. The orchestrator verifies every milestone after you return.
+
+
+## Completion Sentinel
+
+After writing `[M] tdd:ready-for-review` milestone, emit as the LAST H2 of your response body:
+
+- `## PLAN COMPLETE` on success
+- `## BLOCKED <short reason>` if you could not complete (e.g., upstream task returned bad output, test framework broken, ambiguous spec)
+
+The orchestrator will not accept your return without this sentinel.
 
 <!-- BEAD-PROTOCOL-v1:implementer -->
