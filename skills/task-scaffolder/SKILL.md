@@ -1,6 +1,6 @@
 ---
 name: task-scaffolder
-version: 2.7.1
+version: 2.8.0
 description: >
   Reads a plan and creates beads tasks with full dependency graph.
   TRIGGER: After plan is written, before implementation begins.
@@ -55,6 +55,19 @@ Tag in notes:
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <sub-task-id> "[M] task:created role:<role>"
 ```
+
+### Step 3b: must_haves Pointer (Mandatory)
+
+For every child task created, after the `bd create` and `bd dep add` calls, append a must_haves note pointing at the plan file section:
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <child-task-id> "must_haves: <plan-path>#task-<N>"
+```
+
+- `<plan-path>` is the repo-relative path to the plan file you are scaffolding from.
+- `task-<N>` is the anchor format: `task-1`, `task-2`, etc., matching the `### Task N:` heading order in the plan file.
+- If the plan has no per-task `must_haves` block but does have an epic-level one, use `#epic` instead of `#task-<N>`.
+- If the plan has neither, escalate: the plan is incomplete and needs a planner re-dispatch before scaffolding.
 
 ### Step 4: WIRE DEPENDENCIES
 
