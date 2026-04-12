@@ -73,20 +73,27 @@ fi
 echo "$YAML" | awk -v field="$FIELD" '
     BEGIN { in_field = 0; field_indent = -1 }
     {
-        if (match($0, "^([[:space:]]*)" field ":[[:space:]]*$", arr)) {
+        # Compute leading-space indent via zero-width match
+        match($0, /^[[:space:]]*/)
+        indent = RLENGTH
+
+        # Check if this line is the target field key (any indent)
+        if (match($0, "^[[:space:]]*" field ":[[:space:]]*$")) {
             in_field = 1
-            field_indent = length(arr[1])
+            field_indent = indent
             next
         }
+
         if (in_field) {
-            # A new key at same or lesser indent ends the field
-            if (match($0, "^([[:space:]]*)[a-z_]+:", arr2)) {
-                cur_indent = length(arr2[1])
-                if (cur_indent <= field_indent) {
+            # Any key at same-or-lesser indent ends the field
+            if (match($0, "^[[:space:]]*[a-z_]+:")) {
+                if (indent <= field_indent) {
                     in_field = 0
                     next
                 }
             }
+
+            # List entry under the field
             if (match($0, "^[[:space:]]*-[[:space:]]*")) {
                 item = substr($0, RSTART + RLENGTH)
                 print item
