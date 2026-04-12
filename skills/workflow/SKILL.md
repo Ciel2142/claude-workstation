@@ -1,6 +1,6 @@
 ---
 name: workflow
-version: 2.7.1
+version: 2.8.0
 description: >
   Full workflow ref: Beads + Superpowers + ECC.
   TRIGGER: Starting work, workflow unclear, or via /claude-workstation:workflow.
@@ -49,6 +49,19 @@ Exceptions: files in plan/sub-task description, `/start` invocations.
 - Query Context7 before implementing with any library/framework
 - Invoke `/ecc:strategic-compact` every 3rd closed sub-task
 - Outside scope = side-quest: `bd create -t bug` + `bd dep add new current --type=discovered-from`, finish current first
+
+## Gate Taxonomy
+
+Every validation checkpoint maps to one of four canonical gate types (adopted from GSD).
+
+| Gate | Purpose | On fail | Where in this repo |
+|------|---------|---------|--------------------|
+| **pre-flight** | Check preconditions before work | Block entry, no partial work | `milestone-gate` hook, `commit-gate` hook |
+| **revision** | Evaluate output, loop back to producer | Bounded loop + stall check | Orchestrator Steps 5–8 (spec and quality review) |
+| **escalation** | Surface unresolvable to human | `bd human <id>`, stop | Orchestrator Step 9.5 verify, stall detection, 3-cycle ceiling |
+| **abort** | Terminate to prevent damage | Hard stop, preserve state | `stop-gate` hook, `agent-gate` hook |
+
+**Selection heuristic:** Start pre-flight. If the check happens after work is produced, it is a revision gate. If the revision loop cannot resolve the issue, escalate. If continuing is dangerous, abort.
 
 ## Skill Invocation Priority
 
@@ -158,7 +171,10 @@ TDD milestone chain — each requires predecessors:
 | `tdd:ready-for-review` | tdd:refactor | Handed off to orchestrator for review |
 | `review:spec` | tdd:ready-for-review | Spec compliance passed |
 | `review:quality` | review:spec | Code quality review passed |
-| `verified` | review:quality | Verification-before-completion done |
+| `verify:dispatched` | review:quality | Orchestrator dispatched verifier subagent |
+| `verify:passed` | verify:dispatched | Verifier returned `## VERIFICATION PASSED` |
+| `verify:failed` | verify:dispatched | Verifier returned `## VERIFICATION FAILED` — escalated via `bd human` |
+| `verified` | verify:passed | Verification-before-completion done |
 
 Multiple TDD cycles allowed. Special: `paused <reason>` accepted by stop-gate.
 
