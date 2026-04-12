@@ -320,6 +320,41 @@ If all closed:
 
 ---
 
+## Post-Dispatch Parsing (Applies to Every Subagent Return)
+
+After any subagent returns, run this sequence BEFORE acting on the response body:
+
+1. **Parse sentinel:**
+
+```bash
+SENTINEL=$(echo "$SUBAGENT_RESPONSE" | bash "${CLAUDE_PLUGIN_ROOT}/hooks/parse-sentinel.sh" || echo "none")
+```
+
+2. **Fallback to bd show:** if `$SENTINEL` is `none`, read the latest `[M]` milestone from `bd show <task-id>`. If a milestone indicates the intended outcome, treat it as the effective sentinel.
+
+3. **Reject and re-dispatch** if both the sentinel and the latest milestone are missing or contradictory:
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:rejected:no-signal"
+# Re-dispatch the same role once. If still missing, escalate via bd human.
+```
+
+4. **Filesystem spot-check** on any success sentinel (`## PLAN COMPLETE`, `## VERIFICATION PASSED`, `## PLAN READY`):
+
+```bash
+set +e
+bash "${CLAUDE_PLUGIN_ROOT}/hooks/spot-check-artifacts.sh" "$PLAN_PATH" "$ANCHOR"
+SPOT_RC=$?
+set -e
+if [ "$SPOT_RC" -ne 0 ]; then
+    bash "${CLAUDE_PLUGIN_ROOT}/hooks/bd-notes-append" <task-id> "[M] orchestrator:spot-check-failed:<task-id>"
+    bd human <task-id> --reason="sentinel claimed success but must_haves artifacts missing or trivial"
+    # STOP this task. Move to Step 1.
+fi
+```
+
+The spot-check is the anti-hallucination insurance. Sentinels and milestones can both be written by a lying subagent. Files in `must_haves.artifacts` cannot be faked — if they are missing or shorter than 10 lines, the claim is rejected.
+
 ## Rigid Rules (All Non-Negotiable)
 
 1. Every task gets spec review → quality review. No exceptions.
