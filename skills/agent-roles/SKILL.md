@@ -1,6 +1,6 @@
 ---
 name: agent-roles
-version: 2.7.1
+version: 2.8.0
 description: >
   Subagent role registry. Check before dispatching any Agent.
   TRIGGER: Before any Agent dispatch, or when agent-gate blocks a subagent.
@@ -18,6 +18,7 @@ Do not invent roles outside this table.
 | **reviewer** | `templates/protocol-reviewer.md` | reviews code, logs findings |
 | **planner** | `templates/protocol-planner.md` | creates implementation plans |
 | **build-fixer** | `templates/protocol-build-fixer.md` | fixes build or test errors |
+| **verifier** | `templates/protocol-verifier.md` | final goal-backward verification (reads code, not SUMMARY) |
 | **default** | *none* — add `BEAD-ROLE:default` to prompt | **nothing above matches** |
 
 ## How to use
@@ -43,6 +44,9 @@ Do not invent roles outside this table.
 
 **Dispatching a build-error-resolver agent**:
 → Role: build-fixer → include `templates/protocol-build-fixer.md` in prompt
+
+**Dispatching a verifier agent** (runs after quality review, reads source directly):
+→ Role: verifier → include `templates/protocol-verifier.md` in prompt
 
 **Dispatching a planner or architect agent**:
 → Role: planner → include `templates/protocol-planner.md` in prompt
